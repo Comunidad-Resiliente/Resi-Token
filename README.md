@@ -1,13 +1,36 @@
-# Sample Hardhat Project
+# $RESI-TOKEN
 
-This project demonstrates a basic Hardhat use case. It comes with a sample contract, a test for that contract, and a script that deploys that contract.
+- Resi Token de la Comunidad Resiliente.
 
-Try running some of the following tasks:
+---
 
-```shell
-npx hardhat help
-npx hardhat test
-REPORT_GAS=true npx hardhat test
-npx hardhat node
-npx hardhat run scripts/deploy.ts
+### Tokenomics
+
+### Modules
+
+---
+
+### Instalation
+
+- Requires:
+  - Node v18
+  - Hardhat
+  - Typescript
+
+Install dependencies:
+
+```
+yarn
+```
+
+Compile:
+
+```
+yarn compile
+```
+
+Test:
+
+```
+yarn test
 ```
