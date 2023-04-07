@@ -19,18 +19,18 @@
 
 Install dependencies:
 
-```
+```bash
 yarn
 ```
 
 Compile:
 
-```
+```bash
 yarn compile
 ```
 
 Test:
 
-```
+```bash
 yarn test
 ```
