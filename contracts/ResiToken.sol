@@ -46,20 +46,44 @@ contract ResiToken is
         emit MentorAdded(_mentor);
     }
 
-    function removeMentor(
-        address _mentor
-    ) external isValidAddress(_mentor, "INVALID MENTOR ADDRESS") onlyOwner whenNotPaused {}
+    function removeMentor(address _mentor) external isValidAddress(_mentor, "INVALID MENTOR ADDRESS") onlyOwner {
+        _revokeRole(MENTOR_ROLE, _mentor);
+        emit MentorRemoved(_mentor);
+    }
 
     function addProjectBuilder(
         address _builder
-    ) external isValidAddress(_builder, "INVALID BUILDER") onlyOwner whenNotPaused {
+    ) external isValidAddress(_builder, "INVALID BUILDER ADDRESS") onlyOwner whenNotPaused {
         _grantRole(PROJECT_BUILDER_ROLE, _builder);
         emit ProjectBuilderAdded(_builder);
+    }
+
+    function removeProjectBuilder(
+        address _builder
+    ) external isValidAddress(_builder, "INVALID BUILDER ADDRESS") onlyOwner {
+        _revokeRole(PROJECT_BUILDER_ROLE, _builder);
+        emit ProjectBuilderRemoved(_builder);
+    }
+
+    function addResiBuilder(
+        address _builder
+    ) external isValidAddress(_builder, "INVALID BUILDER ADDRESS") onlyOwner whenNotPaused {
+        _grantRole(RESI_BUILDER_ROLE, _builder);
+        emit ResiBuilderAdded(_builder);
+    }
+
+    function removeResiBuilder(
+        address _builder
+    ) external isValidAddress(_builder, "INVALID BUILDER ADDRESS") onlyOwner {
+        _revokeRole(RESI_BUILDER_ROLE, _builder);
+        emit ResiBuilderRemoved(_builder);
     }
 
     function addMentors(address[] memory _mentors) external onlyOwner whenNotPaused {}
 
     function addProjectBuilders(address[] memory _projectBuilders) external onlyOwner whenNotPaused {}
+
+    function addResiBuilders(address[] memory _resiBuilders) external onlyOwner whenNotPaused {}
 
     function _addRolesBatch(bytes32 role, address[] memory _addresses) internal onlyOwner whenNotPaused {
         require(role == MENTOR_ROLE || role == PROJECT_BUILDER_ROLE || role == RESI_BUILDER_ROLE, "INVALID ROLE");

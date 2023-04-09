@@ -5,6 +5,10 @@ interface IResiToken {
     event Initialized();
     event MentorAdded(address indexed mentor);
     event ProjectBuilderAdded(address indexed projectBuilder);
+    event ResiBuilderAdded(address indexed resiBuilder);
+    event MentorRemoved(address indexed mentor);
+    event ProjectBuilderRemoved(address indexed projectBuilder);
+    event ResiBuilderRemoved(address indexed resiBuilder);
 
     error InvalidAddress(address);
 }

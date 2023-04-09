@@ -1,0 +1,4 @@
+export ETHERSCAN_API_KEY=''
+export REPORT_GAS=true
+export ALCHEMY_KEY=''
+export MNEMONIC=''
