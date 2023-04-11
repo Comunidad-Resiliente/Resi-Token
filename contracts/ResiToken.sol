@@ -2,9 +2,8 @@
 pragma solidity ^0.8.18;
 
 import "./interfaces/IResiToken.sol";
+import "./interfaces/IResiRegistry.sol";
 
-import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
-import "@openzeppelin/contracts-upgradeable/utils/ContextUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/token/ERC20/ERC20Upgradeable.sol";
@@ -13,8 +12,6 @@ import "@openzeppelin/contracts-upgradeable/token/ERC20/extensions/ERC20Pausable
 
 contract ResiToken is
     IResiToken,
-    Initializable,
-    ContextUpgradeable,
     OwnableUpgradeable,
     AccessControlUpgradeable,
     ERC20Upgradeable,
@@ -27,21 +24,28 @@ contract ResiToken is
     bytes32 public constant PROJECT_BUILDER_ROLE = keccak256("PROJECT_BUILDER_ROLE");
     bytes32 public constant RESI_BUILDER_ROLE = keccak256("RESI_BUILDER_ROLE");
 
-    function initialize(address _treasury) public initializer {
+    address public RESI_REGISTRY;
+
+    function initialize(address _treasury, address _registry) public initializer {
         require(_treasury != address(0), "INVALID TREASURY ADDRESS");
-        __Context_init();
-        __Ownable_init();
-        __AccessControl_init();
-        __ERC20_init("ResiToken", "RESI");
-        __ERC20Burnable_init();
-        __ERC20Pausable_init();
+        require(_registry != address(0), "INVALID REGISTRY ADDRESS");
+        __Context_init_unchained();
+        __Ownable_init_unchained();
+        __AccessControl_init_unchained();
+        __ERC20_init_unchained("ResiToken", "RESI");
+        __ERC20Burnable_init_unchained();
+        __ERC20Pausable_init_unchained();
         _grantRole(MINTER_ROLE, _msgSender());
         _grantRole(TREASURY_ROLE, _treasury);
+        RESI_REGISTRY = _registry;
+        emit Initialized(_treasury, _registry);
     }
 
     function addMentor(
-        address _mentor
+        address _mentor,
+        bytes32 _project
     ) external isValidAddress(_mentor, "INVALID MENTOR ADDRESS") onlyOwner whenNotPaused {
+        // require(IResiRegistry(RESI_REGISTRY).projects(_project).active, "PROJECT NOT EXIST OR NOT ACTIVE");
         _grantRole(MENTOR_ROLE, _mentor);
         emit MentorAdded(_mentor);
     }

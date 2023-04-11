@@ -2,7 +2,7 @@
 pragma solidity ^0.8.18;
 
 interface IResiToken {
-    event Initialized();
+    event Initialized(address indexed treasury, address indexed registry);
     event MentorAdded(address indexed mentor);
     event ProjectBuilderAdded(address indexed projectBuilder);
     event ResiBuilderAdded(address indexed resiBuilder);
