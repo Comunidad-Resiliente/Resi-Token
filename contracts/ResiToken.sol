@@ -5,7 +5,7 @@ import "./interfaces/IResiToken.sol";
 import "./interfaces/IResiRegistry.sol";
 
 import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
-import "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/access/AccessControlEnumerableUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/token/ERC20/ERC20Upgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/token/ERC20/extensions/ERC20BurnableUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/token/ERC20/extensions/ERC20PausableUpgradeable.sol";
@@ -13,7 +13,7 @@ import "@openzeppelin/contracts-upgradeable/token/ERC20/extensions/ERC20Pausable
 contract ResiToken is
     IResiToken,
     OwnableUpgradeable,
-    AccessControlUpgradeable,
+    AccessControlEnumerableUpgradeable,
     ERC20Upgradeable,
     ERC20BurnableUpgradeable,
     ERC20PausableUpgradeable
@@ -26,6 +26,9 @@ contract ResiToken is
 
     address public RESI_REGISTRY;
 
+    using EnumerableSetUpgradeable for EnumerableSetUpgradeable.Bytes32Set;
+    EnumerableSetUpgradeable.Bytes32Set private _rolesSet;
+
     function initialize(address _treasury, address _registry) public initializer {
         require(_treasury != address(0), "INVALID TREASURY ADDRESS");
         require(_registry != address(0), "INVALID REGISTRY ADDRESS");
@@ -35,36 +38,57 @@ contract ResiToken is
         __ERC20_init_unchained("ResiToken", "RESI");
         __ERC20Burnable_init_unchained();
         __ERC20Pausable_init_unchained();
+
+        // Add roles to the set of Roles for later tracking
+        _rolesSet.add(MENTOR_ROLE);
+        _rolesSet.add(TREASURY_ROLE);
+        _rolesSet.add(PROJECT_BUILDER_ROLE);
+        _rolesSet.add(RESI_BUILDER_ROLE);
+
         _grantRole(MINTER_ROLE, _msgSender());
         _grantRole(TREASURY_ROLE, _treasury);
+
+        // Admin role can add/remove admins in addition to add/remove all other roles
+        _setRoleAdmin(MINTER_ROLE, MINTER_ROLE);
+        _setRoleAdmin(TREASURY_ROLE, MINTER_ROLE);
+        _setRoleAdmin(PROJECT_BUILDER_ROLE, MINTER_ROLE);
+        _setRoleAdmin(RESI_BUILDER_ROLE, MINTER_ROLE);
+
         RESI_REGISTRY = _registry;
+
         emit Initialized(_treasury, _registry);
     }
 
     function addMentor(
         address _mentor,
+        uint256 _serieId,
         bytes32 _project
     ) external isValidAddress(_mentor, "INVALID MENTOR ADDRESS") onlyOwner whenNotPaused {
-        // require(IResiRegistry(RESI_REGISTRY).projects(_project).active, "PROJECT NOT EXIST OR NOT ACTIVE");
+        _checkSerieAndProject(_serieId, _project);
         _grantRole(MENTOR_ROLE, _mentor);
         emit MentorAdded(_mentor);
     }
 
-    function removeMentor(address _mentor) external isValidAddress(_mentor, "INVALID MENTOR ADDRESS") onlyOwner {
+    function removeMentor(
+        address _mentor
+    ) external isValidAddress(_mentor, "INVALID MENTOR ADDRESS") onlyOwner whenNotPaused {
         _revokeRole(MENTOR_ROLE, _mentor);
         emit MentorRemoved(_mentor);
     }
 
     function addProjectBuilder(
-        address _builder
+        address _builder,
+        uint256 _serieId,
+        bytes32 _project
     ) external isValidAddress(_builder, "INVALID BUILDER ADDRESS") onlyOwner whenNotPaused {
+        _checkSerieAndProject(_serieId, _project);
         _grantRole(PROJECT_BUILDER_ROLE, _builder);
         emit ProjectBuilderAdded(_builder);
     }
 
     function removeProjectBuilder(
         address _builder
-    ) external isValidAddress(_builder, "INVALID BUILDER ADDRESS") onlyOwner {
+    ) external isValidAddress(_builder, "INVALID BUILDER ADDRESS") onlyOwner whenNotPaused {
         _revokeRole(PROJECT_BUILDER_ROLE, _builder);
         emit ProjectBuilderRemoved(_builder);
     }
@@ -83,11 +107,13 @@ contract ResiToken is
         emit ResiBuilderRemoved(_builder);
     }
 
-    function addMentors(address[] memory _mentors) external onlyOwner whenNotPaused {}
+    function getRoleCount() external view returns (uint256) {
+        return _rolesSet.length();
+    }
 
-    function addProjectBuilders(address[] memory _projectBuilders) external onlyOwner whenNotPaused {}
-
-    function addResiBuilders(address[] memory _resiBuilders) external onlyOwner whenNotPaused {}
+    function getRoleByIndex(uint index) external view returns (bytes32) {
+        return _rolesSet.at(index);
+    }
 
     function _addRolesBatch(bytes32 role, address[] memory _addresses) internal onlyOwner whenNotPaused {
         require(role == MENTOR_ROLE || role == PROJECT_BUILDER_ROLE || role == RESI_BUILDER_ROLE, "INVALID ROLE");
@@ -99,12 +125,27 @@ contract ResiToken is
         }
     }
 
+    function _checkSerieAndProject(uint256 _serieId, bytes32 _project) internal view onlyOwner {
+        require(
+            IResiRegistry(RESI_REGISTRY).isValidProject(_serieId, _project),
+            "INVALID OR INACTIVE SERIE, PROJECT NOT EXIST OR NOT ACTIVE"
+        );
+    }
+
     function _beforeTokenTransfer(
         address from,
         address to,
         uint256 amount
     ) internal virtual override(ERC20Upgradeable, ERC20PausableUpgradeable) {
         super._beforeTokenTransfer(from, to, amount);
+    }
+
+    function transfer(address, uint256) public pure override(ERC20Upgradeable) returns (bool) {
+        revert TransferForbidden("NO TRANSFER ALLOWED");
+    }
+
+    function transferFrom(address, address, uint256) public pure override(ERC20Upgradeable) returns (bool) {
+        revert TransferFromForbidden("NO TRANSFER FROM ALLOWED");
     }
 
     modifier isValidAddress(address _addr, string memory message) {

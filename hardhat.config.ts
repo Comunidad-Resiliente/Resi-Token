@@ -20,6 +20,10 @@ const config: HardhatUserConfig = {
     path: './abis',
     runOnCompile: false
   },
+  contractSizer: {
+    alphaSort: true,
+    runOnCompile: false
+  },
   gasReporter: {
     currency: 'USD',
     gasPrice: 30,

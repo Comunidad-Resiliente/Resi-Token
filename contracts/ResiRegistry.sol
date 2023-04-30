@@ -6,7 +6,7 @@ import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
 
 contract ResiRegistry is IResiRegistry, OwnableUpgradeable {
     address public RESI_TOKEN;
-    uint256 public activeSerieId;
+    uint256 private activeSerieId;
     mapping(uint256 => Serie) public series;
     mapping(bytes32 => Project) public projects;
 
@@ -18,46 +18,28 @@ contract ResiRegistry is IResiRegistry, OwnableUpgradeable {
         emit RegistryInitialized(RESI_TOKEN);
     }
 
-    function createSerie(
-        uint256 _id,
-        uint256 _startDate,
-        uint256 _endDate,
-        uint256 _numberOfProjects
-    ) external onlyOwner {
-        _checkSerie(_id, _startDate, _endDate, _numberOfProjects);
+    function createSerie(uint256 _startDate, uint256 _endDate, uint256 _numberOfProjects) external onlyOwner {
+        activeSerieId += 1;
+        _checkSerie(_startDate, _endDate, _numberOfProjects);
         Serie memory newSerie = Serie({
-            id: _id,
+            id: activeSerieId,
             startDate: _startDate,
             endDate: _endDate,
             numberOfProjects: _numberOfProjects,
             currentProjects: 0,
             currentSupply: 0,
-            active: false,
+            active: true,
             created: true
         });
-        series[_id] = newSerie;
-        emit SerieCreated(_id, _startDate, _endDate, _numberOfProjects);
+        series[activeSerieId] = newSerie;
+        emit SerieCreated(activeSerieId, _startDate, _endDate, _numberOfProjects);
     }
 
-    function _checkSerie(
-        uint256 _id,
-        uint256 _startDate,
-        uint256 _endDate,
-        uint256 _numberOfProjects
-    ) internal view onlyOwner {
-        require(!series[_id].created, "SERIE ALREADY CREATED");
+    function _checkSerie(uint256 _startDate, uint256 _endDate, uint256 _numberOfProjects) internal view onlyOwner {
+        require(!series[activeSerieId].active, "CURRENT SERIE IS NOT CLOSED YED");
         require(_startDate >= block.timestamp, "INVALID START DATE");
         require(_endDate >= _startDate, "INVALID END DATE");
         require(_numberOfProjects > 0, "PROJECTS MUST BE MORE THAN ZERO");
-    }
-
-    function setActiveSerie(uint256 _id) external onlyOwner {
-        require(series[_id].created, "SERIE DOES NOT EXIST");
-        uint256 oldActiveSerie = activeSerieId;
-        series[activeSerieId].active = false;
-        activeSerieId = _id;
-        series[activeSerieId].active = true;
-        emit ActiveSerieUpdated(oldActiveSerie, activeSerieId);
     }
 
     function addProject(bytes32 _name) external onlyOwner {
@@ -93,6 +75,31 @@ contract ResiRegistry is IResiRegistry, OwnableUpgradeable {
         uint256 oldSupply = series[_serieId].currentSupply;
         series[_serieId].currentSupply += _amount;
         emit SerieSupplyUpdated(oldSupply, series[_serieId].currentSupply);
+    }
+
+    function decreaseSerieSupply(uint256 _serieId, uint256 _amount) external onlyRESIToken {
+        require(series[_serieId].created, "INVALID SERIE");
+        require(_amount > 0, "INVALID AMOUNT");
+        uint256 oldSupply = series[_serieId].currentSupply;
+        series[_serieId].currentSupply -= _amount;
+        emit SerieSupplyUpdated(oldSupply, series[_serieId].currentSupply);
+    }
+
+    function closeSerie() external onlyOwner onlyOwner {
+        require(series[activeSerieId].created, "SERIE NOT CREATED YET");
+        series[activeSerieId].active = false;
+        emit SerieClosed(activeSerieId);
+    }
+
+    function activeSerie() external view returns (uint256 id) {
+        id = activeSerieId;
+    }
+
+    function isValidProject(uint256 _serie, bytes32 _project) external view returns (bool) {
+        if (_serie == activeSerieId && projects[_project].serie == activeSerieId && projects[_project].active) {
+            return true;
+        }
+        return false;
     }
 
     modifier onlyRESIToken() {
