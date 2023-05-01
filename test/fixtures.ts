@@ -1,7 +1,6 @@
-//import {deployments} from 'hardhat'
-const deployments = require('hardhat')
+import {ethers, deployments, getNamedAccounts} from 'hardhat'
 
-export const resiFixture = deployments.createFixture(async ({deployments, getNamedAccounts, ethers}) => {
+export const resiFixture = deployments.createFixture(async () => {
   await deployments.fixture(['v1.0.0'])
 
   const {deployer} = await getNamedAccounts()
@@ -11,7 +10,6 @@ export const resiFixture = deployments.createFixture(async ({deployments, getNam
   const ResiSBTContract = await ethers.getContract('ResiSBT', deployer)
 
   return {
-    deployer,
     ResiTokenContract,
     ResiRegistryContract,
     ResiSBTContract

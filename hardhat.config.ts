@@ -3,8 +3,6 @@ import '@nomicfoundation/hardhat-toolbox'
 import 'hardhat-deploy'
 import 'hardhat-abi-exporter'
 import 'hardhat-contract-sizer'
-import 'hardhat-deploy'
-import 'hardhat-abi-exporter'
 
 import networks from './hardhat.networks'
 import namedAccounts from './hardhat.accounts'

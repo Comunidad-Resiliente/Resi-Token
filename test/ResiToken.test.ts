@@ -6,18 +6,25 @@ import {ResiRegistry, ResiSBT, ResiToken} from '../typechain-types'
 
 describe('Resi Token', () => {
   let deployer: Signer
-  let ResiTokenContract: ResiToken
-  let ResiRegistryContract: ResiRegistry
-  let ResiSBTContract: ResiSBT
+  let ResiToken: ResiToken
+  let ResiRegistry: ResiRegistry
+  let ResiSBT: ResiSBT
+
+  before(async () => {
+    const accounts = await getNamedAccounts()
+    //deployer = await ethers.getSigner(accounts.deployer)
+  })
 
   beforeEach(async () => {
-    const data = await resiFixture()
-    deployer = await ethers.getSigner(data.deployer)
+    const {ResiTokenContract, ResiRegistryContract, ResiSBTContract} = await resiFixture()
+    console.log(ResiRegistryContract)
+    // ResiToken = ResiTokenContract
+    // ResiRegistry = ResiRegistryContract
+    // ResiSBT = ResiSBTContract
   })
 
   it('Correct initialization', async () => {
     console.log('HOLI')
     console.log('Ok')
-    console.log(ResiTokenContract)
   })
 })
