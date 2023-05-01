@@ -1,13 +1,16 @@
 const namedAccounts: any = {
-    deployer: {
-      default: 0
-    },
-    dev: {
-      default: 1
-    },
-    token: {
-      default: 2
-    }
+  deployer: {
+    default: 0
+  },
+  treasury: {
+    default: 1
+  },
+  user: {
+    default: 2
+  },
+  token: {
+    default: 3
+  }
 }
-  
+
 export default namedAccounts
