@@ -148,6 +148,32 @@ contract ResiToken is
         revert TransferFromForbidden("NO TRANSFER FROM ALLOWED");
     }
 
+    function award(
+        address _account,
+        bytes32 _role,
+        uint256 _amount
+    ) external isValidAddress(_account, "INVALID RECEIVER ADDR") onlyRole(MINTER_ROLE) {
+        require(hasRole(_role, _account), "ACCOUNT HAS NOT VALID ROLE");
+        _mint(_account, _amount);
+        uint256 activeSerie = IResiRegistry(RESI_REGISTRY).activeSerie();
+        IResiRegistry(RESI_REGISTRY).increaseSerieSupply(activeSerie, _amount);
+        emit ResiMinted(_account, _amount);
+    }
+
+    /** 
+    function exchangeEquity(
+        uint256 _serieId,
+        bytes32 _project,
+        bytes32 _role,
+        address _to
+    ) external isValidAddress(_to, "INVALID EQUITY RECEIVER") {
+        require(hasRole(_role, _msgSender()), "ACCOUNT HAS NOT VALID ROLE");
+
+    }
+
+    function burnTreasuryEquity(uint256 _serieId, bytes32 _project) external onlyRole(TREASURY_ROLE) {}
+    **/
+
     modifier isValidAddress(address _addr, string memory message) {
         require(_addr != address(0), message);
         _;

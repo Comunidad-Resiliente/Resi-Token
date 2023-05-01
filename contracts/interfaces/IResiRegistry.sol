@@ -36,10 +36,17 @@ interface IResiRegistry {
 
     function isValidProject(uint256 _serie, bytes32 _project) external view returns (bool);
 
+    function isValidProject(bytes32 _project) external view returns (bool);
+
     event RegistryInitialized(address indexed RESI_TOKEN);
+
     event SerieCreated(uint256 _id, uint256 _startDate, uint256 _endDate, uint256 _numberOfProjects);
+
     event SerieSupplyUpdated(uint256 oldSupply, uint256 newSupply);
+
     event SerieClosed(uint256 _id);
+
     event ProjectAdded(bytes32 _name, uint256 serieId);
+
     event ProjectDisabled(bytes32 _name);
 }

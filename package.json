@@ -7,7 +7,9 @@
   "license": "MIT",
   "scripts": {
     "compile": "npx hardhat compile",
+    "size": "npx hardhat size-contracts",
     "test": "npx hardhat test",
+    "coverage": "npx hardhat coverage",
     "deploy": "npx hardhat deploy",
     "deploy:network": "npx hardhat deploy --network"
   },
@@ -26,6 +28,7 @@
     "@types/node": ">=12.0.0",
     "@typescript-eslint/eslint-plugin": "^5.57.1",
     "@typescript-eslint/parser": "^5.57.1",
+    "bignumber.js": "^9.1.1",
     "chai": "^4.2.0",
     "chalk": "^4.1.2",
     "eslint": "^8.37.0",

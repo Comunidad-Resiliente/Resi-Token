@@ -25,6 +25,7 @@ interface IResiToken {
     event MentorRemoved(address indexed mentor);
     event ProjectBuilderRemoved(address indexed projectBuilder);
     event ResiBuilderRemoved(address indexed resiBuilder);
+    event ResiMinted(address indexed account, uint256 amount);
 
     error InvalidAddress(address);
     error TransferForbidden(string message);

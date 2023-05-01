@@ -18,6 +18,29 @@ contract ResiRegistry is IResiRegistry, OwnableUpgradeable {
         emit RegistryInitialized(RESI_TOKEN);
     }
 
+    /**************************** GETTERS  ****************************/
+
+    function activeSerie() external view returns (uint256 id) {
+        id = activeSerieId;
+    }
+
+    function isValidProject(uint256 _serie, bytes32 _project) external view returns (bool) {
+        if (_serie == activeSerieId && projects[_project].serie == activeSerieId && projects[_project].active) {
+            return true;
+        }
+        return false;
+    }
+
+    function isValidProject(bytes32 _project) external view returns (bool) {
+        Project memory proj = projects[_project];
+        if (proj.serie == activeSerieId && proj.active == true) {
+            return true;
+        }
+        return false;
+    }
+
+    /**************************** INTERFACE  ****************************/
+
     function createSerie(uint256 _startDate, uint256 _endDate, uint256 _numberOfProjects) external onlyOwner {
         activeSerieId += 1;
         _checkSerie(_startDate, _endDate, _numberOfProjects);
@@ -85,21 +108,10 @@ contract ResiRegistry is IResiRegistry, OwnableUpgradeable {
         emit SerieSupplyUpdated(oldSupply, series[_serieId].currentSupply);
     }
 
-    function closeSerie() external onlyOwner onlyOwner {
+    function closeSerie() external onlyOwner {
         require(series[activeSerieId].created, "SERIE NOT CREATED YET");
         series[activeSerieId].active = false;
         emit SerieClosed(activeSerieId);
-    }
-
-    function activeSerie() external view returns (uint256 id) {
-        id = activeSerieId;
-    }
-
-    function isValidProject(uint256 _serie, bytes32 _project) external view returns (bool) {
-        if (_serie == activeSerieId && projects[_project].serie == activeSerieId && projects[_project].active) {
-            return true;
-        }
-        return false;
     }
 
     modifier onlyRESIToken() {
