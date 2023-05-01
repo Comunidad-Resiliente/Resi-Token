@@ -38,7 +38,9 @@ interface IResiRegistry {
 
     function isValidProject(bytes32 _project) external view returns (bool);
 
-    event RegistryInitialized(address indexed RESI_TOKEN);
+    event RegistryInitialized();
+
+    event ResiTokenSet(address indexed _resiToken);
 
     event SerieCreated(uint256 _id, uint256 _startDate, uint256 _endDate, uint256 _numberOfProjects);
 

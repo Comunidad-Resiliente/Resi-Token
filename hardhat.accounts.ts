@@ -2,11 +2,14 @@ const namedAccounts: any = {
   deployer: {
     default: 0
   },
-  user: {
+  treasury: {
     default: 1
   },
-  token: {
+  user: {
     default: 2
+  },
+  token: {
+    default: 3
   }
 }
 

@@ -12,19 +12,20 @@ describe('Resi Token', () => {
 
   before(async () => {
     const accounts = await getNamedAccounts()
-    //deployer = await ethers.getSigner(accounts.deployer)
+    deployer = await ethers.getSigner(accounts.deployer)
   })
 
   beforeEach(async () => {
     const {ResiTokenContract, ResiRegistryContract, ResiSBTContract} = await resiFixture()
-    console.log(ResiRegistryContract)
-    // ResiToken = ResiTokenContract
-    // ResiRegistry = ResiRegistryContract
-    // ResiSBT = ResiSBTContract
+    ResiToken = ResiTokenContract
+    ResiRegistry = ResiRegistryContract
+    ResiSBT = ResiSBTContract
   })
 
   it('Correct initialization', async () => {
     console.log('HOLI')
     console.log('Ok')
   })
+
+  it('Cannot re initialize contract', async () => {})
 })

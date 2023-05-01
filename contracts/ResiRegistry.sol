@@ -10,12 +10,10 @@ contract ResiRegistry is IResiRegistry, OwnableUpgradeable {
     mapping(uint256 => Serie) public series;
     mapping(bytes32 => Project) public projects;
 
-    function initialize(address _resiToken) public initializer {
-        require(_resiToken != address(0), "INVALID TOKEN ADDRESS");
+    function initialize() public initializer {
         __Context_init_unchained();
         __Ownable_init_unchained();
-        RESI_TOKEN = _resiToken;
-        emit RegistryInitialized(RESI_TOKEN);
+        emit RegistryInitialized();
     }
 
     /**************************** GETTERS  ****************************/
@@ -40,6 +38,12 @@ contract ResiRegistry is IResiRegistry, OwnableUpgradeable {
     }
 
     /**************************** INTERFACE  ****************************/
+
+    function setResiToken(address _resiToken) external onlyOwner {
+        require(_resiToken != address(0), "INVALID TOKEN ADDRESS");
+        RESI_TOKEN = _resiToken;
+        emit ResiTokenSet(_resiToken);
+    }
 
     function createSerie(uint256 _startDate, uint256 _endDate, uint256 _numberOfProjects) external onlyOwner {
         activeSerieId += 1;
