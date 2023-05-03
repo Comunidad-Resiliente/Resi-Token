@@ -96,6 +96,8 @@ contract ResiRegistry is IResiRegistry, OwnableUpgradeable {
         emit ProjectDisabled(_name);
     }
 
+    function registerSerieSBT(address SBT) external onlyOwner {}
+
     function increaseSerieSupply(uint256 _serieId, uint256 _amount) external onlyRESIToken {
         require(series[_serieId].created, "INVALID SERIE");
         require(_amount > 0, "INVALID AMOUNT");

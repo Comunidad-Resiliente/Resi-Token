@@ -1,6 +1,6 @@
 import {HardhatRuntimeEnvironment} from 'hardhat/types'
 import {DeployFunction} from 'hardhat-deploy/types'
-import {printDeploySuccessful, printInfo} from '../utils/utils'
+import {printDeploySuccessful, printInfo} from '../utils'
 import {ethers} from 'hardhat'
 
 const version = 'v1.0.0'
