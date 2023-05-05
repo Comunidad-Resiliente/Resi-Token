@@ -36,13 +36,29 @@ contract ResiSBT is IResiSBT, IERC5192, OwnableUpgradeable, ERC721URIStorageUpgr
         emit ContractURIUpdated(contractUri);
     }
 
+    /// @custom:notice The following function is override required by Solidity.
+    function tokenURI(uint256 tokenId) public view override(ERC721URIStorageUpgradeable) returns (string memory) {
+        return super.tokenURI(tokenId);
+    }
+
     function mint() external {}
 
     function mintBatch() external {}
 
     function lazyMint() external {}
 
+    function lazyMintBatch() external {}
+
+    function claim() external {}
+
     function locked(uint256 tokenId) external view returns (bool) {}
+
+    /**
+     * @dev See {ERC721-_beforeTokenTransfer}.
+     */
+    function _beforeTokenTransfer(address from, address to, uint256 firstTokenId, uint256 batchSize) internal override {
+        super._beforeTokenTransfer(from, to, firstTokenId, batchSize);
+    }
 
     function transferFrom(address, address, uint256) public override {
         revert TransferForbidden("NO TRANSFER FROM ALLOWED");
