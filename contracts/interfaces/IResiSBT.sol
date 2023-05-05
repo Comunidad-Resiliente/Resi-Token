@@ -3,4 +3,5 @@ pragma solidity ^0.8.18;
 
 interface IResiSBT {
     event ContractURIUpdated(string contractUri);
+    error TransferForbidden(string message);
 }

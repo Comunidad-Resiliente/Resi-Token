@@ -40,5 +40,19 @@ contract ResiSBT is IResiSBT, IERC5192, OwnableUpgradeable, ERC721URIStorageUpgr
 
     function mintBatch() external {}
 
+    function lazyMint() external {}
+
     function locked(uint256 tokenId) external view returns (bool) {}
+
+    function transferFrom(address, address, uint256) public override {
+        revert TransferForbidden("NO TRANSFER FROM ALLOWED");
+    }
+
+    function safeTransferFrom(address, address, uint256) public override {
+        revert TransferForbidden("NO TRANSFER FROM ALLOWED");
+    }
+
+    function safeTransferFrom(address, address, uint256, bytes memory data) public override {
+        revert TransferForbidden("NO TRANSFER FROM ALLOWED");
+    }
 }
