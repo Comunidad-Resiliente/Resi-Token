@@ -9,6 +9,8 @@ interface IResiRegistry {
         uint256 currentProjects;
         uint256 numberOfProjects;
         uint256 currentSupply;
+        uint256 maxSupply;
+        address vault;
         bool active;
         bool created;
     }
@@ -18,7 +20,13 @@ interface IResiRegistry {
         bool active;
     }
 
-    function createSerie(uint256 _startDate, uint256 _endDate, uint256 _numberOfProjects) external;
+    function createSerie(
+        uint256 _startDate,
+        uint256 _endDate,
+        uint256 _numberOfProjects,
+        uint256 _maxSupply,
+        address _vault
+    ) external;
 
     function addProject(bytes32 _name) external;
 
@@ -42,7 +50,18 @@ interface IResiRegistry {
 
     event ResiTokenSet(address indexed _resiToken);
 
-    event SerieCreated(uint256 _id, uint256 _startDate, uint256 _endDate, uint256 _numberOfProjects);
+    event TreasuryVaultSet(address indexed _treasuryVault);
+
+    event SerieSBTSet(uint256 activeSerieId, address indexed _sbt);
+
+    event SerieCreated(
+        uint256 _id,
+        uint256 _startDate,
+        uint256 _endDate,
+        uint256 _numberOfProjects,
+        uint256 _maxSupply,
+        address indexed _vault
+    );
 
     event SerieSupplyUpdated(uint256 oldSupply, uint256 newSupply);
 

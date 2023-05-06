@@ -13,20 +13,29 @@ contract ResiSBT is IResiSBT, IERC5192, OwnableUpgradeable, ERC721URIStorageUpgr
 
     /// @dev ContractUri
     string public contractUri;
-    uint256 public serieId;
+    uint256 public SERIE_ID;
+    address public RESI_REGISTRY;
 
     mapping(uint256 => bool) private availableToMint;
     mapping(address => uint256) private resiTokenBalances;
 
     bytes32 private constant TYPEHASH = keccak256("MintRequest(address to,string uri,uint256 tokenId)");
 
-    function initialize(string memory _name, string memory _symbol, uint256 _serieId) external initializer {
+    function initialize(
+        string memory _name,
+        string memory _symbol,
+        string memory _contractUri,
+        uint256 _serieId
+    ) external initializer {
         __Context_init_unchained();
         __Ownable_init_unchained();
         __ERC721_init_unchained(_name, _symbol);
         __ERC721URIStorage_init_unchained();
 
-        emit Initialized(_name, _symbol);
+        SERIE_ID = _serieId;
+        contractUri = _contractUri;
+
+        emit Initialized(_name, _symbol, _serieId);
     }
 
     /// @notice Modify contractUri for NFT collection
@@ -36,18 +45,26 @@ contract ResiSBT is IResiSBT, IERC5192, OwnableUpgradeable, ERC721URIStorageUpgr
         emit ContractURIUpdated(contractUri);
     }
 
+    function setRegistry(address _registry) external onlyOwner {
+        require(_registry != address(0), "INVALID REGISTRY ADDRESS");
+        RESI_REGISTRY = _registry;
+        emit RegistrySet(_registry);
+    }
+
     /// @custom:notice The following function is override required by Solidity.
     function tokenURI(uint256 tokenId) public view override(ERC721URIStorageUpgradeable) returns (string memory) {
         return super.tokenURI(tokenId);
     }
 
-    function mint() external {}
+    function mint() external onlyOwner {}
 
-    function mintBatch() external {}
+    function mintBatch() external onlyOwner {}
 
-    function lazyMint() external {}
+    function mintByRegistry() external onlyRegistry {}
 
-    function lazyMintBatch() external {}
+    function lazyMint() external onlyOwner {}
+
+    function lazyMintBatch() external onlyOwner {}
 
     function claim() external {}
 
@@ -60,15 +77,20 @@ contract ResiSBT is IResiSBT, IERC5192, OwnableUpgradeable, ERC721URIStorageUpgr
         super._beforeTokenTransfer(from, to, firstTokenId, batchSize);
     }
 
-    function transferFrom(address, address, uint256) public override {
+    function transferFrom(address, address, uint256) public pure override {
         revert TransferForbidden("NO TRANSFER FROM ALLOWED");
     }
 
-    function safeTransferFrom(address, address, uint256) public override {
+    function safeTransferFrom(address, address, uint256) public pure override {
         revert TransferForbidden("NO TRANSFER FROM ALLOWED");
     }
 
-    function safeTransferFrom(address, address, uint256, bytes memory data) public override {
+    function safeTransferFrom(address, address, uint256, bytes memory) public pure override {
         revert TransferForbidden("NO TRANSFER FROM ALLOWED");
+    }
+
+    modifier onlyRegistry() {
+        require(_msgSender() == RESI_REGISTRY, "INVALID REGISTRY ADDRESS");
+        _;
     }
 }
