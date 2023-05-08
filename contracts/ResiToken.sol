@@ -132,6 +132,13 @@ contract ResiToken is
         );
     }
 
+    function isSBTReceiver(address _account, bytes32 _role, uint256 _serieId) external view returns (bool) {
+        if (hasRole(_role, _account) && IResiRegistry(RESI_REGISTRY).activeSerie() == _serieId) {
+            return true;
+        }
+        return false;
+    }
+
     function _beforeTokenTransfer(
         address from,
         address to,
@@ -161,7 +168,7 @@ contract ResiToken is
     }
 
     /** 
-    function exchangeEquity(
+    function exit(
         uint256 _serieId,
         bytes32 _project,
         bytes32 _role,

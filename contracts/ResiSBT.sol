@@ -6,18 +6,31 @@ import "@openzeppelin/contracts-upgradeable/token/ERC721/extensions/ERC721URISto
 import "@openzeppelin/contracts/utils/Counters.sol";
 
 import "./interfaces/IResiSBT.sol";
+import "./interfaces/IResiRegistry.sol";
+import "./interfaces/IResiToken.sol";
 import "./interfaces/IERC5192.sol";
 
 contract ResiSBT is IResiSBT, IERC5192, OwnableUpgradeable, ERC721URIStorageUpgradeable {
     using Counters for Counters.Counter;
+    /// @dev Private counter to make internal security checks
+    Counters.Counter private _tokenIdCounter;
 
     /// @dev ContractUri
     string public contractUri;
     uint256 public SERIE_ID;
+    address public RESI_TOKEN;
     address public RESI_REGISTRY;
 
-    mapping(uint256 => bool) private availableToMint;
+    /**
+    // Mapping from token ID to owner address
+    mapping(uint256 => address) private _owners;
+
+    // Mapping owner address to token count
+    mapping(address => uint256) private _balances;
+     */
+
     mapping(address => uint256) private resiTokenBalances;
+    mapping(uint256 => bool) private lockedSBTs;
 
     bytes32 private constant TYPEHASH = keccak256("MintRequest(address to,string uri,uint256 tokenId)");
 
@@ -25,17 +38,23 @@ contract ResiSBT is IResiSBT, IERC5192, OwnableUpgradeable, ERC721URIStorageUpgr
         string memory _name,
         string memory _symbol,
         string memory _contractUri,
-        uint256 _serieId
+        uint256 _serieId,
+        address _registry,
+        address _token
     ) external initializer {
+        require(_registry != address(0), "INVALID REGISTRY ADDRESS");
+        require(_token != address(0), "INVALID RESI TOKEN ADDRESS");
         __Context_init_unchained();
         __Ownable_init_unchained();
         __ERC721_init_unchained(_name, _symbol);
         __ERC721URIStorage_init_unchained();
 
+        RESI_REGISTRY = _registry;
+        RESI_TOKEN = _token;
         SERIE_ID = _serieId;
         contractUri = _contractUri;
 
-        emit Initialized(_name, _symbol, _serieId);
+        emit Initialized(_name, _symbol, _serieId, _registry, _token);
     }
 
     /// @notice Modify contractUri for NFT collection
@@ -56,19 +75,42 @@ contract ResiSBT is IResiSBT, IERC5192, OwnableUpgradeable, ERC721URIStorageUpgr
         return super.tokenURI(tokenId);
     }
 
-    function mint() external onlyOwner {}
+    function mint(address _to, bytes32 _role, string calldata _uri) external onlyOwner returns (uint256) {
+        uint256 tokenId = _mintSBT(_to, _role, _uri);
+        emit MintSBT(_to, _role, tokenId);
+        return tokenId;
+    }
 
     function mintBatch() external onlyOwner {}
 
     function mintByRegistry() external onlyRegistry {}
 
-    function lazyMint() external onlyOwner {}
+    function _mintSBT(address _to, bytes32 _role, string calldata _uri) internal onlyOwner returns (uint256) {
+        _checkMint(_to, _role, _uri);
+        uint256 _tokenId = _tokenIdCounter.current();
 
-    function lazyMintBatch() external onlyOwner {}
+        //mint sbt
+        lockedSBTs[_tokenId] = true;
+        _safeMint(_to, _tokenId);
+        super._setTokenURI(_tokenId, _uri);
+
+        _tokenIdCounter.increment();
+
+        emit Locked(_tokenId);
+        return _tokenId;
+    }
 
     function claim() external {}
 
-    function locked(uint256 tokenId) external view returns (bool) {}
+    function locked(uint256 tokenId) external view returns (bool) {
+        return lockedSBTs[tokenId];
+    }
+
+    function _checkMint(address _to, bytes32 _role, string memory uri) internal view onlyOwner {
+        require(_to != address(0), "INVALID TO ADDRESS");
+        require(bytes(uri).length > 0, "RESISBT: Empty URI");
+        require(IResiToken(RESI_TOKEN).isSBTReceiver(_to, _role, SERIE_ID), "INVALID SBT RECEIVER");
+    }
 
     /**
      * @dev See {ERC721-_beforeTokenTransfer}.
