@@ -21,14 +21,6 @@ contract ResiSBT is IResiSBT, IERC5192, OwnableUpgradeable, ERC721URIStorageUpgr
     address public RESI_TOKEN;
     address public RESI_REGISTRY;
 
-    /**
-    // Mapping from token ID to owner address
-    mapping(uint256 => address) private _owners;
-
-    // Mapping owner address to token count
-    mapping(address => uint256) private _balances;
-     */
-
     mapping(address => uint256) private resiTokenBalances;
     mapping(uint256 => bool) private lockedSBTs;
 
@@ -81,9 +73,22 @@ contract ResiSBT is IResiSBT, IERC5192, OwnableUpgradeable, ERC721URIStorageUpgr
         return tokenId;
     }
 
-    function mintBatch() external onlyOwner {}
+    function mintBatchByRole(address[] memory _to, string calldata _uri, bytes32 _role) external onlyOwner {
+        for (uint256 i = 0; i < _to.length; i++) {
+            _checkMint(_to[i], _role, _uri);
+            _mintSBT(_to[i], _role, _uri);
+        }
+    }
 
     function mintByRegistry() external onlyRegistry {}
+
+    function lazyMint() external onlyOwner {}
+
+    function lazyMintBatch() external onlyOwner {}
+
+    function increaseResiTokenBalance() external onlyResiToken {}
+
+    function decreaseResiTokenBalance() external onlyResiToken {}
 
     function _mintSBT(address _to, bytes32 _role, string calldata _uri) internal onlyOwner returns (uint256) {
         _checkMint(_to, _role, _uri);
@@ -133,6 +138,11 @@ contract ResiSBT is IResiSBT, IERC5192, OwnableUpgradeable, ERC721URIStorageUpgr
 
     modifier onlyRegistry() {
         require(_msgSender() == RESI_REGISTRY, "INVALID REGISTRY ADDRESS");
+        _;
+    }
+
+    modifier onlyResiToken() {
+        require(_msgSender() == RESI_TOKEN, "INVALID RESI TOKEN ADDRESS");
         _;
     }
 }

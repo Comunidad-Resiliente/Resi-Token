@@ -10,6 +10,8 @@ contract ResiVault is IResiVault, OwnableUpgradeable {
     address public RESI_TOKEN;
     uint256 public SERIE_ID;
 
+    // mapping(bytes32 => address) tokens;
+
     function initialize(uint256 _serieId, address _token, address _resiToken) public initializer {
         require(_token != address(0), "INVALID TOKEN ADDRESS");
         require(_resiToken != address(0), "INVALID RESI TOKEN ADDRESS");
@@ -21,7 +23,23 @@ contract ResiVault is IResiVault, OwnableUpgradeable {
         emit Initialized(_serieId, _token, _resiToken);
     }
 
-    function balance() external view returns (uint256) {
+    function tokenBalance() external view returns (uint256) {
         return IERC20(TOKEN).balanceOf(address(this));
     }
+
+    function balance() external view returns (uint256) {
+        return address(this).balance;
+    }
+
+    function release() external {}
+
+    function release() external onlyResiToken {}
+
+    receive() external payable {
+        emit EtherReceived(_msgSender(), msg.value);
+    }
+
+    // Leave a gap betweeen inherited contracts variables in order
+    // to be able to add more variables in them later.
+    uint256[20] private upgradeGap;
 }
