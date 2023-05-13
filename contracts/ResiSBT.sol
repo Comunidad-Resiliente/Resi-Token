@@ -23,8 +23,7 @@ contract ResiSBT is IResiSBT, IERC5192, OwnableUpgradeable, ERC721URIStorageUpgr
 
     mapping(address => uint256) private resiTokenBalances;
     mapping(uint256 => bool) private lockedSBTs;
-
-    bytes32 private constant TYPEHASH = keccak256("MintRequest(address to,string uri,uint256 tokenId)");
+    mapping(bytes32 => string) private defaultRoleUris;
 
     function initialize(
         string memory _name,
@@ -62,35 +61,44 @@ contract ResiSBT is IResiSBT, IERC5192, OwnableUpgradeable, ERC721URIStorageUpgr
         emit RegistrySet(_registry);
     }
 
+    function setDefaultRoleUri(bytes32 _role, string calldata _uri) external onlyOwner {
+        require(_role != bytes32(0), "ResiSBT: INVALID ROLE");
+        require(bytes(_uri).length > 0, "RESISBT: Empty URI");
+        string memory oldUri = defaultRoleUris[_role];
+        defaultRoleUris[_role] = _uri;
+        emit DefaultRoleUriUpdated(oldUri, _uri);
+    }
+
     /// @custom:notice The following function is override required by Solidity.
     function tokenURI(uint256 tokenId) public view override(ERC721URIStorageUpgradeable) returns (string memory) {
         return super.tokenURI(tokenId);
     }
 
-    function mint(address _to, bytes32 _role, string calldata _uri) external onlyOwner returns (uint256) {
+    function mint(address _to, bytes32 _role, string memory _uri) external onlyOwner returns (uint256) {
         uint256 tokenId = _mintSBT(_to, _role, _uri);
         emit MintSBT(_to, _role, tokenId);
         return tokenId;
     }
 
-    function mintBatchByRole(address[] memory _to, string calldata _uri, bytes32 _role) external onlyOwner {
+    function mintBatchByRole(address[] memory _to, string memory _uri, bytes32 _role) external onlyOwner {
         for (uint256 i = 0; i < _to.length; i++) {
             _checkMint(_to[i], _role, _uri);
             _mintSBT(_to[i], _role, _uri);
         }
     }
 
-    function mintByRegistry() external onlyRegistry {}
-
-    function lazyMint() external onlyOwner {}
-
-    function lazyMintBatch() external onlyOwner {}
+    function mintByRegistry(address _to, bytes32 _role) external onlyRegistry {
+        string memory defaultUri = defaultRoleUris[_role];
+        require(bytes(defaultUri).length > 0, "Default Role Uri not set");
+        uint256 tokenId = _mintSBT(_to, _role, defaultUri);
+        emit SBTMintedByRegistry(_to, _role, tokenId);
+    }
 
     function increaseResiTokenBalance() external onlyResiToken {}
 
     function decreaseResiTokenBalance() external onlyResiToken {}
 
-    function _mintSBT(address _to, bytes32 _role, string calldata _uri) internal onlyOwner returns (uint256) {
+    function _mintSBT(address _to, bytes32 _role, string memory _uri) internal onlyOwner returns (uint256) {
         _checkMint(_to, _role, _uri);
         uint256 _tokenId = _tokenIdCounter.current();
 
@@ -105,14 +113,13 @@ contract ResiSBT is IResiSBT, IERC5192, OwnableUpgradeable, ERC721URIStorageUpgr
         return _tokenId;
     }
 
-    function claim() external {}
-
     function locked(uint256 tokenId) external view returns (bool) {
         return lockedSBTs[tokenId];
     }
 
     function _checkMint(address _to, bytes32 _role, string memory uri) internal view onlyOwner {
         require(_to != address(0), "INVALID TO ADDRESS");
+        require(balanceOf(_to) == 0, "ResiSBT: User already has SBT");
         require(bytes(uri).length > 0, "RESISBT: Empty URI");
         require(IResiToken(RESI_TOKEN).isSBTReceiver(_to, _role, SERIE_ID), "INVALID SBT RECEIVER");
     }

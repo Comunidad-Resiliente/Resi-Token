@@ -3,6 +3,8 @@ pragma solidity ^0.8.18;
 
 interface IResiRegistry {
     struct Serie {
+        bool active;
+        bool created;
         uint256 id;
         uint256 startDate;
         uint256 endDate;
@@ -11,8 +13,6 @@ interface IResiRegistry {
         uint256 currentSupply;
         uint256 maxSupply;
         address vault;
-        bool active;
-        bool created;
     }
 
     struct Project {
@@ -45,6 +45,8 @@ interface IResiRegistry {
     function isValidProject(uint256 _serie, bytes32 _project) external view returns (bool);
 
     function isValidProject(bytes32 _project) external view returns (bool);
+
+    function getSBTSerie() external view returns (address);
 
     event RegistryInitialized();
 

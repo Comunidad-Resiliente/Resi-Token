@@ -40,6 +40,10 @@ contract ResiRegistry is IResiRegistry, OwnableUpgradeable {
         return false;
     }
 
+    function getSBTSerie() external view returns (address) {
+        return seriesSBTs[activeSerieId];
+    }
+
     /**************************** INTERFACE  ****************************/
 
     function setResiToken(address _resiToken) external onlyOwner {

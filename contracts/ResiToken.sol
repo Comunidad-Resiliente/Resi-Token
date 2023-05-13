@@ -3,12 +3,16 @@ pragma solidity ^0.8.18;
 
 import "./interfaces/IResiToken.sol";
 import "./interfaces/IResiRegistry.sol";
+import "./interfaces/IResiSBT.sol";
 
 import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/access/AccessControlEnumerableUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/token/ERC20/ERC20Upgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/token/ERC20/extensions/ERC20BurnableUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/token/ERC20/extensions/ERC20PausableUpgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/token/ERC721/IERC721Upgradeable.sol";
+
+import "@openzeppelin/contracts-upgradeable/security/ReentrancyGuardUpgradeable.sol";
 
 contract ResiToken is
     IResiToken,
@@ -161,13 +165,16 @@ contract ResiToken is
         uint256 _amount
     ) external isValidAddress(_account, "INVALID RECEIVER ADDR") onlyRole(MINTER_ROLE) {
         require(hasRole(_role, _account), "ACCOUNT HAS NOT VALID ROLE");
+        address SERIE_SBT = IResiRegistry(RESI_REGISTRY).getSBTSerie();
+        if (IERC721Upgradeable(SERIE_SBT).balanceOf(_account) == 0) {
+            IResiSBT(SERIE_SBT).mintByRegistry(_account, _role);
+        }
         _mint(_account, _amount);
         uint256 activeSerie = IResiRegistry(RESI_REGISTRY).activeSerie();
         IResiRegistry(RESI_REGISTRY).increaseSerieSupply(activeSerie, _amount);
         emit ResiMinted(_account, _amount);
     }
 
-    /** 
     function exit(
         uint256 _serieId,
         bytes32 _project,
@@ -175,9 +182,9 @@ contract ResiToken is
         address _to
     ) external isValidAddress(_to, "INVALID EQUITY RECEIVER") {
         require(hasRole(_role, _msgSender()), "ACCOUNT HAS NOT VALID ROLE");
-
     }
 
+    /** 
     function burnTreasuryEquity(uint256 _serieId, bytes32 _project) external onlyRole(TREASURY_ROLE) {}
     **/
 

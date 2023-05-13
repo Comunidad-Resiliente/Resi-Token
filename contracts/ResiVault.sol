@@ -10,7 +10,7 @@ contract ResiVault is IResiVault, OwnableUpgradeable {
     address public RESI_TOKEN;
     uint256 public SERIE_ID;
 
-    // mapping(bytes32 => address) tokens;
+    mapping(bytes32 => address) public tokens;
 
     function initialize(uint256 _serieId, address _token, address _resiToken) public initializer {
         require(_token != address(0), "INVALID TOKEN ADDRESS");
@@ -27,8 +27,27 @@ contract ResiVault is IResiVault, OwnableUpgradeable {
         return IERC20(TOKEN).balanceOf(address(this));
     }
 
+    function tokenBalance(bytes32 _name) external view returns (uint256) {
+        require(tokens[_name] != address(0), "INVALID TOKEN NAME");
+        return IERC20(tokens[_name].balanceOf(address(this)));
+    }
+
     function balance() external view returns (uint256) {
         return address(this).balance;
+    }
+
+    function addToken(address _token, bytes32 _name) external onlyOwner {
+        require(_token != address(0), "INVALID TOKEN ADDRESS");
+        require(_name != bytes32(0), "INVALID NAME");
+        require(tokens[_name] == address(0), "TOKEN ALREADY SET");
+        tokens[_name] = _token;
+        emit TokenAdded(_name, _token);
+    }
+
+    function removeToken(bytes32 _name) external onlyOwner {
+        require(tokens[_name] != address(0), "INVALID TOKEN NAME");
+        tokens[_name] = address(0);
+        emit TokenRemoved(_name, _token);
     }
 
     function release() external {}
