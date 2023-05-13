@@ -167,21 +167,26 @@ contract ResiToken is
         require(hasRole(_role, _account), "ACCOUNT HAS NOT VALID ROLE");
         address SERIE_SBT = IResiRegistry(RESI_REGISTRY).getSBTSerie();
         if (IERC721Upgradeable(SERIE_SBT).balanceOf(_account) == 0) {
-            IResiSBT(SERIE_SBT).mintByRegistry(_account, _role);
+            IResiSBT(SERIE_SBT).mintByResiToken(_account, _role);
         }
         _mint(_account, _amount);
         uint256 activeSerie = IResiRegistry(RESI_REGISTRY).activeSerie();
+        IResiSBT(SERIE_SBT).increaseResiTokenBalance(_account, _amount);
         IResiRegistry(RESI_REGISTRY).increaseSerieSupply(activeSerie, _amount);
         emit ResiMinted(_account, _amount);
     }
 
     function exit(
         uint256 _serieId,
-        bytes32 _project,
         bytes32 _role,
         address _to
     ) external isValidAddress(_to, "INVALID EQUITY RECEIVER") {
+        require(_role != TREASURY_ROLE, "INVALID ACTION");
         require(hasRole(_role, _msgSender()), "ACCOUNT HAS NOT VALID ROLE");
+        require(balanceOf(_msgSender()) > 0, "NO BALANCE");
+        (bool isActive, uint256 currentSerieSupplyLeft) = IResiRegistry(RESI_REGISTRY).getSerieState(_serieId);
+        require(!isActive, "SERIE STILL ACTIVE");
+        require(currentSerieSupplyLeft > 0, "SERIE WITH NO FUNDS LEFT");
     }
 
     /** 

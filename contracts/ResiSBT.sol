@@ -87,16 +87,26 @@ contract ResiSBT is IResiSBT, IERC5192, OwnableUpgradeable, ERC721URIStorageUpgr
         }
     }
 
-    function mintByRegistry(address _to, bytes32 _role) external onlyRegistry {
+    function mintByResiToken(address _to, bytes32 _role) external onlyResiToken {
         string memory defaultUri = defaultRoleUris[_role];
         require(bytes(defaultUri).length > 0, "Default Role Uri not set");
         uint256 tokenId = _mintSBT(_to, _role, defaultUri);
-        emit SBTMintedByRegistry(_to, _role, tokenId);
+        emit SBTMintedByResiToken(_to, _role, tokenId);
     }
 
-    function increaseResiTokenBalance() external onlyResiToken {}
+    function increaseResiTokenBalance(address _to, uint256 _amount) external onlyResiToken {
+        require(balanceOf(_to) == 1, "ResiSBT: User has no SBT");
+        require(_amount > 0, "ResiSBT: Invalid amount");
+        resiTokenBalances[_to] += _amount;
+        emit IncreaseResiBalance(_to, _amount);
+    }
 
-    function decreaseResiTokenBalance() external onlyResiToken {}
+    function decreaseResiTokenBalance(address _to, uint256 _amount) external onlyResiToken {
+        require(balanceOf(_to) == 1, "ResiSBT: User has no SBT");
+        require(_amount > 0, "ResiSBT: Invalid amount");
+        resiTokenBalances[_to] -= _amount;
+        emit DecreaseResiBalance(_to, _amount);
+    }
 
     function _mintSBT(address _to, bytes32 _role, string memory _uri) internal onlyOwner returns (uint256) {
         _checkMint(_to, _role, _uri);

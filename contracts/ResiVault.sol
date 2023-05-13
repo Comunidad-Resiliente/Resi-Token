@@ -29,7 +29,7 @@ contract ResiVault is IResiVault, OwnableUpgradeable {
 
     function tokenBalance(bytes32 _name) external view returns (uint256) {
         require(tokens[_name] != address(0), "INVALID TOKEN NAME");
-        return IERC20(tokens[_name].balanceOf(address(this)));
+        return IERC20(tokens[_name]).balanceOf(address(this));
     }
 
     function balance() external view returns (uint256) {
@@ -46,13 +46,14 @@ contract ResiVault is IResiVault, OwnableUpgradeable {
 
     function removeToken(bytes32 _name) external onlyOwner {
         require(tokens[_name] != address(0), "INVALID TOKEN NAME");
+        address _token = tokens[_name];
         tokens[_name] = address(0);
         emit TokenRemoved(_name, _token);
     }
 
-    function release() external {}
+    // function release() external {}
 
-    function release() external onlyResiToken {}
+    // function release() external onlyResiRegistry {}
 
     receive() external payable {
         emit EtherReceived(_msgSender(), msg.value);

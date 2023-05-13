@@ -44,6 +44,12 @@ contract ResiRegistry is IResiRegistry, OwnableUpgradeable {
         return seriesSBTs[activeSerieId];
     }
 
+    function getSerieState(uint256 _serieId) external view returns (bool, uint256) {
+        bool isActive = series[_serieId].active;
+        uint256 currentSupply = series[_serieId].currentSupply;
+        return (isActive, currentSupply);
+    }
+
     /**************************** INTERFACE  ****************************/
 
     function setResiToken(address _resiToken) external onlyOwner {
@@ -134,7 +140,12 @@ contract ResiRegistry is IResiRegistry, OwnableUpgradeable {
 
     function increaseSerieSupply(uint256 _serieId, uint256 _amount) external onlyRESIToken {
         require(series[_serieId].created, "INVALID SERIE");
+        require(series[_serieId].active, "ResiRegistry: Serie inactive");
         require(_amount > 0, "INVALID AMOUNT");
+        require(
+            series[_serieId].currentSupply + _amount <= series[_serieId].maxSupply,
+            "ResiRegistry: Amount will exceed serie max supply"
+        );
         uint256 oldSupply = series[_serieId].currentSupply;
         series[_serieId].currentSupply += _amount;
         emit SerieSupplyUpdated(oldSupply, series[_serieId].currentSupply);
@@ -150,6 +161,7 @@ contract ResiRegistry is IResiRegistry, OwnableUpgradeable {
 
     function closeSerie() external onlyOwner {
         require(series[activeSerieId].created, "SERIE NOT CREATED YET");
+        require(block.timestamp >= series[activeSerieId].endDate, "SERIE STILL ACTIVE");
         series[activeSerieId].active = false;
         emit SerieClosed(activeSerieId);
     }

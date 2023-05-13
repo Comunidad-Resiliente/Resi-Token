@@ -48,6 +48,8 @@ interface IResiRegistry {
 
     function getSBTSerie() external view returns (address);
 
+    function getSerieState(uint256 _serieId) external view returns (bool, uint256);
+
     event RegistryInitialized();
 
     event ResiTokenSet(address indexed _resiToken);
