@@ -29,7 +29,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
 
   const sbtName = SBTConfig.NAMES[process.env.SBT_ROLE_NAME].NAME
   const sbtSymbol = SBTConfig.NAMES[process.env.SBT_ROLE_NAME].SYMBOL
-  if (!sbtName || sbtSymbol) {
+  if (!sbtName || !sbtSymbol) {
     throw Error('Please provide a valid SBT Role to deploy')
   }
   const contractURI = SBTConfig[chainId].CONTRACT_URI
