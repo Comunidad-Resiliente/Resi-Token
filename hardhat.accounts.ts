@@ -8,7 +8,7 @@ const namedAccounts: any = {
   user: {
     default: 2
   },
-  token: {
+  vaultToken: {
     default: 3
   }
 }
