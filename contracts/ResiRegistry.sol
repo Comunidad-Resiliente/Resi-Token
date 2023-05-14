@@ -63,13 +63,13 @@ contract ResiRegistry is IResiRegistry, OwnableUpgradeable {
     /**************************** INTERFACE  ****************************/
 
     function setResiToken(address _resiToken) external onlyOwner {
-        require(_resiToken != address(0), "INVALID TOKEN ADDRESS");
+        require(_resiToken != address(0), "RESIRegistry: INVALID TOKEN ADDRESS");
         RESI_TOKEN = _resiToken;
         emit ResiTokenSet(_resiToken);
     }
 
     function setTreasuryVault(address _treasuryVault) external onlyOwner {
-        require(_treasuryVault != address(0), "INVALID VAULT ADDRESS");
+        require(_treasuryVault != address(0), "RESIRegistry: INVALID VAULT ADDRESS");
         TREASURY_VAULT = _treasuryVault;
         emit TreasuryVaultSet(_treasuryVault);
     }
@@ -99,22 +99,6 @@ contract ResiRegistry is IResiRegistry, OwnableUpgradeable {
         emit SerieCreated(activeSerieId, _startDate, _endDate, _numberOfProjects, _maxSupply, _vault);
     }
 
-    function _checkSerie(
-        uint256 _startDate,
-        uint256 _endDate,
-        uint256 _numberOfProjects,
-        uint256 _maxSupply,
-        address _vault
-    ) internal view onlyOwner {
-        require(!series[activeSerieId].active, "CURRENT SERIE IS NOT CLOSED YED");
-        require(_startDate >= block.timestamp, "INVALID START DATE");
-        require(_endDate >= _startDate, "INVALID END DATE");
-        require(_numberOfProjects > 0, "PROJECTS MUST BE MORE THAN ZERO");
-        require(_maxSupply > 0, "MAX SUPPLY TO EMIT MSUT BE GREATER THAN ZERO");
-        require(_vault != address(0), "INVALID VAULT CONTRACT");
-        // TODO: see why is not working require(isContract(_vault), "VAULT MUST BE CONTRACT");
-    }
-
     function addProject(bytes32 _name) external onlyOwner {
         _addProject(_name);
     }
@@ -125,36 +109,25 @@ contract ResiRegistry is IResiRegistry, OwnableUpgradeable {
         }
     }
 
-    function _addProject(bytes32 _name) internal onlyOwner {
-        require(_name != bytes32(0), "INVALID NAME");
-        require(
-            series[activeSerieId].currentProjects < series[activeSerieId].numberOfProjects,
-            "MAX PROJECTS SERIES REACHED"
-        );
-        series[activeSerieId].currentProjects++;
-        Project memory newProject = Project({serie: activeSerieId, active: true});
-        projects[_name] = newProject;
-        emit ProjectAdded(_name, activeSerieId);
-    }
-
     function disableProject(bytes32 _name) external onlyOwner {
         projects[_name].active = false;
         emit ProjectDisabled(_name);
     }
 
     function registerSerieSBT(address _sbt) external onlyOwner {
-        require(_sbt != address(0), "INVALID SBT ADDRESS");
+        require(series[activeSerieId].active, "RESIRegisty: SERIE NOT ACTIVE");
+        require(_sbt != address(0), "RESIRegistry: INVALID SBT ADDRESS");
         seriesSBTs[activeSerieId] = _sbt;
         emit SerieSBTSet(activeSerieId, _sbt);
     }
 
     function increaseSerieSupply(uint256 _serieId, uint256 _amount) external onlyRESIToken {
-        require(series[_serieId].created, "INVALID SERIE");
-        require(series[_serieId].active, "ResiRegistry: Serie inactive");
-        require(_amount > 0, "INVALID AMOUNT");
+        require(series[_serieId].created, "RESIRegistry: INVALID SERIE");
+        require(series[_serieId].active, "RESIRegistry: SERIE INACTIVE");
+        require(_amount > 0, "RESIRegistry: INVALID AMOUNT");
         require(
             series[_serieId].currentSupply + _amount <= series[_serieId].maxSupply,
-            "ResiRegistry: Amount will exceed serie max supply"
+            "RESIRegistry: Amount will exceed serie max supply"
         );
         uint256 oldSupply = series[_serieId].currentSupply;
         series[_serieId].currentSupply += _amount;
@@ -162,16 +135,16 @@ contract ResiRegistry is IResiRegistry, OwnableUpgradeable {
     }
 
     function decreaseSerieSupply(uint256 _serieId, uint256 _amount) external onlyRESIToken {
-        require(series[_serieId].created, "INVALID SERIE");
-        require(_amount > 0, "INVALID AMOUNT");
+        require(series[_serieId].created, "RESIRegistry: INVALID SERIE");
+        require(_amount > 0, "RESIRegistry: INVALID AMOUNT");
         uint256 oldSupply = series[_serieId].currentSupply;
         series[_serieId].currentSupply -= _amount;
         emit SerieSupplyUpdated(oldSupply, series[_serieId].currentSupply);
     }
 
     function closeSerie() external onlyOwner {
-        require(series[activeSerieId].created, "SERIE NOT CREATED YET");
-        require(block.timestamp >= series[activeSerieId].endDate, "SERIE STILL ACTIVE");
+        require(series[activeSerieId].created, "RESIRegistry: SERIE NOT CREATED YET");
+        require(block.timestamp >= series[activeSerieId].endDate, "RESIRegistry: SERIE STILL ACTIVE");
         series[activeSerieId].active = false;
         emit SerieClosed(activeSerieId);
     }
@@ -194,6 +167,37 @@ contract ResiRegistry is IResiRegistry, OwnableUpgradeable {
         IERC20(vaultToken).safeTransfer(_to, afterBalance);
 
         emit WithdrawFromVault(_serieId, _amount, _to);
+    }
+
+    /**************************** INTERNALS  ****************************/
+
+    function _checkSerie(
+        uint256 _startDate,
+        uint256 _endDate,
+        uint256 _numberOfProjects,
+        uint256 _maxSupply,
+        address _vault
+    ) internal view onlyOwner {
+        require(!series[activeSerieId].active, "CURRENT SERIE IS NOT CLOSED YED");
+        require(_startDate >= block.timestamp, "INVALID START DATE");
+        require(_endDate >= _startDate, "INVALID END DATE");
+        require(_numberOfProjects > 0, "PROJECTS MUST BE MORE THAN ZERO");
+        require(_maxSupply > 0, "MAX SUPPLY TO EMIT MSUT BE GREATER THAN ZERO");
+        require(_vault != address(0), "INVALID VAULT CONTRACT");
+        // TODO: see why is not working require(isContract(_vault), "VAULT MUST BE CONTRACT");
+    }
+
+    function _addProject(bytes32 _name) internal onlyOwner {
+        require(series[activeSerieId].created, "RESIRegistry: SERIE INACTIVE");
+        require(_name != bytes32(0), "RESIRegistry: INVALID NAME");
+        require(
+            series[activeSerieId].currentProjects < series[activeSerieId].numberOfProjects,
+            "RESIRegistry: MAX PROJECTS SERIES REACHED"
+        );
+        series[activeSerieId].currentProjects++;
+        Project memory newProject = Project({serie: activeSerieId, active: true});
+        projects[_name] = newProject;
+        emit ProjectAdded(_name, activeSerieId);
     }
 
     modifier onlyRESIToken() {
