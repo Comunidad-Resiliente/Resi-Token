@@ -196,7 +196,7 @@ describe('Resi Registry', () => {
 
     it('Should not allow to close serie to anybody', async () => {
       expect(await ResiRegistry.connect(invalidSigner).closeSerie()).to.be.revertedWith(
-        'Ownable: caller is not the owner'
+        'Ownable: caller is not the ownerasdasd'
       )
     })
   })
