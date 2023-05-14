@@ -11,6 +11,7 @@ import "@openzeppelin/contracts-upgradeable/token/ERC20/ERC20Upgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/token/ERC20/extensions/ERC20BurnableUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/token/ERC20/extensions/ERC20PausableUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/token/ERC721/IERC721Upgradeable.sol";
+import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 
 import "@openzeppelin/contracts-upgradeable/security/ReentrancyGuardUpgradeable.sol";
 
@@ -176,22 +177,27 @@ contract ResiToken is
         emit ResiMinted(_account, _amount);
     }
 
-    function exit(
-        uint256 _serieId,
-        bytes32 _role,
-        address _to
-    ) external isValidAddress(_to, "INVALID EQUITY RECEIVER") {
+    function exit(uint256 _serieId, bytes32 _role) external {
+        _checkExit(_role);
+        address SERIE_SBT = IResiRegistry(RESI_REGISTRY).getSBTSerie(_serieId);
+        require(SERIE_SBT != address(0), "NO SBT SERIE SET");
+        uint256 resiSerieBalance = IERC20(SERIE_SBT).balanceOf(_msgSender());
+
+        IResiRegistry(RESI_REGISTRY).withdrawFromVault(_serieId, resiSerieBalance, _msgSender());
+        IResiRegistry(RESI_REGISTRY).decreaseSerieSupply(_serieId, resiSerieBalance);
+        IResiSBT(SERIE_SBT).decreaseResiTokenBalance(_msgSender(), resiSerieBalance);
+        _transfer(_msgSender(), address(this), resiSerieBalance);
+
+        //BURN ????? TO ASK
+
+        emit Exit(_msgSender(), resiSerieBalance, _serieId);
+    }
+
+    function _checkExit(bytes32 _role) internal view {
         require(_role != TREASURY_ROLE, "INVALID ACTION");
         require(hasRole(_role, _msgSender()), "ACCOUNT HAS NOT VALID ROLE");
         require(balanceOf(_msgSender()) > 0, "NO BALANCE");
-        (bool isActive, uint256 currentSerieSupplyLeft) = IResiRegistry(RESI_REGISTRY).getSerieState(_serieId);
-        require(!isActive, "SERIE STILL ACTIVE");
-        require(currentSerieSupplyLeft > 0, "SERIE WITH NO FUNDS LEFT");
     }
-
-    /** 
-    function burnTreasuryEquity(uint256 _serieId, bytes32 _project) external onlyRole(TREASURY_ROLE) {}
-    **/
 
     modifier isValidAddress(address _addr, string memory message) {
         require(_addr != address(0), message);

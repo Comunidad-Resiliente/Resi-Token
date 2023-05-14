@@ -2,8 +2,12 @@
 pragma solidity ^0.8.18;
 
 import "./interfaces/IResiRegistry.sol";
+import "./interfaces/IResiVault.sol";
+
 import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
 import "@openzeppelin/contracts/utils/Address.sol";
+import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
+import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 
 contract ResiRegistry is IResiRegistry, OwnableUpgradeable {
     address public RESI_TOKEN;
@@ -12,6 +16,8 @@ contract ResiRegistry is IResiRegistry, OwnableUpgradeable {
     mapping(uint256 => Serie) public series;
     mapping(uint256 => address) public seriesSBTs;
     mapping(bytes32 => Project) public projects;
+
+    using SafeERC20 for IERC20;
 
     function initialize() public initializer {
         __Context_init_unchained();
@@ -42,6 +48,10 @@ contract ResiRegistry is IResiRegistry, OwnableUpgradeable {
 
     function getSBTSerie() external view returns (address) {
         return seriesSBTs[activeSerieId];
+    }
+
+    function getSBTSerie(uint256 _serieId) external view returns (address) {
+        return seriesSBTs[_serieId];
     }
 
     function getSerieState(uint256 _serieId) external view returns (bool, uint256) {
@@ -164,6 +174,26 @@ contract ResiRegistry is IResiRegistry, OwnableUpgradeable {
         require(block.timestamp >= series[activeSerieId].endDate, "SERIE STILL ACTIVE");
         series[activeSerieId].active = false;
         emit SerieClosed(activeSerieId);
+    }
+
+    function withdrawFromVault(uint256 _serieId, uint256 _amount, address _to) external onlyRESIToken {
+        require(!series[_serieId].active, "SERIE STILL ACTIVE");
+        require(_amount > 0, "INVALID AMOUNT");
+        require(_to != address(0), "INVALID RECEIVER");
+        require(series[_serieId].currentSupply > 0, "NO MORE SUPPLY TO WITHDRAW");
+        require(series[_serieId].currentSupply - _amount > 0, "INVALID WITHDRAW AMOUNT");
+
+        address vaultToken = IResiVault(series[_serieId].vault).getMainToken();
+
+        uint256 beforeBalance = IERC20(vaultToken).balanceOf(address(this));
+        IResiVault(series[_serieId].vault).release(_amount);
+        uint256 afterBalance = IERC20(vaultToken).balanceOf(address(this));
+
+        require(afterBalance > beforeBalance, "SOMETHING WENT WRONG WITHDRAWING FROM VAULT");
+
+        IERC20(vaultToken).safeTransfer(_to, afterBalance);
+
+        emit WithdrawFromVault(_serieId, _amount, _to);
     }
 
     modifier onlyRESIToken() {

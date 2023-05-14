@@ -50,6 +50,10 @@ interface IResiRegistry {
 
     function getSerieState(uint256 _serieId) external view returns (bool, uint256);
 
+    function getSBTSerie(uint256 _serieId) external view returns (address);
+
+    function withdrawFromVault(uint256 _serieId, uint256 _amount, address _to) external;
+
     event RegistryInitialized();
 
     event ResiTokenSet(address indexed _resiToken);
@@ -74,4 +78,6 @@ interface IResiRegistry {
     event ProjectAdded(bytes32 _name, uint256 serieId);
 
     event ProjectDisabled(bytes32 _name);
+
+    event WithdrawFromVault(uint256 _serieId, uint256 _amount, address indexed _to);
 }
