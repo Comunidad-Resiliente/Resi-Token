@@ -2,13 +2,22 @@
 pragma solidity ^0.8.18;
 
 import "./interfaces/IResiRegistry.sol";
+import "./interfaces/IResiVault.sol";
+
 import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
+import "@openzeppelin/contracts/utils/Address.sol";
+import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
+import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 
 contract ResiRegistry is IResiRegistry, OwnableUpgradeable {
     address public RESI_TOKEN;
+    address public TREASURY_VAULT;
     uint256 private activeSerieId;
     mapping(uint256 => Serie) public series;
+    mapping(uint256 => address) public seriesSBTs;
     mapping(bytes32 => Project) public projects;
+
+    using SafeERC20 for IERC20;
 
     function initialize() public initializer {
         __Context_init_unchained();
@@ -37,6 +46,20 @@ contract ResiRegistry is IResiRegistry, OwnableUpgradeable {
         return false;
     }
 
+    function getSBTSerie() external view returns (address) {
+        return seriesSBTs[activeSerieId];
+    }
+
+    function getSBTSerie(uint256 _serieId) external view returns (address) {
+        return seriesSBTs[_serieId];
+    }
+
+    function getSerieState(uint256 _serieId) external view returns (bool, uint256) {
+        bool isActive = series[_serieId].active;
+        uint256 currentSupply = series[_serieId].currentSupply;
+        return (isActive, currentSupply);
+    }
+
     /**************************** INTERFACE  ****************************/
 
     function setResiToken(address _resiToken) external onlyOwner {
@@ -45,9 +68,21 @@ contract ResiRegistry is IResiRegistry, OwnableUpgradeable {
         emit ResiTokenSet(_resiToken);
     }
 
-    function createSerie(uint256 _startDate, uint256 _endDate, uint256 _numberOfProjects) external onlyOwner {
+    function setTreasuryVault(address _treasuryVault) external onlyOwner {
+        require(_treasuryVault != address(0), "INVALID VAULT ADDRESS");
+        TREASURY_VAULT = _treasuryVault;
+        emit TreasuryVaultSet(_treasuryVault);
+    }
+
+    function createSerie(
+        uint256 _startDate,
+        uint256 _endDate,
+        uint256 _numberOfProjects,
+        uint256 _maxSupply,
+        address _vault
+    ) external onlyOwner {
         activeSerieId += 1;
-        _checkSerie(_startDate, _endDate, _numberOfProjects);
+        _checkSerie(_startDate, _endDate, _numberOfProjects, _maxSupply, _vault);
         Serie memory newSerie = Serie({
             id: activeSerieId,
             startDate: _startDate,
@@ -55,18 +90,29 @@ contract ResiRegistry is IResiRegistry, OwnableUpgradeable {
             numberOfProjects: _numberOfProjects,
             currentProjects: 0,
             currentSupply: 0,
+            maxSupply: _maxSupply,
+            vault: _vault,
             active: true,
             created: true
         });
         series[activeSerieId] = newSerie;
-        emit SerieCreated(activeSerieId, _startDate, _endDate, _numberOfProjects);
+        emit SerieCreated(activeSerieId, _startDate, _endDate, _numberOfProjects, _maxSupply, _vault);
     }
 
-    function _checkSerie(uint256 _startDate, uint256 _endDate, uint256 _numberOfProjects) internal view onlyOwner {
+    function _checkSerie(
+        uint256 _startDate,
+        uint256 _endDate,
+        uint256 _numberOfProjects,
+        uint256 _maxSupply,
+        address _vault
+    ) internal view onlyOwner {
         require(!series[activeSerieId].active, "CURRENT SERIE IS NOT CLOSED YED");
         require(_startDate >= block.timestamp, "INVALID START DATE");
         require(_endDate >= _startDate, "INVALID END DATE");
         require(_numberOfProjects > 0, "PROJECTS MUST BE MORE THAN ZERO");
+        require(_maxSupply > 0, "MAX SUPPLY TO EMIT MSUT BE GREATER THAN ZERO");
+        require(_vault != address(0), "INVALID VAULT CONTRACT");
+        // TODO: see why is not working require(isContract(_vault), "VAULT MUST BE CONTRACT");
     }
 
     function addProject(bytes32 _name) external onlyOwner {
@@ -96,9 +142,20 @@ contract ResiRegistry is IResiRegistry, OwnableUpgradeable {
         emit ProjectDisabled(_name);
     }
 
+    function registerSerieSBT(address _sbt) external onlyOwner {
+        require(_sbt != address(0), "INVALID SBT ADDRESS");
+        seriesSBTs[activeSerieId] = _sbt;
+        emit SerieSBTSet(activeSerieId, _sbt);
+    }
+
     function increaseSerieSupply(uint256 _serieId, uint256 _amount) external onlyRESIToken {
         require(series[_serieId].created, "INVALID SERIE");
+        require(series[_serieId].active, "ResiRegistry: Serie inactive");
         require(_amount > 0, "INVALID AMOUNT");
+        require(
+            series[_serieId].currentSupply + _amount <= series[_serieId].maxSupply,
+            "ResiRegistry: Amount will exceed serie max supply"
+        );
         uint256 oldSupply = series[_serieId].currentSupply;
         series[_serieId].currentSupply += _amount;
         emit SerieSupplyUpdated(oldSupply, series[_serieId].currentSupply);
@@ -114,8 +171,29 @@ contract ResiRegistry is IResiRegistry, OwnableUpgradeable {
 
     function closeSerie() external onlyOwner {
         require(series[activeSerieId].created, "SERIE NOT CREATED YET");
+        require(block.timestamp >= series[activeSerieId].endDate, "SERIE STILL ACTIVE");
         series[activeSerieId].active = false;
         emit SerieClosed(activeSerieId);
+    }
+
+    function withdrawFromVault(uint256 _serieId, uint256 _amount, address _to) external onlyRESIToken {
+        require(!series[_serieId].active, "SERIE STILL ACTIVE");
+        require(_amount > 0, "INVALID AMOUNT");
+        require(_to != address(0), "INVALID RECEIVER");
+        require(series[_serieId].currentSupply > 0, "NO MORE SUPPLY TO WITHDRAW");
+        require(series[_serieId].currentSupply - _amount > 0, "INVALID WITHDRAW AMOUNT");
+
+        address vaultToken = IResiVault(series[_serieId].vault).getMainToken();
+
+        uint256 beforeBalance = IERC20(vaultToken).balanceOf(address(this));
+        IResiVault(series[_serieId].vault).release(_amount);
+        uint256 afterBalance = IERC20(vaultToken).balanceOf(address(this));
+
+        require(afterBalance > beforeBalance, "SOMETHING WENT WRONG WITHDRAWING FROM VAULT");
+
+        IERC20(vaultToken).safeTransfer(_to, afterBalance);
+
+        emit WithdrawFromVault(_serieId, _amount, _to);
     }
 
     modifier onlyRESIToken() {

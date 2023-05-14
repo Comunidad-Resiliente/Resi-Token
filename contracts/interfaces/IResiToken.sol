@@ -18,6 +18,8 @@ interface IResiToken {
 
     function getRoleByIndex(uint index) external view returns (bytes32);
 
+    function isSBTReceiver(address _account, bytes32 _role, uint256 _serieId) external view returns (bool);
+
     event Initialized(address indexed treasury, address indexed registry);
     event MentorAdded(address indexed mentor);
     event ProjectBuilderAdded(address indexed projectBuilder);
@@ -26,6 +28,7 @@ interface IResiToken {
     event ProjectBuilderRemoved(address indexed projectBuilder);
     event ResiBuilderRemoved(address indexed resiBuilder);
     event ResiMinted(address indexed account, uint256 amount);
+    event Exit(address indexed account, uint256 _amount, uint256 _serieId);
 
     error InvalidAddress(address);
     error TransferForbidden(string message);

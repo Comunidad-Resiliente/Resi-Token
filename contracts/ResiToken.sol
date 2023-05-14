@@ -3,12 +3,17 @@ pragma solidity ^0.8.18;
 
 import "./interfaces/IResiToken.sol";
 import "./interfaces/IResiRegistry.sol";
+import "./interfaces/IResiSBT.sol";
 
 import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/access/AccessControlEnumerableUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/token/ERC20/ERC20Upgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/token/ERC20/extensions/ERC20BurnableUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/token/ERC20/extensions/ERC20PausableUpgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/token/ERC721/IERC721Upgradeable.sol";
+import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
+
+import "@openzeppelin/contracts-upgradeable/security/ReentrancyGuardUpgradeable.sol";
 
 contract ResiToken is
     IResiToken,
@@ -132,6 +137,13 @@ contract ResiToken is
         );
     }
 
+    function isSBTReceiver(address _account, bytes32 _role, uint256 _serieId) external view returns (bool) {
+        if (hasRole(_role, _account) && IResiRegistry(RESI_REGISTRY).activeSerie() == _serieId) {
+            return true;
+        }
+        return false;
+    }
+
     function _beforeTokenTransfer(
         address from,
         address to,
@@ -154,25 +166,38 @@ contract ResiToken is
         uint256 _amount
     ) external isValidAddress(_account, "INVALID RECEIVER ADDR") onlyRole(MINTER_ROLE) {
         require(hasRole(_role, _account), "ACCOUNT HAS NOT VALID ROLE");
+        address SERIE_SBT = IResiRegistry(RESI_REGISTRY).getSBTSerie();
+        if (IERC721Upgradeable(SERIE_SBT).balanceOf(_account) == 0) {
+            IResiSBT(SERIE_SBT).mintByResiToken(_account, _role);
+        }
         _mint(_account, _amount);
         uint256 activeSerie = IResiRegistry(RESI_REGISTRY).activeSerie();
+        IResiSBT(SERIE_SBT).increaseResiTokenBalance(_account, _amount);
         IResiRegistry(RESI_REGISTRY).increaseSerieSupply(activeSerie, _amount);
         emit ResiMinted(_account, _amount);
     }
 
-    /** 
-    function exchangeEquity(
-        uint256 _serieId,
-        bytes32 _project,
-        bytes32 _role,
-        address _to
-    ) external isValidAddress(_to, "INVALID EQUITY RECEIVER") {
-        require(hasRole(_role, _msgSender()), "ACCOUNT HAS NOT VALID ROLE");
+    function exit(uint256 _serieId, bytes32 _role) external {
+        _checkExit(_role);
+        address SERIE_SBT = IResiRegistry(RESI_REGISTRY).getSBTSerie(_serieId);
+        require(SERIE_SBT != address(0), "NO SBT SERIE SET");
+        uint256 resiSerieBalance = IERC20(SERIE_SBT).balanceOf(_msgSender());
 
+        IResiRegistry(RESI_REGISTRY).withdrawFromVault(_serieId, resiSerieBalance, _msgSender());
+        IResiRegistry(RESI_REGISTRY).decreaseSerieSupply(_serieId, resiSerieBalance);
+        IResiSBT(SERIE_SBT).decreaseResiTokenBalance(_msgSender(), resiSerieBalance);
+        _transfer(_msgSender(), address(this), resiSerieBalance);
+
+        //BURN ????? TO ASK
+
+        emit Exit(_msgSender(), resiSerieBalance, _serieId);
     }
 
-    function burnTreasuryEquity(uint256 _serieId, bytes32 _project) external onlyRole(TREASURY_ROLE) {}
-    **/
+    function _checkExit(bytes32 _role) internal view {
+        require(_role != TREASURY_ROLE, "INVALID ACTION");
+        require(hasRole(_role, _msgSender()), "ACCOUNT HAS NOT VALID ROLE");
+        require(balanceOf(_msgSender()) > 0, "NO BALANCE");
+    }
 
     modifier isValidAddress(address _addr, string memory message) {
         require(_addr != address(0), message);
