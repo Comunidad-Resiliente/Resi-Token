@@ -43,7 +43,7 @@ describe('Resi Token', () => {
     })
 
     it('Cannot re initialize contract', async () => {
-      expect(await ResiToken.initialize(treasury, ResiRegistry.address)).to.be.revertedWith(
+      await expect(ResiToken.initialize(treasury, ResiRegistry.address)).to.be.revertedWith(
         'Initializable: contract is already initialized'
       )
     })

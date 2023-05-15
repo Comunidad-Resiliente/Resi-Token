@@ -33,7 +33,7 @@ describe('Resi Registry', () => {
     })
 
     it('Cannot re initialize contract', async () => {
-      expect(await ResiRegistry.initialize).to.be.revertedWith('Initializable: contract is already initialized')
+      await expect(ResiRegistry.initialize()).to.be.revertedWith('Initializable: contract is already initialized')
     })
 
     it('Active serie should be zero at creation', async () => {
@@ -79,7 +79,7 @@ describe('Resi Registry', () => {
     })
 
     it('Should not allow to set an invalid resi token address', async () => {
-      expect(await ResiRegistry.setResiToken(ethers.constants.AddressZero)).to.be.revertedWith(
+      await expect(ResiRegistry.setResiToken(ethers.constants.AddressZero)).to.be.revertedWith(
         'RESIRegistry: INVALID TOKEN ADDRESS'
       )
     })
@@ -88,7 +88,7 @@ describe('Resi Registry', () => {
       //GIVEN
       const resiAddress: string = await deployer.getAddress()
       //WHEN //THEN
-      expect(await ResiRegistry.connect(invalidSigner).setResiToken(resiAddress)).to.be.revertedWith(
+      await expect(ResiRegistry.connect(invalidSigner).setResiToken(resiAddress)).to.be.revertedWith(
         'Ownable: caller is not the owner'
       )
     })
@@ -112,14 +112,14 @@ describe('Resi Registry', () => {
       //GIVEN
       const fakeProjectName = keccak256(toUtf8Bytes('Fake project'))
       //WHEN //THEN
-      expect(await ResiRegistry.addProject(fakeProjectName)).to.be.revertedWith('RESIRegistry: SERIE INACTIVE')
+      await expect(ResiRegistry.addProject(fakeProjectName)).to.be.revertedWith('RESIRegistry: SERIE INACTIVE')
     })
 
     it('Should not allow to add a project to anybody', async () => {
       //GIVEN
       const fakeProjectName = keccak256(toUtf8Bytes('Fake project'))
       //WHEN THEN
-      expect(await ResiRegistry.connect(invalidSigner).addProject(fakeProjectName)).to.be.revertedWith(
+      await expect(ResiRegistry.connect(invalidSigner).addProject(fakeProjectName)).to.be.revertedWith(
         'Ownable: caller is not the owner'
       )
     })
@@ -130,7 +130,7 @@ describe('Resi Registry', () => {
       const fakeProjectTwo = keccak256(toUtf8Bytes('Fake project2'))
       const projects = [fakeProjectOne, fakeProjectTwo]
       //WHEN //THEN
-      expect(await ResiRegistry.addProjects(projects)).to.be.revertedWith('RESIRegistry: SERIE INACTIVE')
+      await expect(ResiRegistry.addProjects(projects)).to.be.revertedWith('RESIRegistry: SERIE INACTIVE')
     })
 
     it('Should not allow to add projects to anybody', async () => {
@@ -139,7 +139,7 @@ describe('Resi Registry', () => {
       const fakeProjectTwo = keccak256(toUtf8Bytes('Fake project2'))
       const projects = [fakeProjectOne, fakeProjectTwo]
       //WHEN  //THEN
-      expect(await ResiRegistry.connect(invalidSigner).addProjects(projects)).to.be.revertedWith(
+      await expect(ResiRegistry.connect(invalidSigner).addProjects(projects)).to.be.revertedWith(
         'Ownable: caller is not the owner'
       )
     })
@@ -158,44 +158,32 @@ describe('Resi Registry', () => {
     })
 
     it('Should not allow to register serieSBT', async () => {
-      expect(await ResiRegistry.registerSerieSBT(ethers.constants.AddressZero)).to.be.revertedWith(
+      await expect(ResiRegistry.registerSerieSBT(ethers.constants.AddressZero)).to.be.revertedWith(
         'RESIRegisty: SERIE NOT ACTIVE'
       )
     })
 
     it('Should not allow to register serieSBT to anybody', async () => {
-      expect(
-        await ResiRegistry.connect(invalidSigner).registerSerieSBT(ethers.constants.AddressZero)
+      await expect(
+        ResiRegistry.connect(invalidSigner).registerSerieSBT(ethers.constants.AddressZero)
       ).to.be.revertedWith('Ownable: caller is not the owner')
     })
 
     it('Should not allow to increase inactive serie supply', async () => {
-      expect(await ResiRegistry.increaseSerieSupply(3, 0)).to.be.revertedWith('RESIRegistry: INVALID SERIE')
-    })
-
-    it('Should not allow to increase serie supply to anybody', async () => {
-      expect(await ResiRegistry.connect(invalidSigner).increaseSerieSupply(3, 0)).to.be.revertedWith(
-        'Ownable: caller is not the owner'
-      )
+      await expect(ResiRegistry.increaseSerieSupply(3, 0)).to.be.revertedWith('RESIRegistry: ONLY RESI TOKEN')
     })
 
     it('Should not allow to decrease invalid serie', async () => {
-      expect(await ResiRegistry.decreaseSerieSupply(3, 0)).to.be.revertedWith('RESIRegistry: INVALID SERIE')
-    })
-
-    it('Should not allow to decrease serie supply to anybody', async () => {
-      expect(await ResiRegistry.connect(invalidSigner).decreaseSerieSupply(3, 0)).to.be.revertedWith(
-        'Ownable: caller is not the owner'
-      )
+      await expect(ResiRegistry.decreaseSerieSupply(3, 0)).to.be.revertedWith('RESIRegistry: ONLY RESI TOKEN')
     })
 
     it('Should not allow to close invalid serie', async () => {
-      expect(await ResiRegistry.closeSerie()).to.be.revertedWith('RESIRegistry: SERIE NOT CREATED YET')
+      await expect(ResiRegistry.closeSerie()).to.be.revertedWith('RESIRegistry: SERIE NOT CREATED YET')
     })
 
     it('Should not allow to close serie to anybody', async () => {
-      expect(await ResiRegistry.connect(invalidSigner).closeSerie()).to.be.revertedWith(
-        'Ownable: caller is not the ownerasdasdsa'
+      await expect(ResiRegistry.connect(invalidSigner).closeSerie()).to.be.revertedWith(
+        'Ownable: caller is not the owner'
       )
     })
   })
