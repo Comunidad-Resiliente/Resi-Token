@@ -201,7 +201,7 @@ contract ResiRegistry is IResiRegistry, OwnableUpgradeable {
     }
 
     modifier onlyRESIToken() {
-        require(_msgSender() == RESI_TOKEN, "ONLY RESI TOKEN");
+        require(_msgSender() == RESI_TOKEN, "RESIRegistry: ONLY RESI TOKEN");
         _;
     }
 
