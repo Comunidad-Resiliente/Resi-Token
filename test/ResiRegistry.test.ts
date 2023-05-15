@@ -4,7 +4,6 @@ import {resiMainFixture} from './fixtures'
 import {Signer} from 'ethers'
 import {ResiRegistry, ResiSBT, ResiToken} from '../typechain-types'
 import {keccak256, toUtf8Bytes} from 'ethers/lib/utils'
-import {SignerWithAddress} from '@nomiclabs/hardhat-ethers/signers'
 
 describe('Resi Registry', () => {
   let deployer: Signer
@@ -196,7 +195,7 @@ describe('Resi Registry', () => {
 
     it('Should not allow to close serie to anybody', async () => {
       expect(await ResiRegistry.connect(invalidSigner).closeSerie()).to.be.revertedWith(
-        'Ownable: caller is not the ownerasdasd'
+        'Ownable: caller is not the owner'
       )
     })
   })
