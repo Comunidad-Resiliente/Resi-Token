@@ -93,6 +93,12 @@ describe('Resi Token', () => {
       ).to.be.revertedWith('Ownable: caller is not the owner')
     })
 
+    it('Should not allow to remove mentor to anybody', async () => {
+      await expect(ResiToken.connect(invalidSigner).removeMentor(await deployer.getAddress())).to.be.revertedWith(
+        'Ownable: caller is not the owner'
+      )
+    })
+
     it('Should not add project builder', async () => {
       const fakeProject = keccak256(toUtf8Bytes('Fake project'))
       await expect(ResiToken.addProjectBuilder(await user.getAddress(), 0, fakeProject)).to.be.revertedWith(
@@ -106,5 +112,22 @@ describe('Resi Token', () => {
         ResiToken.connect(invalidSigner).addProjectBuilder(await user.getAddress(), 0, fakeProject)
       ).to.be.revertedWith('Ownable: caller is not the owner')
     })
+
+    it('Should not allow to remove resi builder to anybody', async () => {
+      await expect(ResiToken.connect(invalidSigner).removeResiBuilder(await deployer.getAddress())).to.be.revertedWith(
+        'Ownable: caller is not the owner'
+      )
+    })
+
+    it('Should not allow to execute transfer', async () => {
+      await expect(ResiToken.connect(user).transfer(await deployer.getAddress(), '10')).to.be.revertedWithCustomError(
+        ResiToken,
+        'TransferForbidden'
+      )
+    })
+  })
+
+  describe('Inteface', async () => {
+    it('Add mentor', async () => {})
   })
 })

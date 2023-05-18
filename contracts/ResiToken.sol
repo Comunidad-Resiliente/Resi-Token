@@ -61,7 +61,7 @@ contract ResiToken is
 
         RESI_REGISTRY = _registry;
 
-        emit Initialized(_treasury, _registry);
+        emit TokenInitialized(_treasury, _registry);
     }
 
     /**************************** GETTERS  ****************************/
@@ -141,11 +141,11 @@ contract ResiToken is
     }
 
     function transfer(address, uint256) public pure override(ERC20Upgradeable) returns (bool) {
-        revert TransferForbidden("NO TRANSFER ALLOWED");
+        revert TransferForbidden("RESIToken: NO TRANSFER ALLOWED");
     }
 
     function transferFrom(address, address, uint256) public pure override(ERC20Upgradeable) returns (bool) {
-        revert TransferFromForbidden("NO TRANSFER FROM ALLOWED");
+        revert TransferFromForbidden("RESIToken: NO TRANSFER FROM ALLOWED");
     }
 
     function award(
