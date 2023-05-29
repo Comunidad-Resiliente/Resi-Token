@@ -2,6 +2,10 @@
 
 - Resi Token de la Comunidad Resiliente.
 
+[![GitHub tag](https://img.shields.io/github/tag/Comunidad-Resiliente/Resi-Token?include_prereleases=&sort=semver&color=blue)](https://github.com/Comunidad-Resiliente/Resi-Token/releases/)
+[![License](https://img.shields.io/badge/License-MIT-blue)](#license)
+[![issues - Resi-Token](https://img.shields.io/github/issues/Comunidad-Resiliente/Resi-Token)](https://github.com/Comunidad-Resiliente/Resi-Token/issues)
+
 ---
 
 ### Contracts
