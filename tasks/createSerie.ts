@@ -5,10 +5,10 @@ import {ResiRegistry} from '../typechain-types'
 
 export const tasks = () => {
   task('create-serie', 'Create Serie')
-    .addParam('start-date', 'Start Date')
-    .addParam('end-date', 'End Date')
+    .addParam('startDate', 'Start Date')
+    .addParam('endDate', 'End Date')
     .addParam('projects', 'Number of projects')
-    .addParam('max-supply', 'Max supply the Serie could emit')
+    .addParam('maxSupply', 'Max supply the Serie could emit')
     .addParam('vault', 'Address of the vault')
     .setAction(async ({startDate, endDate, projects, maxSupply, vault}, {ethers}) => {
       const [admin]: SignerWithAddress[] = await ethers.getSigners()
