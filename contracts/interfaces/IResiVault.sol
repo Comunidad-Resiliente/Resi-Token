@@ -7,6 +7,7 @@ interface IResiVault {
     function release(uint256 _amount) external;
 
     event Initialized(uint256 _serieId, address indexed _token, address indexed _resiToken);
+    event MainTokenUpdated(address indexed oldToken, address indexed TOKEN);
     event TokenAdded(bytes32 _name, address indexed _token);
     event TokenRemoved(bytes32 _name, address indexed _token);
     event EtherReceived(address indexed _from, uint256 _value);
