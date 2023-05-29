@@ -77,6 +77,16 @@ yarn abis
 yarn size
 ```
 
+### Roadmap
+
+[X] Desarrollo
+[] Test >= 90%
+[] Deploy a testnet mumbai
+[] Desarrollo de los subgrafos asociados
+[] Desarrollo del front-end asociado
+[] Auditoría de contratos
+[] Deploy mainnet
+
 ### Autores
 
 - Alejo Lovallo
