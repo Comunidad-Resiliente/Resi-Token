@@ -61,8 +61,29 @@ contract ResiToken is
 
         RESI_REGISTRY = _registry;
 
-        emit Initialized(_treasury, _registry);
+        emit TokenInitialized(_treasury, _registry);
     }
+
+    /**************************** GETTERS  ****************************/
+
+    function getRoleCount() external view returns (uint256) {
+        return _rolesSet.length();
+    }
+
+    function getRoleByIndex(uint index) external view returns (bytes32) {
+        return _rolesSet.at(index);
+    }
+
+    function isSBTReceiver(address _account, bytes32 _role, uint256 _serieId) external view returns (bool) {
+        if (hasRole(_role, _account) && IResiRegistry(RESI_REGISTRY).activeSerie() == _serieId) {
+            return true;
+        }
+        return false;
+    }
+
+    /**************************** INTERFACE  ****************************/
+
+    /**************************** INTERNALS  ****************************/
 
     function addMentor(
         address _mentor,
@@ -112,52 +133,19 @@ contract ResiToken is
         emit ResiBuilderRemoved(_builder);
     }
 
-    function getRoleCount() external view returns (uint256) {
-        return _rolesSet.length();
-    }
-
-    function getRoleByIndex(uint index) external view returns (bytes32) {
-        return _rolesSet.at(index);
-    }
-
-    function _addRolesBatch(bytes32 role, address[] memory _addresses) internal onlyOwner whenNotPaused {
-        require(role == MENTOR_ROLE || role == PROJECT_BUILDER_ROLE || role == RESI_BUILDER_ROLE, "INVALID ROLE");
-        for (uint8 i = 0; i < _addresses.length; i++) {
-            if (_addresses[i] == address(0)) {
-                revert InvalidAddress(_addresses[i]);
-            }
-            _grantRole(role, _addresses[i]);
-        }
-    }
-
     function _checkSerieAndProject(uint256 _serieId, bytes32 _project) internal view onlyOwner {
         require(
             IResiRegistry(RESI_REGISTRY).isValidProject(_serieId, _project),
-            "INVALID OR INACTIVE SERIE, PROJECT NOT EXIST OR NOT ACTIVE"
+            "RESIToken: INVALID OR INACTIVE SERIE, PROJECT NOT EXIST OR NOT ACTIVE"
         );
     }
 
-    function isSBTReceiver(address _account, bytes32 _role, uint256 _serieId) external view returns (bool) {
-        if (hasRole(_role, _account) && IResiRegistry(RESI_REGISTRY).activeSerie() == _serieId) {
-            return true;
-        }
-        return false;
-    }
-
-    function _beforeTokenTransfer(
-        address from,
-        address to,
-        uint256 amount
-    ) internal virtual override(ERC20Upgradeable, ERC20PausableUpgradeable) {
-        super._beforeTokenTransfer(from, to, amount);
-    }
-
     function transfer(address, uint256) public pure override(ERC20Upgradeable) returns (bool) {
-        revert TransferForbidden("NO TRANSFER ALLOWED");
+        revert TransferForbidden("RESIToken: NO TRANSFER ALLOWED");
     }
 
     function transferFrom(address, address, uint256) public pure override(ERC20Upgradeable) returns (bool) {
-        revert TransferFromForbidden("NO TRANSFER FROM ALLOWED");
+        revert TransferFromForbidden("RESIToken: NO TRANSFER FROM ALLOWED");
     }
 
     function award(
@@ -193,10 +181,30 @@ contract ResiToken is
         emit Exit(_msgSender(), resiSerieBalance, _serieId);
     }
 
+    /**************************** INTERNALS  ****************************/
+
+    function _addRolesBatch(bytes32 role, address[] memory _addresses) internal onlyOwner whenNotPaused {
+        require(role == MENTOR_ROLE || role == PROJECT_BUILDER_ROLE || role == RESI_BUILDER_ROLE, "INVALID ROLE");
+        for (uint8 i = 0; i < _addresses.length; i++) {
+            if (_addresses[i] == address(0)) {
+                revert InvalidAddress(_addresses[i]);
+            }
+            _grantRole(role, _addresses[i]);
+        }
+    }
+
     function _checkExit(bytes32 _role) internal view {
         require(_role != TREASURY_ROLE, "INVALID ACTION");
         require(hasRole(_role, _msgSender()), "ACCOUNT HAS NOT VALID ROLE");
         require(balanceOf(_msgSender()) > 0, "NO BALANCE");
+    }
+
+    function _beforeTokenTransfer(
+        address from,
+        address to,
+        uint256 amount
+    ) internal virtual override(ERC20Upgradeable, ERC20PausableUpgradeable) {
+        super._beforeTokenTransfer(from, to, amount);
     }
 
     modifier isValidAddress(address _addr, string memory message) {

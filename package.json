@@ -6,12 +6,13 @@
   "author": "AlejoLovallo <alejoe.lovallo@gmail.com>",
   "license": "MIT",
   "scripts": {
+    "abis": "npx hardhat export-abi",
     "compile": "npx hardhat compile",
-    "size": "npx hardhat size-contracts",
-    "test": "npx hardhat test",
     "coverage": "npx hardhat coverage",
     "deploy": "npx hardhat deploy",
-    "deploy:network": "npx hardhat deploy --network"
+    "deploy:network": "npx hardhat deploy --network",
+    "size": "npx hardhat size-contracts",
+    "test": "npx hardhat test"
   },
   "devDependencies": {
     "@ethersproject/abi": "^5.4.7",

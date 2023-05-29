@@ -37,5 +37,5 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
 export default func
 const id = ContractName + version
 func.tags = [id, version]
-func.dependencies = ['ResiRegistry.0.0']
+func.dependencies = ['ResiRegistry' + version]
 func.id = id

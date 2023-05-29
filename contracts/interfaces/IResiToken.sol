@@ -20,7 +20,7 @@ interface IResiToken {
 
     function isSBTReceiver(address _account, bytes32 _role, uint256 _serieId) external view returns (bool);
 
-    event Initialized(address indexed treasury, address indexed registry);
+    event TokenInitialized(address indexed treasury, address indexed registry);
     event MentorAdded(address indexed mentor);
     event ProjectBuilderAdded(address indexed projectBuilder);
     event ResiBuilderAdded(address indexed resiBuilder);
