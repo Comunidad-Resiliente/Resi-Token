@@ -46,16 +46,23 @@ contract ResiVault is IResiVault, OwnableUpgradeable {
         return TOKEN;
     }
 
+    function setMainToken(address _token) external onlyOwner {
+        require(_token != address(0), "ResiVault: INVALID TOKEN ADDRESS");
+        address oldToken = TOKEN;
+        TOKEN = _token;
+        emit MainTokenUpdated(oldToken, TOKEN);
+    }
+
     function addToken(address _token, bytes32 _name) external onlyOwner {
-        require(_token != address(0), "INVALID TOKEN ADDRESS");
-        require(_name != bytes32(0), "INVALID NAME");
-        require(tokens[_name] == address(0), "TOKEN ALREADY SET");
+        require(_token != address(0), "ResiVault: INVALID TOKEN ADDRESS");
+        require(_name != bytes32(0), "ResiVault: INVALID NAME");
+        require(tokens[_name] == address(0), "ResiVault: TOKEN ALREADY SET");
         tokens[_name] = _token;
         emit TokenAdded(_name, _token);
     }
 
     function removeToken(bytes32 _name) external onlyOwner {
-        require(tokens[_name] != address(0), "INVALID TOKEN NAME");
+        require(tokens[_name] != address(0), "ResiVault: INVALID TOKEN NAME");
         address _token = tokens[_name];
         tokens[_name] = address(0);
         emit TokenRemoved(_name, _token);
@@ -63,7 +70,7 @@ contract ResiVault is IResiVault, OwnableUpgradeable {
 
     function release(uint256 _amount) external onlyResiRegistry {
         require(_amount > 0, "INVALID AMOUNT");
-        require(IERC20(TOKEN).balanceOf(address(this)) >= _amount, "INVALID AMOUNT TO RELEASE");
+        require(IERC20(TOKEN).balanceOf(address(this)) >= _amount, "ResiVault: INVALID AMOUNT TO RELEASE");
         IERC20(TOKEN).safeTransfer(RESI_REGISTRY, _amount);
         emit TokenReleased(TOKEN, _amount);
     }

@@ -5,7 +5,7 @@ import {ResiRegistry} from '../typechain-types'
 
 export const tasks = () => {
   task('set-resi-token', 'Set Resi Token')
-    .addParam('resi-token', 'Resi Token')
+    .addParam('resiToken', 'Resi Token')
     .setAction(async ({resiToken}, {ethers}) => {
       const [admin]: SignerWithAddress[] = await ethers.getSigners()
       const ResiRegistry: ResiRegistry = await ethers.getContract('ResiRegistry')
@@ -21,7 +21,7 @@ export const tasks = () => {
     })
 
   task('set-treasury-vault', 'Set Treasury vault')
-    .addParam('treasury-vault', 'Treasury vault')
+    .addParam('treasuryVault', 'Treasury vault')
     .setAction(async ({treasuryVault}, {ethers}) => {
       const [admin]: SignerWithAddress[] = await ethers.getSigners()
       const ResiRegistry: ResiRegistry = await ethers.getContract('ResiRegistry')

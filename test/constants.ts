@@ -9,3 +9,10 @@ export const RESI_BUILDER_ROLE = keccak256(toUtf8Bytes('RESI_BUILDER_ROLE'))
 export const PROJECT_ONE = keccak256(toUtf8Bytes('PROJECT ONE'))
 export const PROJECT_TWO = keccak256(toUtf8Bytes('PROJECT TWO'))
 export const PROJECT_THREE = keccak256(toUtf8Bytes('PROJECT THREE'))
+
+// export const FAKE_SERIE = {
+//     startDate:
+//     endDate:
+//     numberOfProjects: 2,
+//     maxSupply:
+// }

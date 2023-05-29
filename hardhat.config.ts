@@ -4,6 +4,18 @@ import 'hardhat-deploy'
 import 'hardhat-abi-exporter'
 import 'hardhat-contract-sizer'
 
+import {tasks as AdminRegistryTasks} from './tasks/adminRegistry'
+import {tasks as AdminSerieTasks} from './tasks/adminSerie'
+import {tasks as AddProjectTasks} from './tasks/addProject'
+import {tasks as DisableProjectTask} from './tasks/disableProject'
+import {tasks as CreateSerieTask} from './tasks/createSerie'
+
+AdminRegistryTasks()
+AdminSerieTasks()
+AddProjectTasks()
+DisableProjectTask()
+CreateSerieTask()
+
 import networks from './hardhat.networks'
 import namedAccounts from './hardhat.accounts'
 

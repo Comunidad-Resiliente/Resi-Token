@@ -3,10 +3,10 @@ import {ethers, getNamedAccounts} from 'hardhat'
 import {resiMainFixture} from './fixtures'
 import {Signer} from 'ethers'
 import {ResiRegistry, ResiSBT, ResiToken} from '../typechain-types'
-import {MENTOR_ROLE, PROJECT_BUILDER_ROLE, RESI_BUILDER_ROLE, TREASURY_ROLE} from './constants'
+import {MENTOR_ROLE, MINTER_ROLE, PROJECT_BUILDER_ROLE, RESI_BUILDER_ROLE, TREASURY_ROLE} from './constants'
 import {keccak256, toUtf8Bytes} from 'ethers/lib/utils'
 
-describe('Resi Token', () => {
+describe('Resi Token initial', () => {
   let deployer: Signer
   let user: Signer
   let treasury: string
@@ -125,9 +125,43 @@ describe('Resi Token', () => {
         'TransferForbidden'
       )
     })
-  })
 
-  describe('Inteface', async () => {
-    it('Add mentor', async () => {})
+    it('Should not allow to execute transfer from', async () => {
+      await expect(
+        ResiToken.connect(user).transferFrom(await deployer.getAddress(), await deployer.getAddress(), '10')
+      ).to.be.revertedWithCustomError(ResiToken, 'TransferFromForbidden')
+    })
+
+    it('Should not allow to award to anybody', async () => {
+      await expect(ResiToken.connect(user).award(await user.getAddress(), MENTOR_ROLE, '10')).to.be.revertedWith(
+        `AccessControl: account ${(await user.getAddress()).toLowerCase()} is missing role ${MINTER_ROLE}`
+      )
+    })
+
+    it('Should not allow to exit', async () => {
+      await expect(ResiToken.connect(user).exit('2', MENTOR_ROLE)).to.be.revertedWith(`ACCOUNT HAS NOT VALID ROLE`)
+    })
+  })
+})
+
+describe('Inteface', async () => {
+  let deployer: Signer
+  let user: Signer
+  let treasury: string
+  let invalidSigner: Signer
+  let ResiRegistry: ResiRegistry
+  let ResiToken: ResiToken
+
+  before(async () => {
+    const accounts = await getNamedAccounts()
+    const signers = await ethers.getSigners()
+    deployer = await ethers.getSigner(accounts.deployer)
+    user = await ethers.getSigner(accounts.user)
+    treasury = accounts.treasury
+    invalidSigner = signers[18]
+
+    const {ResiRegistryContract, ResiTokenContract} = await resiMainFixture()
+    ResiRegistry = ResiRegistryContract
+    ResiToken = ResiTokenContract
   })
 })
