@@ -215,7 +215,17 @@ describe('Resi Registry administration', () => {
     await MockERC20Token.deployed()
   })
 
-  it('ALL OK', async () => {
-    console.log('all ok')
+  it('Should allow to create Serie', async () => {
+    //GIVEN
+    //WHEN
+    //THEN
   })
+
+  it('Create Serie should emit event', async () => {})
+
+  it('Should allow to add project', async () => {})
+
+  it('Should allow to add projects', async () => {})
+
+  it('Should allow to disable project', async () => {})
 })
