@@ -1,10 +1,9 @@
 import {expect} from 'chai'
 import {ethers, getNamedAccounts} from 'hardhat'
 import {resiMainFixture} from './fixtures'
-import {Signer} from 'ethers'
-import {MockERC20, ResiRegistry, ResiSBT, ResiToken, ResiVault} from '../typechain-types'
-import {MENTOR_ROLE, PROJECT_BUILDER_ROLE, RESI_BUILDER_ROLE, TREASURY_ROLE} from './constants'
-import {keccak256, toUtf8Bytes} from 'ethers/lib/utils'
+import {Contract, Signer} from 'ethers'
+import {MockERC20, ResiRegistry, ResiToken, ResiVault, IERC20} from '../typechain-types'
+import {getBytes32String} from '../utils'
 
 describe('Resi Vault initial', () => {
   let deployer: Signer, user: Signer, vaultToken: Signer
@@ -12,7 +11,7 @@ describe('Resi Vault initial', () => {
   let ResiRegistry: ResiRegistry
   let ResiToken: ResiToken
   let ResiVault: ResiVault
-  let MockERC20Token: MockERC20
+  let MockERC20Token: Contract
 
   before(async () => {
     const accounts = await getNamedAccounts()
@@ -30,7 +29,7 @@ describe('Resi Vault initial', () => {
     ResiVault = ResiVaultContract
 
     const MockERC20Factory = await ethers.getContractFactory('MockERC20')
-    const MockERC20Token = await MockERC20Factory.deploy('MOCKERC20', 'MERC20', '1000000000000000000000000')
+    MockERC20Token = await MockERC20Factory.deploy('MOCKERC20', 'MERC20', '1000000000000000000000000')
     await MockERC20Token.deployed()
   })
 
@@ -53,24 +52,103 @@ describe('Resi Vault initial', () => {
       expect(expectedResiRegistry).to.be.equal(resiRegistry)
     })
 
-    xit('Should get the main token balance', async () => {
-      //GIVEN
-      const expectedMainTokenBalance = 0
-      //WHEN
-      const mainTokenBalance = await ResiVault.getMainToken()
-      //THEN
+    it('Should not allow to get balance from invalid token', async () => {
+      await expect(ResiVault.tokenBalance(ethers.utils.formatBytes32String('bla'))).to.be.revertedWith(
+        'ResiVault: INVALID TOKEN NAME'
+      )
     })
 
-    it('Should get token balance from tokens mapping', async () => {})
+    it('Should get native balance', async () => {
+      //GIVEN
+      const expectedNativeBalance = 0
+      //WHEN
+      const nativeBalance = await ResiVault.balance()
+      //THEN
+      expect(expectedNativeBalance).to.be.equal(nativeBalance)
+    })
 
-    it('Should not allow to get balance from invalid token', async () => {})
+    it('Should allow to set main token', async () => {
+      //GIVEN
+      const mainToken = await vaultToken.getAddress()
+      const newToken = MockERC20Token.address
+      //WHEN
+      await ResiVault.setMainToken(newToken)
+      const newMainToken = await ResiVault.getMainToken()
+      //THEN
+      expect(newMainToken).to.be.equal(newToken)
+    })
 
-    it('Should get native balance', async () => {})
+    it('Should not allow to set main token to anybody', async () => {
+      await expect(ResiVault.connect(invalidSigner).setMainToken(await invalidSigner.getAddress())).to.be.revertedWith(
+        'Ownable: caller is not the owner'
+      )
+    })
 
-    it('Should allow to set main token', async () => {})
+    it('Should not allow to set invalid main token', async () => {
+      await expect(ResiVault.setMainToken(ethers.constants.AddressZero)).to.be.revertedWith(
+        'ResiVault: INVALID TOKEN ADDRESS'
+      )
+    })
 
-    it('Should not allow to set main token to anybody', async () => {})
+    it('Should allow to add token', async () => {
+      //GIVEN
+      const newToken = {
+        name: 'New Token',
+        address: await user.getAddress()
+      }
+      //WHEN
+      await ResiVault.addToken(newToken.address, ethers.utils.formatBytes32String(newToken.name))
+      const expectedNewToken = await ResiVault.tokens(ethers.utils.formatBytes32String(newToken.name))
+      //THEN
+      expect(expectedNewToken).to.be.equal(newToken.address)
+    })
 
-    it('Should not allow to set invalid main token', async () => {})
+    it('Should not alow to add invalid token address', async () => {
+      await expect(ResiVault.addToken(ethers.constants.AddressZero, getBytes32String('bla'))).to.be.revertedWith(
+        'ResiVault: INVALID TOKEN ADDRESS'
+      )
+    })
+
+    it('Should not allow to add invalid token name', async () => {
+      await expect(ResiVault.addToken(await user.getAddress(), getBytes32String(''))).to.be.revertedWith(
+        'ResiVault: INVALID TOKEN NAME'
+      )
+    })
+
+    it('Should not allow to add already added token', async () => {
+      await expect(ResiVault.addToken(await user.getAddress(), getBytes32String('New Token'))).to.be.revertedWith(
+        'ResiVault: TOKEN ALREADY SET'
+      )
+    })
+
+    it('Should not allow to add token to anybody', async () => {
+      await expect(
+        ResiVault.connect(invalidSigner).addToken(
+          await invalidSigner.getAddress(),
+          ethers.utils.formatBytes32String('bla')
+        )
+      ).to.be.revertedWith('Ownable: caller is not the owner')
+    })
+
+    it('Should allow to remove token', async () => {
+      //GIVEN
+      const tokenNameToRemove = getBytes32String('New Token')
+      //WHEN
+      await expect(ResiVault.removeToken(tokenNameToRemove))
+        .to.emit(ResiVault, 'TokenRemoved')
+        .withArgs(tokenNameToRemove, await user.getAddress())
+    })
+
+    it('Should not allow to remove invalid token', async () => {
+      await expect(ResiVault.removeToken(getBytes32String('invalid'))).to.be.revertedWith(
+        'ResiVault: INVALID TOKEN NAME'
+      )
+    })
+
+    it('Should not allow to remove token to anybody', async () => {
+      await expect(
+        ResiVault.connect(invalidSigner).removeToken(ethers.utils.formatBytes32String('bla'))
+      ).to.be.revertedWith('Ownable: caller is not the owner')
+    })
   })
 })
