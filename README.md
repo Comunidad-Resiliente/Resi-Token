@@ -10,9 +10,27 @@
 
 ### Contracts
 
-![ResiRegistry-one](./docs/imgs/RegistryOne.png)
+- ResiRegistry.sol
+
+- ResiVault.sol
+
+- ResiToken.sol
+
+- ResiSBT.sol
+
+![ResiRegistry-one](./docs/imgs/Registry-SBT-one.png)
 
 ### Tokenomics
+
+**Roles**:
+
+- MENTOR:
+
+- PROJECT BUILDER:
+
+- RESI BUILDER:
+
+- TREASURY:
 
 ---
 
