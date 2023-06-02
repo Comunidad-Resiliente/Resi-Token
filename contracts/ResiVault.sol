@@ -22,19 +22,19 @@ contract ResiVault is IResiVault, OwnableUpgradeable {
         address _token,
         address _resiRegistry
     ) public initializer {
-        require(_resiToken != address(0), "INVALID RESI TOKEN ADDRESS");
-        require(_resiRegistry != address(0), "INVALID RESI REGISTRY ADDRESS");
+        require(_resiToken != address(0), "ResiVault: INVALID RESI TOKEN ADDRESS");
+        require(_resiRegistry != address(0), "ResiVault: INVALID RESI REGISTRY ADDRESS");
         __Context_init_unchained();
         __Ownable_init_unchained();
         SERIE_ID = _serieId;
         TOKEN = _token;
         RESI_TOKEN = _resiToken;
         RESI_REGISTRY = _resiRegistry;
-        emit Initialized(_serieId, _resiToken, _resiRegistry);
+        emit ResiVaultInitialized(_serieId, _resiToken, _resiRegistry);
     }
 
     function tokenBalance(bytes32 _name) external view returns (uint256) {
-        require(tokens[_name] != address(0), "INVALID TOKEN NAME");
+        require(tokens[_name] != address(0), "ResiVault: INVALID TOKEN NAME");
         return IERC20(tokens[_name]).balanceOf(address(this));
     }
 
@@ -55,7 +55,7 @@ contract ResiVault is IResiVault, OwnableUpgradeable {
 
     function addToken(address _token, bytes32 _name) external onlyOwner {
         require(_token != address(0), "ResiVault: INVALID TOKEN ADDRESS");
-        require(_name != bytes32(0), "ResiVault: INVALID NAME");
+        require(_name != bytes32(0), "ResiVault: INVALID TOKEN NAME");
         require(tokens[_name] == address(0), "ResiVault: TOKEN ALREADY SET");
         tokens[_name] = _token;
         emit TokenAdded(_name, _token);

@@ -1,4 +1,5 @@
 import {keccak256, toUtf8Bytes} from 'ethers/lib/utils'
+import {BigNumber} from 'ethers'
 
 export const MINTER_ROLE = keccak256(toUtf8Bytes('MINTER_ROLE'))
 export const MENTOR_ROLE = keccak256(toUtf8Bytes('MENTOR_ROLE'))
@@ -10,9 +11,10 @@ export const PROJECT_ONE = keccak256(toUtf8Bytes('PROJECT ONE'))
 export const PROJECT_TWO = keccak256(toUtf8Bytes('PROJECT TWO'))
 export const PROJECT_THREE = keccak256(toUtf8Bytes('PROJECT THREE'))
 
-// export const FAKE_SERIE = {
-//     startDate:
-//     endDate:
-//     numberOfProjects: 2,
-//     maxSupply:
-// }
+export interface ISerie {
+  startDate: BigNumber
+  endDate: BigNumber
+  numberOfProjects: number
+  maxSupply: BigNumber
+  vault?: string
+}

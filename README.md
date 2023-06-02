@@ -10,9 +10,27 @@
 
 ### Contracts
 
-![ResiRegistry-one](./docs/imgs/RegistryOne.png)
+- ResiRegistry.sol
+
+- ResiVault.sol
+
+- ResiToken.sol
+
+- ResiSBT.sol
+
+![ResiRegistry-one](./docs/imgs/Registry-SBT-one.png)
 
 ### Tokenomics
+
+**Roles**:
+
+- MENTOR:
+
+- PROJECT BUILDER:
+
+- RESI BUILDER:
+
+- TREASURY:
 
 ---
 
@@ -83,13 +101,13 @@ yarn size
 
 ### Roadmap
 
-[X] Desarrollo
-[] Test >= 90%
-[] Deploy a testnet mumbai
-[] Desarrollo de los subgrafos asociados
-[] Desarrollo del front-end asociado
-[] Auditoría de contratos
-[] Deploy mainnet
+* [X] Desarrollo
+* [] Test >= 90%
+* [] Deploy a testnet mumbai
+* [] Desarrollo de los subgrafos asociados
+* [] Desarrollo del front-end asociado
+* [] Auditoría de contratos
+* [] Deploy mainnet
 
 ### Autores
 

@@ -81,8 +81,8 @@ contract ResiRegistry is IResiRegistry, OwnableUpgradeable {
         uint256 _maxSupply,
         address _vault
     ) external onlyOwner {
-        activeSerieId += 1;
         _checkSerie(_startDate, _endDate, _numberOfProjects, _maxSupply, _vault);
+        activeSerieId += 1;
         Serie memory newSerie = Serie({
             id: activeSerieId,
             startDate: _startDate,
@@ -178,12 +178,12 @@ contract ResiRegistry is IResiRegistry, OwnableUpgradeable {
         uint256 _maxSupply,
         address _vault
     ) internal view onlyOwner {
-        require(!series[activeSerieId].active, "CURRENT SERIE IS NOT CLOSED YED");
-        require(_startDate >= block.timestamp, "INVALID START DATE");
-        require(_endDate >= _startDate, "INVALID END DATE");
-        require(_numberOfProjects > 0, "PROJECTS MUST BE MORE THAN ZERO");
-        require(_maxSupply > 0, "MAX SUPPLY TO EMIT MSUT BE GREATER THAN ZERO");
-        require(_vault != address(0), "INVALID VAULT CONTRACT");
+        require(!(series[activeSerieId].active), "ResiRegistry: CURRENT SERIE IS NOT CLOSED YET");
+        require(_startDate >= block.timestamp, "ResiRegistry: INVALID START DATE");
+        require(_endDate >= _startDate, "ResiRegistry: INVALID END DATE");
+        require(_numberOfProjects > 0, "ResiRegistry: PROJECTS MUST BE MORE THAN ZERO");
+        require(_maxSupply > 0, "ResiRegistry: MAX SUPPLY TO EMIT MSUT BE GREATER THAN ZERO");
+        require(_vault != address(0), "ResiRegistry: INVALID VAULT CONTRACT");
         // TODO: see why is not working require(isContract(_vault), "VAULT MUST BE CONTRACT");
     }
 
