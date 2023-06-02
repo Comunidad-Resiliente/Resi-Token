@@ -30,7 +30,7 @@ contract ResiVault is IResiVault, OwnableUpgradeable {
         TOKEN = _token;
         RESI_TOKEN = _resiToken;
         RESI_REGISTRY = _resiRegistry;
-        emit Initialized(_serieId, _resiToken, _resiRegistry);
+        emit ResiVaultInitialized(_serieId, _resiToken, _resiRegistry);
     }
 
     function tokenBalance(bytes32 _name) external view returns (uint256) {

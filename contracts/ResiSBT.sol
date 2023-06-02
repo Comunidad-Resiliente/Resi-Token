@@ -45,7 +45,7 @@ contract ResiSBT is IResiSBT, IERC5192, OwnableUpgradeable, ERC721URIStorageUpgr
         SERIE_ID = _serieId;
         contractUri = _contractUri;
 
-        emit Initialized(_name, _symbol, _serieId, _registry, _token);
+        emit ResiSBTInitialized(_name, _symbol, _serieId, _registry, _token);
     }
 
     /// @notice Modify contractUri for NFT collection

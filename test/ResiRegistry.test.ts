@@ -1,9 +1,11 @@
 import {expect} from 'chai'
 import {ethers, getNamedAccounts} from 'hardhat'
-import {resiMainFixture} from './fixtures'
-import {Contract, Signer} from 'ethers'
+import {resiMainFixture, resiManualFixture} from './fixtures'
+import {BigNumber, Contract, Signer} from 'ethers'
 import {ResiRegistry, ResiSBT, ResiToken, ResiVault} from '../typechain-types'
 import {keccak256, toUtf8Bytes} from 'ethers/lib/utils'
+import {MOCK_SERIE} from './constants'
+import {advanceTime, getBlockTimestamp, getMockSerie} from '../utils'
 
 describe('Resi Registry', () => {
   let deployer: Signer
@@ -205,27 +207,73 @@ describe('Resi Registry administration', () => {
   })
 
   before(async () => {
-    const {ResiRegistryContract, ResiTokenContract, ResiVaultContract} = await resiMainFixture()
+    const {ResiRegistryContract, ResiTokenContract, ResiVaultContract, MockERC20TokenContract} =
+      await resiManualFixture()
     ResiRegistry = ResiRegistryContract
     ResiToken = ResiTokenContract
     ResiVault = ResiVaultContract
-
-    const MockERC20Factory = await ethers.getContractFactory('MockERC20')
-    MockERC20Token = await MockERC20Factory.deploy('MOCKERC20', 'MERC20', '1000000000000000000000000')
-    await MockERC20Token.deployed()
+    MockERC20Token = MockERC20TokenContract
   })
+
+  it('Should not create serie if invalid start time', async () => {})
+
+  it('Should not create serie if invalid end time', async () => {})
+
+  it('Should not create serie if invalid number of projects', async () => {})
+
+  it('Should not create serie if invalid max supply', async () => {})
+
+  it('Should not create serie if invalid vault', async () => {})
 
   it('Should allow to create Serie', async () => {
     //GIVEN
+    const SerieToBeCreated = await getMockSerie()
     //WHEN
+    await ResiRegistry.createSerie(
+      SerieToBeCreated.startDate,
+      SerieToBeCreated.endDate,
+      SerieToBeCreated.numberOfProjects,
+      SerieToBeCreated.maxSupply,
+      ResiVault.address
+    )
+    const activeSerie = await ResiRegistry.activeSerie()
+    const serieData = await ResiRegistry.series(activeSerie)
+    const serieActive = serieData.active
+    const serieStartDate = serieData.startDate
+    const serieEndDate = serieData.endDate
+    const serieNumberOfProjects = serieData.numberOfProjects
+    const serieCurrentProjects = serieData.currentProjects
+    const serieCurrentSupply = serieData.currentSupply
+    const serieMaxSupply = serieData.maxSupply
+    const serieVault = serieData.vault
     //THEN
+    expect(activeSerie).to.be.equal('1')
+    expect(serieActive).to.be.true
+    expect(serieStartDate).to.be.equal(SerieToBeCreated.startDate)
+    expect(serieEndDate).to.be.equal(SerieToBeCreated.endDate)
+    expect(serieNumberOfProjects).to.be.equal(SerieToBeCreated.numberOfProjects)
+    expect(serieCurrentProjects).to.be.equal('0')
+    expect(serieCurrentSupply).to.be.equal('0')
+    expect(serieMaxSupply).to.be.equal(SerieToBeCreated.maxSupply)
+    expect(serieVault).to.be.equal(ResiVault.address)
   })
 
-  it('Create Serie should emit event', async () => {})
+  it('Should not create serie if ongoing serie', async () => {
+    const getLastBlock = await getBlockTimestamp()
+    await expect(
+      ResiRegistry.createSerie(
+        getLastBlock.add('100000'),
+        getLastBlock.add('10000000000'),
+        '4',
+        BigNumber.from('10000000000'),
+        ResiVault.address
+      )
+    ).to.be.revertedWith('ResiRegistry: CURRENT SERIE IS NOT CLOSED YET')
+  })
 
-  it('Should allow to add project', async () => {})
+  xit('Should allow to add project', async () => {})
 
-  it('Should allow to add projects', async () => {})
+  xit('Should allow to add projects', async () => {})
 
-  it('Should allow to disable project', async () => {})
+  xit('Should allow to disable project', async () => {})
 })

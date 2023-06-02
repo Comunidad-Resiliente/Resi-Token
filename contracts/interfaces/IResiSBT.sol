@@ -2,7 +2,7 @@
 pragma solidity ^0.8.18;
 
 interface IResiSBT {
-    event Initialized(
+    event ResiSBTInitialized(
         string _name,
         string _symbol,
         uint256 _serieId,

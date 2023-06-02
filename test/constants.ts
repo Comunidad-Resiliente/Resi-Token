@@ -18,10 +18,3 @@ export interface ISerie {
   maxSupply: BigNumber
   vault?: string
 }
-
-export const MOCK_SERIE: ISerie = {
-  startDate: BigNumber.from(new Date().getTime()),
-  endDate: BigNumber.from(new Date().getTime()),
-  numberOfProjects: 3,
-  maxSupply: BigNumber.from('10000000000000000000')
-}
