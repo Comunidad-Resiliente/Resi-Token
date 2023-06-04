@@ -68,6 +68,18 @@ contract ResiVault is IResiVault, OwnableUpgradeable {
         emit TokenRemoved(_name, _token);
     }
 
+    /***
+     *
+     * Logica
+     *
+     * Hip 1. Hay en el vault 1x106 usdt
+     *
+     * Hip 2. Vengo a claimear con un balance de 20 Resi tokens
+     *
+     *
+     * Resultado: 1x106 / CANTIDAD DE TOKENS EMITIDOS EN ESA SERIE * MI CANTIDAD ==> VALOR EN USD QUE ME CORRESPONDE.
+     *
+     */
     function release(uint256 _amount) external onlyResiRegistry {
         require(_amount > 0, "INVALID AMOUNT");
         require(IERC20(TOKEN).balanceOf(address(this)) >= _amount, "ResiVault: INVALID AMOUNT TO RELEASE");

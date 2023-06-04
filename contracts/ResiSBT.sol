@@ -21,6 +21,7 @@ contract ResiSBT is IResiSBT, IERC5192, OwnableUpgradeable, ERC721URIStorageUpgr
     address public RESI_TOKEN;
     address public RESI_REGISTRY;
 
+    mapping(address => bytes32) public userNickNames;
     mapping(address => uint256) private resiTokenBalances;
     mapping(uint256 => bool) private lockedSBTs;
     mapping(bytes32 => string) private defaultRoleUris;
@@ -128,7 +129,7 @@ contract ResiSBT is IResiSBT, IERC5192, OwnableUpgradeable, ERC721URIStorageUpgr
     }
 
     function _checkMint(address _to, bytes32 _role, string memory uri) internal view onlyOwner {
-        require(_to != address(0), "INVALID TO ADDRESS");
+        require(_to != address(0), "ResiSBT: INVALID TO ADDRESS");
         require(balanceOf(_to) == 0, "ResiSBT: User already has SBT");
         require(bytes(uri).length > 0, "RESISBT: Empty URI");
         require(IResiToken(RESI_TOKEN).isSBTReceiver(_to, _role, SERIE_ID), "INVALID SBT RECEIVER");
@@ -142,15 +143,15 @@ contract ResiSBT is IResiSBT, IERC5192, OwnableUpgradeable, ERC721URIStorageUpgr
     }
 
     function transferFrom(address, address, uint256) public pure override {
-        revert TransferForbidden("NO TRANSFER FROM ALLOWED");
+        revert TransferForbidden("ResiSBT: NO TRANSFER FROM ALLOWED");
     }
 
     function safeTransferFrom(address, address, uint256) public pure override {
-        revert TransferForbidden("NO TRANSFER FROM ALLOWED");
+        revert TransferForbidden("ResiSBT: NO TRANSFER FROM ALLOWED");
     }
 
     function safeTransferFrom(address, address, uint256, bytes memory) public pure override {
-        revert TransferForbidden("NO TRANSFER FROM ALLOWED");
+        revert TransferForbidden("ResiSBT: NO TRANSFER FROM ALLOWED");
     }
 
     modifier onlyRegistry() {

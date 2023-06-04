@@ -188,11 +188,11 @@ contract ResiRegistry is IResiRegistry, OwnableUpgradeable {
     }
 
     function _addProject(bytes32 _name) internal onlyOwner {
-        require(series[activeSerieId].created, "RESIRegistry: SERIE INACTIVE");
-        require(_name != bytes32(0), "RESIRegistry: INVALID NAME");
+        require(series[activeSerieId].created, "ResiRegistry: SERIE INACTIVE");
+        require(_name != bytes32(0), "ResiRegistry: INVALID NAME");
         require(
             series[activeSerieId].currentProjects < series[activeSerieId].numberOfProjects,
-            "RESIRegistry: MAX PROJECTS SERIES REACHED"
+            "ResiRegistry: MAX PROJECTS SERIES REACHED"
         );
         series[activeSerieId].currentProjects++;
         Project memory newProject = Project({serie: activeSerieId, active: true});

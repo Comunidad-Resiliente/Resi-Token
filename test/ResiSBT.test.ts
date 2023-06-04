@@ -100,9 +100,11 @@ describe('Resi SBT initial', () => {
         .withArgs('', newDefaultTokenURI)
     })
 
-    xit('Should not allow to set default role uri to anyone', async () => {})
-
-    xit('Should view tokenUri', async () => {})
+    it('Should not allow to set default role uri to anyone', async () => {
+      await expect(ResiSBT.connect(invalidSigner).setDefaultRoleUri(MINTER_ROLE, 'bla')).to.be.revertedWith(
+        'Ownable: caller is not the owner'
+      )
+    })
 
     it('Transfer from should be not allowed', async () => {
       await expect(
