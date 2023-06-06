@@ -10,6 +10,8 @@ import {
   ResiVault,
   ResiVault__factory
 } from '../typechain-types'
+import {getMockSerie} from '../utils'
+import {PROJECT_ONE, PROJECT_THREE, PROJECT_TWO} from './constants'
 
 export const resiMainFixture = deployments.createFixture(async () => {
   await deployments.fixture(['v1.0.0'])
@@ -68,4 +70,31 @@ export const resiManualFixture = deployments.createFixture(async () => {
   }
 })
 
-export const getResiFullTestEnvironment = deployments.createFixture(async () => {})
+export const getManualEnvironemntInitialization = async () => {
+  const {ResiTokenContract, ResiRegistryContract, ResiVaultContract, ResiSBTContract, MockERC20TokenContract} =
+    await resiManualFixture()
+  const SerieToBeCreated = await getMockSerie()
+
+  //CREATE SERIE
+  await ResiRegistryContract.createSerie(
+    SerieToBeCreated.startDate,
+    SerieToBeCreated.endDate,
+    SerieToBeCreated.numberOfProjects,
+    SerieToBeCreated.maxSupply,
+    ResiVaultContract.address
+  )
+
+  //REGISTER SERIE SBT
+  await ResiRegistryContract.registerSerieSBT(ResiSBTContract.address)
+
+  //REGISTER PROJECTS
+  await ResiRegistryContract.addProjects([PROJECT_ONE, PROJECT_TWO, PROJECT_THREE])
+
+  return {
+    ResiTokenContract,
+    ResiRegistryContract,
+    ResiVaultContract,
+    ResiSBTContract,
+    MockERC20TokenContract
+  }
+}

@@ -92,7 +92,7 @@ contract ResiToken is
     ) external isValidAddress(_mentor, "INVALID MENTOR ADDRESS") onlyOwner whenNotPaused {
         _checkSerieAndProject(_serieId, _project);
         _grantRole(MENTOR_ROLE, _mentor);
-        emit MentorAdded(_mentor);
+        emit MentorAdded(_mentor, _project);
     }
 
     function removeMentor(

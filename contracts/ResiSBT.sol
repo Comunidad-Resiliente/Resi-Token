@@ -130,9 +130,9 @@ contract ResiSBT is IResiSBT, IERC5192, OwnableUpgradeable, ERC721URIStorageUpgr
 
     function _checkMint(address _to, bytes32 _role, string memory uri) internal view onlyOwner {
         require(_to != address(0), "ResiSBT: INVALID TO ADDRESS");
-        require(balanceOf(_to) == 0, "ResiSBT: User already has SBT");
-        require(bytes(uri).length > 0, "RESISBT: Empty URI");
-        require(IResiToken(RESI_TOKEN).isSBTReceiver(_to, _role, SERIE_ID), "INVALID SBT RECEIVER");
+        require(balanceOf(_to) == 0, "ResiSBT: USER ALREADY HAS SBT");
+        require(bytes(uri).length > 0, "ResiSBT: EMPTY URI");
+        require(IResiToken(RESI_TOKEN).isSBTReceiver(_to, _role, SERIE_ID), "ResiSBT: INVALID SBT RECEIVER");
     }
 
     /**

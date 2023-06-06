@@ -1,9 +1,17 @@
 import {expect} from 'chai'
 import {ethers, getNamedAccounts} from 'hardhat'
-import {resiMainFixture} from './fixtures'
+import {getManualEnvironemntInitialization, resiMainFixture, resiManualFixture} from './fixtures'
 import {Signer} from 'ethers'
 import {ResiRegistry, ResiSBT, ResiToken} from '../typechain-types'
-import {MENTOR_ROLE, MINTER_ROLE, PROJECT_BUILDER_ROLE, RESI_BUILDER_ROLE, TREASURY_ROLE} from './constants'
+import {
+  MENTOR_ROLE,
+  MINTER_ROLE,
+  PROJECT_BUILDER_ROLE,
+  PROJECT_ONE,
+  PROJECT_TWO,
+  RESI_BUILDER_ROLE,
+  TREASURY_ROLE
+} from './constants'
 import {keccak256, toUtf8Bytes} from 'ethers/lib/utils'
 
 describe('Resi Token initial', () => {
@@ -146,7 +154,7 @@ describe('Resi Token initial', () => {
 
 describe('Inteface', async () => {
   let deployer: Signer
-  let user: Signer
+  let user: Signer, userTwo: Signer, userThree: Signer
   let treasury: string
   let invalidSigner: Signer
   let ResiRegistry: ResiRegistry
@@ -159,9 +167,68 @@ describe('Inteface', async () => {
     user = await ethers.getSigner(accounts.user)
     treasury = accounts.treasury
     invalidSigner = signers[18]
+    userTwo = signers[17]
+    userThree = signers[16]
 
-    const {ResiRegistryContract, ResiTokenContract} = await resiMainFixture()
+    const {ResiRegistryContract, ResiTokenContract} = await getManualEnvironemntInitialization()
     ResiRegistry = ResiRegistryContract
     ResiToken = ResiTokenContract
   })
+
+  it('Should allow to add mentor', async () => {
+    //GIVEN
+    const mentor = await user.getAddress()
+    //WHEN
+    await ResiToken.addMentor(mentor, '1', PROJECT_ONE)
+    const amountOfMentors = await ResiToken.getRoleMemberCount(MENTOR_ROLE)
+    const isMentor = await ResiToken.hasRole(MENTOR_ROLE, mentor)
+    //THEN
+    expect(amountOfMentors).to.be.equal('1')
+    expect(isMentor).to.be.true
+  })
+
+  it('Add mentor should emit event', async () => {
+    //GIVEN
+    const mentor = await userTwo.getAddress()
+    //WHEN //THEN
+    await expect(ResiToken.addMentor(mentor, '1', PROJECT_TWO))
+      .to.emit(ResiToken, 'MentorAdded')
+      .withArgs(mentor, PROJECT_TWO)
+  })
+
+  it('Should allow to remove mentor', async () => {
+    //GIVEN
+    const mentorToRemove = await userTwo.getAddress()
+    const mentorCount = await ResiToken.getRoleMemberCount(MENTOR_ROLE)
+    //WHEN
+    await ResiToken.removeMentor(mentorToRemove)
+    const newMentorCount = await ResiToken.getRoleMemberCount(MENTOR_ROLE)
+    const isMentor = await ResiToken.hasRole(MENTOR_ROLE, mentorToRemove)
+    //THEN
+    expect(mentorCount).to.be.equal('2')
+    expect(newMentorCount).to.be.equal('1')
+    expect(isMentor).to.be.false
+  })
+
+  it('Should allow to add project builder', async () => {
+    //GIVEN
+    const projectBuilder = await userThree.getAddress()
+    //WHEN
+    await ResiToken.addProjectBuilder(projectBuilder, '1', PROJECT_ONE)
+    const amountOfProjectBuilders = await ResiToken.getRoleMemberCount(PROJECT_BUILDER_ROLE)
+    const isProjectBuilder = await ResiToken.hasRole(PROJECT_BUILDER_ROLE, projectBuilder)
+    //THEN
+    expect(amountOfProjectBuilders).to.be.equal('1')
+    expect(isProjectBuilder).to.be.true
+  })
+
+  xit('Should allow to remove project builder', async () => {})
+
+  xit('Should allow to add Resi builder', async () => {})
+
+  xit('Should allow to remove Resi builder', async () => {})
+
+  xit('Should allow to award', async () => {})
+
+  xit('Award should emit event', async () => {})
 })

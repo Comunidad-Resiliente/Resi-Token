@@ -133,10 +133,28 @@ describe('Resi SBT initial', () => {
       ).to.be.revertedWithCustomError(ResiSBT, 'TransferForbidden')
     })
 
-    xit('Should allow to mint', async () => {})
+    it('Should not allow to mint if invalid address', async () => {
+      await expect(ResiSBT.mint(ethers.constants.AddressZero, MINTER_ROLE, 'bla')).to.be.revertedWith(
+        'ResiSBT: INVALID TO ADDRESS'
+      )
+    })
 
-    xit('Should not allow to mint to anyone', async () => {})
+    it('Should not allow to mint if invalid uri', async () => {
+      await expect(ResiSBT.mint(await invalidSigner.getAddress(), MINTER_ROLE, '')).to.be.revertedWith(
+        'ResiSBT: EMPTY URI'
+      )
+    })
 
-    xit('Mint should emit event', async () => {})
+    it('Should not allow to mint if is not sbt receiver', async () => {
+      await expect(ResiSBT.mint(await invalidSigner.getAddress(), MINTER_ROLE, 'bla')).to.be.revertedWith(
+        'ResiSBT: INVALID SBT RECEIVER'
+      )
+    })
+
+    it('Should not allow to mint to anyone', async () => {
+      await expect(
+        ResiSBT.connect(invalidSigner).mint(await invalidSigner.getAddress(), MINTER_ROLE, 'asdasas')
+      ).to.be.revertedWith('Ownable: caller is not the owner')
+    })
   })
 })
