@@ -5,6 +5,7 @@ import "./interfaces/IResiToken.sol";
 import "./interfaces/IResiRegistry.sol";
 import "./interfaces/IResiSBT.sol";
 
+import "@openzeppelin/contracts-upgradeable/security/ReentrancyGuardUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/access/AccessControlEnumerableUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/token/ERC20/ERC20Upgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/token/ERC20/extensions/ERC20BurnableUpgradeable.sol";
@@ -12,8 +13,9 @@ import "@openzeppelin/contracts-upgradeable/token/ERC20/extensions/ERC20Pausable
 import "@openzeppelin/contracts-upgradeable/token/ERC721/IERC721Upgradeable.sol";
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 
-import "@openzeppelin/contracts-upgradeable/security/ReentrancyGuardUpgradeable.sol";
-
+/// @title Resi Token Contract
+/// @author Alejo Lovallo
+/// @notice ERC20 Resi Token
 contract ResiToken is
     IResiToken,
     AccessControlEnumerableUpgradeable,
