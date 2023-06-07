@@ -60,6 +60,10 @@ contract ResiRegistry is IResiRegistry, OwnableUpgradeable {
         return (isActive, currentSupply);
     }
 
+    function getSerieSupply(uint256 _serieId) external view returns (uint256) {
+        return series[_serieId].currentSupply;
+    }
+
     /**************************** INTERFACE  ****************************/
 
     function setResiToken(address _resiToken) external onlyOwner {
@@ -143,18 +147,18 @@ contract ResiRegistry is IResiRegistry, OwnableUpgradeable {
     }
 
     function closeSerie() external onlyOwner {
-        require(series[activeSerieId].created, "RESIRegistry: SERIE NOT CREATED YET");
-        require(block.timestamp >= series[activeSerieId].endDate, "RESIRegistry: SERIE STILL ACTIVE");
+        require(series[activeSerieId].created, "ResiRegistry: SERIE NOT CREATED YET");
+        require(block.timestamp >= series[activeSerieId].endDate, "ResiRegistry: SERIE STILL ACTIVE");
         series[activeSerieId].active = false;
         emit SerieClosed(activeSerieId);
     }
 
     function withdrawFromVault(uint256 _serieId, uint256 _amount, address _to) external onlyRESIToken {
-        require(!series[_serieId].active, "SERIE STILL ACTIVE");
-        require(_amount > 0, "INVALID AMOUNT");
-        require(_to != address(0), "INVALID RECEIVER");
-        require(series[_serieId].currentSupply > 0, "NO MORE SUPPLY TO WITHDRAW");
-        require(series[_serieId].currentSupply - _amount > 0, "INVALID WITHDRAW AMOUNT");
+        require(!series[_serieId].active, "ResiRegistry: SERIE STILL ACTIVE");
+        require(_amount > 0, "ResiRegistry: INVALID AMOUNT");
+        require(_to != address(0), "ResiRegistry: INVALID RECEIVER");
+        require(series[_serieId].currentSupply > 0, "ResiRegistry: NO MORE SUPPLY TO WITHDRAW");
+        require(series[_serieId].currentSupply - _amount > 0, "ResiRegistry: INVALID WITHDRAW AMOUNT");
 
         address vaultToken = IResiVault(series[_serieId].vault).getMainToken();
 
@@ -162,7 +166,7 @@ contract ResiRegistry is IResiRegistry, OwnableUpgradeable {
         IResiVault(series[_serieId].vault).release(_amount);
         uint256 afterBalance = IERC20(vaultToken).balanceOf(address(this));
 
-        require(afterBalance > beforeBalance, "SOMETHING WENT WRONG WITHDRAWING FROM VAULT");
+        require(afterBalance > beforeBalance, "ResiRegistry: SOMETHING WENT WRONG WITHDRAWING FROM VAULT");
 
         IERC20(vaultToken).safeTransfer(_to, afterBalance);
 
@@ -201,7 +205,7 @@ contract ResiRegistry is IResiRegistry, OwnableUpgradeable {
     }
 
     modifier onlyRESIToken() {
-        require(_msgSender() == RESI_TOKEN, "RESIRegistry: ONLY RESI TOKEN");
+        require(_msgSender() == RESI_TOKEN, "ResiRegistry: ONLY RESI TOKEN");
         _;
     }
 

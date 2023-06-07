@@ -173,15 +173,15 @@ describe('Resi Registry', () => {
   })
 
   it('Should not allow to increase inactive serie supply', async () => {
-    await expect(ResiRegistry.increaseSerieSupply(3, 0)).to.be.revertedWith('RESIRegistry: ONLY RESI TOKEN')
+    await expect(ResiRegistry.increaseSerieSupply(3, 0)).to.be.revertedWith('ResiRegistry: ONLY RESI TOKEN')
   })
 
   it('Should not allow to decrease invalid serie', async () => {
-    await expect(ResiRegistry.decreaseSerieSupply(3, 0)).to.be.revertedWith('RESIRegistry: ONLY RESI TOKEN')
+    await expect(ResiRegistry.decreaseSerieSupply(3, 0)).to.be.revertedWith('ResiRegistry: ONLY RESI TOKEN')
   })
 
   it('Should not allow to close invalid serie', async () => {
-    await expect(ResiRegistry.closeSerie()).to.be.revertedWith('RESIRegistry: SERIE NOT CREATED YET')
+    await expect(ResiRegistry.closeSerie()).to.be.revertedWith('ResiRegistry: SERIE NOT CREATED YET')
   })
 
   it('Should not allow to close serie to anybody', async () => {

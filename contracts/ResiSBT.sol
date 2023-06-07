@@ -49,6 +49,12 @@ contract ResiSBT is IResiSBT, IERC5192, OwnableUpgradeable, ERC721URIStorageUpgr
         emit ResiSBTInitialized(_name, _symbol, _serieId, _registry, _token);
     }
 
+    /**************************** GETTERS  ****************************/
+
+    /**************************** INTERFACE  ****************************/
+
+    /**************************** INTERNALS  ****************************/
+
     /// @notice Modify contractUri for NFT collection
     /// @param _contractUri contractUri
     function setContractURI(string memory _contractUri) external onlyOwner {
@@ -64,7 +70,7 @@ contract ResiSBT is IResiSBT, IERC5192, OwnableUpgradeable, ERC721URIStorageUpgr
 
     function setDefaultRoleUri(bytes32 _role, string calldata _uri) external onlyOwner {
         require(_role != bytes32(0), "ResiSBT: INVALID ROLE");
-        require(bytes(_uri).length > 0, "RESISBT: Empty URI");
+        require(bytes(_uri).length > 0, "ResiSBT: Empty URI");
         string memory oldUri = defaultRoleUris[_role];
         defaultRoleUris[_role] = _uri;
         emit DefaultRoleUriUpdated(oldUri, _uri);
@@ -90,7 +96,7 @@ contract ResiSBT is IResiSBT, IERC5192, OwnableUpgradeable, ERC721URIStorageUpgr
 
     function mintByResiToken(address _to, bytes32 _role) external onlyResiToken {
         string memory defaultUri = defaultRoleUris[_role];
-        require(bytes(defaultUri).length > 0, "Default Role Uri not set");
+        require(bytes(defaultUri).length > 0, "ResiSBT: Default Role Uri not set");
         uint256 tokenId = _mintSBT(_to, _role, defaultUri);
         emit SBTMintedByResiToken(_to, _role, tokenId);
     }
@@ -155,12 +161,12 @@ contract ResiSBT is IResiSBT, IERC5192, OwnableUpgradeable, ERC721URIStorageUpgr
     }
 
     modifier onlyRegistry() {
-        require(_msgSender() == RESI_REGISTRY, "INVALID REGISTRY ADDRESS");
+        require(_msgSender() == RESI_REGISTRY, "ResiSBT: INVALID REGISTRY ADDRESS");
         _;
     }
 
     modifier onlyResiToken() {
-        require(_msgSender() == RESI_TOKEN, "INVALID RESI TOKEN ADDRESS");
+        require(_msgSender() == RESI_TOKEN, "ResiSBT: INVALID RESI TOKEN ADDRESS");
         _;
     }
 }
