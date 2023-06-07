@@ -67,21 +67,6 @@ describe('Resi Token initial', () => {
       expect(expectedRoleCount).to.be.equal(roleCount)
     })
 
-    it('Should get role by index', async () => {
-      //GIVEN
-      const roles = []
-      for (let i = 0; i < 3; i++) {
-        //WHEN
-        const roleName = await ResiToken.getRoleByIndex(i)
-        roles.push(roleName)
-      }
-
-      //THEN
-      expect(roles[0]).to.be.equal(MENTOR_ROLE)
-      expect(roles[1]).to.be.equal(PROJECT_BUILDER_ROLE)
-      expect(roles[2]).to.be.equal(RESI_BUILDER_ROLE)
-    })
-
     it('Is sbt receiver should return false', async () => {
       expect(await ResiToken.isSBTReceiver(await user.getAddress(), MENTOR_ROLE, 0)).to.be.false
     })

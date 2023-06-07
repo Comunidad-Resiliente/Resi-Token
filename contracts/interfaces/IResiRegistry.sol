@@ -56,6 +56,7 @@ interface IResiRegistry {
 
     function withdrawFromVault(uint256 _serieId, uint256 _amount, address _to) external;
 
+    /// @notice Emitted when the Registry is initialized.
     event RegistryInitialized();
 
     event ResiTokenSet(address indexed _resiToken);

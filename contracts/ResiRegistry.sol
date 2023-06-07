@@ -98,24 +98,45 @@ contract ResiRegistry is IResiRegistry, OwnableUpgradeable, ReentrancyGuardUpgra
         return (isActive, currentSupply);
     }
 
+    /**
+     * @dev Get current serie supply minted
+     * @param _serieId serie id to get current supply
+     * @return supply minted
+     */
     function getSerieSupply(uint256 _serieId) external view returns (uint256) {
         return series[_serieId].currentSupply;
     }
 
     /**************************** INTERFACE  ****************************/
 
+    /**
+     * @dev Set Resi token for Registry
+     * @param _resiToken address of the token
+     */
     function setResiToken(address _resiToken) external onlyOwner {
-        require(_resiToken != address(0), "RESIRegistry: INVALID TOKEN ADDRESS");
+        require(_resiToken != address(0), "ResiRegistry: INVALID TOKEN ADDRESS");
         RESI_TOKEN = _resiToken;
         emit ResiTokenSet(_resiToken);
     }
 
+    /**
+     * @dev Set Treasury Vault for Registry
+     * @param _treasuryVault treasury vault address
+     */
     function setTreasuryVault(address _treasuryVault) external onlyOwner {
-        require(_treasuryVault != address(0), "RESIRegistry: INVALID VAULT ADDRESS");
+        require(_treasuryVault != address(0), "ResiRegistry: INVALID VAULT ADDRESS");
         TREASURY_VAULT = _treasuryVault;
         emit TreasuryVaultSet(_treasuryVault);
     }
 
+    /**
+     * @dev Create New Serie. Cannot be created if another serie is running
+     * @param _startDate timestamp when serie starts
+     * @param _endDate timestamp when serie ends
+     * @param _numberOfProjects amount of projects
+     * @param _maxSupply max supply to mint during serie
+     * @param _vault address of the serie vault
+     */
     function createSerie(
         uint256 _startDate,
         uint256 _endDate,
@@ -141,24 +162,40 @@ contract ResiRegistry is IResiRegistry, OwnableUpgradeable, ReentrancyGuardUpgra
         emit SerieCreated(activeSerieId, _startDate, _endDate, _numberOfProjects, _maxSupply, _vault);
     }
 
+    /**
+     * @dev Add project to current serie
+     * @param _name name of the project
+     */
     function addProject(bytes32 _name) external onlyOwner {
         _addProject(_name);
     }
 
+    /**
+     * @dev Add projects to current serie
+     * @param names projects names
+     */
     function addProjects(bytes32[] memory names) external onlyOwner {
         for (uint256 i = 0; i < names.length; i++) {
             _addProject(names[i]);
         }
     }
 
+    /**
+     * @dev Disable project (no matter if serie not active)
+     * @param _name project name
+     */
     function disableProject(bytes32 _name) external onlyOwner {
         projects[_name].active = false;
         emit ProjectDisabled(_name);
     }
 
+    /**
+     * @dev Set SBT for current serie
+     * @param _sbt address of the SBT token
+     */
     function registerSerieSBT(address _sbt) external onlyOwner {
-        require(series[activeSerieId].active, "RESIRegisty: SERIE NOT ACTIVE");
-        require(_sbt != address(0), "RESIRegistry: INVALID SBT ADDRESS");
+        require(series[activeSerieId].active, "ResiRegistry: SERIE NOT ACTIVE");
+        require(_sbt != address(0), "ResiRegistry: INVALID SBT ADDRESS");
         seriesSBTs[activeSerieId] = _sbt;
         emit SerieSBTSet(activeSerieId, _sbt);
     }
@@ -230,12 +267,12 @@ contract ResiRegistry is IResiRegistry, OwnableUpgradeable, ReentrancyGuardUpgra
     }
 
     function _increaseSerieSupply(uint256 _serieId, uint256 _amount) private {
-        require(series[_serieId].created, "RESIRegistry: INVALID SERIE");
-        require(series[_serieId].active, "RESIRegistry: SERIE INACTIVE");
-        require(_amount > 0, "RESIRegistry: INVALID AMOUNT");
+        require(series[_serieId].created, "ResiRegistry: INVALID SERIE");
+        require(series[_serieId].active, "ResiRegistry: SERIE INACTIVE");
+        require(_amount > 0, "ResiRegistry: INVALID AMOUNT");
         require(
             series[_serieId].currentSupply + _amount <= series[_serieId].maxSupply,
-            "RESIRegistry: Amount will exceed serie max supply"
+            "ResiRegistry: Amount will exceed serie max supply"
         );
         uint256 oldSupply = series[_serieId].currentSupply;
         series[_serieId].currentSupply += _amount;
@@ -243,8 +280,8 @@ contract ResiRegistry is IResiRegistry, OwnableUpgradeable, ReentrancyGuardUpgra
     }
 
     function _decreaseSerieSupply(uint256 _serieId, uint256 _amount) private {
-        require(series[_serieId].created, "RESIRegistry: INVALID SERIE");
-        require(_amount > 0, "RESIRegistry: INVALID AMOUNT");
+        require(series[_serieId].created, "ResiRegistry: INVALID SERIE");
+        require(_amount > 0, "ResiRegistry: INVALID AMOUNT");
         uint256 oldSupply = series[_serieId].currentSupply;
         series[_serieId].currentSupply -= _amount;
         emit SerieSupplyUpdated(oldSupply, series[_serieId].currentSupply);

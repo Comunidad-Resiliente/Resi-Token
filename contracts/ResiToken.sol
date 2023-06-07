@@ -23,12 +23,18 @@ contract ResiToken is
     ERC20BurnableUpgradeable,
     ERC20PausableUpgradeable
 {
+    ///@dev ADMIN ROLE
     bytes32 public constant ADMIN_ROLE = keccak256("ADMIN_ROLE");
+    ///@dev MENTOR ROLE
     bytes32 public constant MENTOR_ROLE = keccak256("MENTOR_ROLE");
+    ///@dev TREASURY ROLE
     bytes32 public constant TREASURY_ROLE = keccak256("TREASURY_ROLE");
+    ///@dev PROJECT BUILDER ROLE
     bytes32 public constant PROJECT_BUILDER_ROLE = keccak256("PROJECT_BUILDER_ROLE");
+    ///@dev RESI BUILDER ROLE
     bytes32 public constant RESI_BUILDER_ROLE = keccak256("RESI_BUILDER_ROLE");
 
+    /// @dev Resi Registry contract
     address public RESI_REGISTRY;
 
     using EnumerableSetUpgradeable for EnumerableSetUpgradeable.Bytes32Set;
@@ -43,7 +49,7 @@ contract ResiToken is
         __ERC20Burnable_init_unchained();
         __ERC20Pausable_init_unchained();
 
-        // Add roles to the set of Roles for later tracking
+        ///@dev Add roles to the set of Roles for later tracking
         _rolesSet.add(MENTOR_ROLE);
         _rolesSet.add(PROJECT_BUILDER_ROLE);
         _rolesSet.add(RESI_BUILDER_ROLE);
@@ -51,7 +57,7 @@ contract ResiToken is
         _grantRole(ADMIN_ROLE, _msgSender());
         _grantRole(TREASURY_ROLE, _treasury);
 
-        // Admin role can add/remove admins in addition to add/remove all other roles
+        ///@dev Admin role can add/remove admins in addition to add/remove all other roles
         _setRoleAdmin(ADMIN_ROLE, ADMIN_ROLE);
         _setRoleAdmin(TREASURY_ROLE, ADMIN_ROLE);
         _setRoleAdmin(PROJECT_BUILDER_ROLE, ADMIN_ROLE);
@@ -64,14 +70,15 @@ contract ResiToken is
 
     /**************************** GETTERS  ****************************/
 
+    /**
+     * @dev Get amount of roles
+     * @return amount of roles
+     */
     function getRoleCount() external view returns (uint256) {
         return _rolesSet.length();
     }
 
-    function getRoleByIndex(uint index) external view returns (bytes32) {
-        return _rolesSet.at(index);
-    }
-
+    /// TODO: MOVE FUNCTION OUT OF HERE
     function isSBTReceiver(address _account, bytes32 _role, uint256 _serieId) external view returns (bool) {
         if (hasRole(_role, _account) && IResiRegistry(RESI_REGISTRY).activeSerie() == _serieId) {
             return true;

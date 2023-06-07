@@ -9,7 +9,7 @@ import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 
-contract ResiVault is IResiVault, OwnableUpgradeable {
+contract ResiVault is IResiVault, OwnableUpgradeable, ReentrancyGuardUpgradeable {
     address public TOKEN;
     address public RESI_TOKEN;
     address public RESI_REGISTRY;
@@ -29,6 +29,7 @@ contract ResiVault is IResiVault, OwnableUpgradeable {
         require(_resiRegistry != address(0), "ResiVault: INVALID RESI REGISTRY ADDRESS");
         __Context_init_unchained();
         __Ownable_init_unchained();
+        __ReentrancyGuard_init_unchained();
         SERIE_ID = _serieId;
         TOKEN = _token;
         RESI_TOKEN = _resiToken;
