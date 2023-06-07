@@ -4,8 +4,10 @@ import {resiMainFixture, resiManualFixture} from './fixtures'
 import {BigNumber, Contract, Signer} from 'ethers'
 import {ResiRegistry, ResiSBT, ResiToken, ResiVault} from '../typechain-types'
 import {keccak256, toUtf8Bytes} from 'ethers/lib/utils'
-import {MOCK_SERIE} from './constants'
+import {PROJECT_FOUR, PROJECT_THREE} from './constants'
 import {advanceTime, getBlockTimestamp, getMockSerie} from '../utils'
+import {PROJECT_ONE} from './constants'
+import {PROJECT_TWO} from './constants'
 
 describe('Resi Registry', () => {
   let deployer: Signer
@@ -113,7 +115,7 @@ describe('Resi Registry', () => {
     //GIVEN
     const fakeProjectName = keccak256(toUtf8Bytes('Fake project'))
     //WHEN //THEN
-    await expect(ResiRegistry.addProject(fakeProjectName)).to.be.revertedWith('RESIRegistry: SERIE INACTIVE')
+    await expect(ResiRegistry.addProject(fakeProjectName)).to.be.revertedWith('ResiRegistry: SERIE INACTIVE')
   })
 
   it('Should not allow to add a project to anybody', async () => {
@@ -131,7 +133,7 @@ describe('Resi Registry', () => {
     const fakeProjectTwo = keccak256(toUtf8Bytes('Fake project2'))
     const projects = [fakeProjectOne, fakeProjectTwo]
     //WHEN //THEN
-    await expect(ResiRegistry.addProjects(projects)).to.be.revertedWith('RESIRegistry: SERIE INACTIVE')
+    await expect(ResiRegistry.addProjects(projects)).to.be.revertedWith('ResiRegistry: SERIE INACTIVE')
   })
 
   it('Should not allow to add projects to anybody', async () => {
@@ -171,15 +173,15 @@ describe('Resi Registry', () => {
   })
 
   it('Should not allow to increase inactive serie supply', async () => {
-    await expect(ResiRegistry.increaseSerieSupply(3, 0)).to.be.revertedWith('RESIRegistry: ONLY RESI TOKEN')
+    await expect(ResiRegistry.increaseSerieSupply(3, 0)).to.be.revertedWith('ResiRegistry: ONLY RESI TOKEN')
   })
 
   it('Should not allow to decrease invalid serie', async () => {
-    await expect(ResiRegistry.decreaseSerieSupply(3, 0)).to.be.revertedWith('RESIRegistry: ONLY RESI TOKEN')
+    await expect(ResiRegistry.decreaseSerieSupply(3, 0)).to.be.revertedWith('ResiRegistry: ONLY RESI TOKEN')
   })
 
   it('Should not allow to close invalid serie', async () => {
-    await expect(ResiRegistry.closeSerie()).to.be.revertedWith('RESIRegistry: SERIE NOT CREATED YET')
+    await expect(ResiRegistry.closeSerie()).to.be.revertedWith('ResiRegistry: SERIE NOT CREATED YET')
   })
 
   it('Should not allow to close serie to anybody', async () => {
@@ -215,15 +217,61 @@ describe('Resi Registry administration', () => {
     MockERC20Token = MockERC20TokenContract
   })
 
-  it('Should not create serie if invalid start time', async () => {})
+  it('Should not create serie if invalid start time', async () => {
+    // GIVEN //WHEN
+    const currentTimestamp = await getBlockTimestamp()
+    const invalidStartTime = currentTimestamp.sub('10000')
+    // THEN
+    await expect(
+      ResiRegistry.createSerie(invalidStartTime, currentTimestamp.add('1000000'), 3, '10', ResiVault.address)
+    ).to.be.revertedWith('ResiRegistry: INVALID START DATE')
+  })
 
-  it('Should not create serie if invalid end time', async () => {})
+  it('Should not create serie if invalid end time', async () => {
+    //GIVEN //WHEN
+    const currentTimestamp = await getBlockTimestamp()
+    const invalidEndTime = currentTimestamp.sub('10000')
+    // THEN
+    await expect(
+      ResiRegistry.createSerie(currentTimestamp.add('1000000'), invalidEndTime, 3, '10', ResiVault.address)
+    ).to.be.revertedWith('ResiRegistry: INVALID END DATE')
+  })
 
-  it('Should not create serie if invalid number of projects', async () => {})
+  it('Should not create serie if invalid number of projects', async () => {
+    await expect(
+      ResiRegistry.createSerie(
+        (await getBlockTimestamp()).add('1000'),
+        (await getBlockTimestamp()).add('1000000'),
+        0,
+        '10',
+        ResiVault.address
+      )
+    ).to.be.revertedWith('ResiRegistry: PROJECTS MUST BE MORE THAN ZERO')
+  })
 
-  it('Should not create serie if invalid max supply', async () => {})
+  it('Should not create serie if invalid max supply', async () => {
+    await expect(
+      ResiRegistry.createSerie(
+        (await getBlockTimestamp()).add('1000'),
+        (await getBlockTimestamp()).add('1000000'),
+        30,
+        '0',
+        ResiVault.address
+      )
+    ).to.be.revertedWith('ResiRegistry: MAX SUPPLY TO EMIT MSUT BE GREATER THAN ZERO')
+  })
 
-  it('Should not create serie if invalid vault', async () => {})
+  it('Should not create serie if invalid vault', async () => {
+    await expect(
+      ResiRegistry.createSerie(
+        (await getBlockTimestamp()).add('1000'),
+        (await getBlockTimestamp()).add('1000000'),
+        30,
+        '1000',
+        ethers.constants.AddressZero
+      )
+    ).to.be.revertedWith('ResiRegistry: INVALID VAULT CONTRACT')
+  })
 
   it('Should allow to create Serie', async () => {
     //GIVEN
@@ -271,9 +319,56 @@ describe('Resi Registry administration', () => {
     ).to.be.revertedWith('ResiRegistry: CURRENT SERIE IS NOT CLOSED YET')
   })
 
-  xit('Should allow to add project', async () => {})
+  it('Should allow to add project', async () => {
+    //GIVEN
+    const projectToAdd = PROJECT_ONE
+    //WHEN
+    await ResiRegistry.addProject(projectToAdd)
+    const project = await ResiRegistry.projects(projectToAdd)
+    const projectSerie = project.serie
+    const isProjectActive = project.active
+    //THEN
+    expect(projectSerie).to.be.equal('1')
+    expect(isProjectActive).to.be.true
+  })
 
-  xit('Should allow to add projects', async () => {})
+  it('Add project should emit event', async () => {
+    //GIVEN
+    const projectToAdd = PROJECT_TWO
+    const activeSerie = await ResiRegistry.activeSerie()
+    //WHEN //THEN
+    await expect(ResiRegistry.addProject(projectToAdd))
+      .to.emit(ResiRegistry, 'ProjectAdded')
+      .withArgs(projectToAdd, activeSerie)
+  })
 
-  xit('Should allow to disable project', async () => {})
+  it('Should not add project if invalid name', async () => {
+    await expect(ResiRegistry.addProject(ethers.utils.formatBytes32String(''))).to.be.revertedWith(
+      'ResiRegistry: INVALID NAME'
+    )
+  })
+
+  it('Should allow to add projects', async () => {
+    //GIVEN
+    const projectsToAdd = [PROJECT_THREE, PROJECT_FOUR]
+    //WHEN
+    await ResiRegistry.addProjects(projectsToAdd)
+    const projectThree = await ResiRegistry.projects(PROJECT_THREE)
+    const projectFour = await ResiRegistry.projects(PROJECT_FOUR)
+    //THEN
+    expect(projectThree.serie).to.be.equal('1')
+    expect(projectThree.active).to.be.true
+    expect(projectFour.serie).to.be.equal('1')
+    expect(projectThree.active).to.be.true
+  })
+
+  it('Should allow to disable project', async () => {
+    //GIVEN
+    const projectToDisable = PROJECT_FOUR
+    //WHEN
+    await ResiRegistry.disableProject(projectToDisable)
+    const project = await ResiRegistry.projects(projectToDisable)
+    //THEN
+    expect(project.active).to.be.false
+  })
 })

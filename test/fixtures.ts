@@ -10,6 +10,15 @@ import {
   ResiVault,
   ResiVault__factory
 } from '../typechain-types'
+import {getMockSerie} from '../utils'
+import {
+  MENTOR_ROLE,
+  PROJECT_BUILDER_ROLE,
+  PROJECT_ONE,
+  PROJECT_THREE,
+  PROJECT_TWO,
+  RESI_BUILDER_ROLE
+} from './constants'
 
 export const resiMainFixture = deployments.createFixture(async () => {
   await deployments.fixture(['v1.0.0'])
@@ -68,4 +77,39 @@ export const resiManualFixture = deployments.createFixture(async () => {
   }
 })
 
-export const getResiFullTestEnvironment = deployments.createFixture(async () => {})
+export const getManualEnvironemntInitialization = async () => {
+  const {ResiTokenContract, ResiRegistryContract, ResiVaultContract, ResiSBTContract, MockERC20TokenContract} =
+    await resiManualFixture()
+  const SerieToBeCreated = await getMockSerie()
+
+  //CREATE SERIE
+  await ResiRegistryContract.createSerie(
+    SerieToBeCreated.startDate,
+    SerieToBeCreated.endDate,
+    SerieToBeCreated.numberOfProjects,
+    SerieToBeCreated.maxSupply,
+    ResiVaultContract.address
+  )
+
+  //SET DEFAULT SBTs URIS
+  await ResiSBTContract.setDefaultRoleUri(MENTOR_ROLE, 'https://ipfs-metor-role')
+  await ResiSBTContract.setDefaultRoleUri(RESI_BUILDER_ROLE, 'https://ipfs-resi-builder-role')
+  await ResiSBTContract.setDefaultRoleUri(PROJECT_BUILDER_ROLE, 'https://ipfs-project-builder-role')
+
+  //REGISTER SERIE SBT
+  await ResiRegistryContract.registerSerieSBT(ResiSBTContract.address)
+
+  //SET RESI TOKEN
+  await ResiRegistryContract.setResiToken(ResiTokenContract.address)
+
+  //REGISTER PROJECTS
+  await ResiRegistryContract.addProjects([PROJECT_ONE, PROJECT_TWO, PROJECT_THREE])
+
+  return {
+    ResiTokenContract,
+    ResiRegistryContract,
+    ResiVaultContract,
+    ResiSBTContract,
+    MockERC20TokenContract
+  }
+}

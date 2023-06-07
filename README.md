@@ -10,15 +10,19 @@
 
 ### Contracts
 
-- ResiRegistry.sol
+- ResiRegistry.sol: Main admin of the protocol. Where Series and projects are created and handled.
 
-- ResiVault.sol
+- ResiVault.sol: Each Serie wiil have its own vault to securely store funds from convertible notes and pre-funded series.
 
-- ResiToken.sol
+- ResiToken.sol: Token which holds roles and funcitons to interact with Series.
 
-- ResiSBT.sol
+- ResiSBT.sol: SBT per Serie holding data from each available role in Resi Token ecosystem. (See #Roles).
 
 ![ResiRegistry-one](./docs/imgs/Registry-SBT-one.png)
+
+![ResiToken](./docs/imgs/ResiToken.png)
+
+![ResiToken-two](./docs/imgs/ResiToken-two.png)
 
 ### Tokenomics
 
@@ -101,13 +105,13 @@ yarn size
 
 ### Roadmap
 
-* [X] Desarrollo
-* [] Test >= 90%
-* [] Deploy a testnet mumbai
-* [] Desarrollo de los subgrafos asociados
-* [] Desarrollo del front-end asociado
-* [] Auditoría de contratos
-* [] Deploy mainnet
+- [x] Development
+- [] Test >= 90% (Current coverage ~60%)
+- [] Deploy to testnet mumbai
+- [] Development of associated subgraphs
+- [] Front end develpment
+- [] SC Auditory
+- [] Mainnet deploy
 
 ### Autores
 

@@ -2,6 +2,9 @@
 pragma solidity ^0.8.18;
 
 import "./interfaces/IResiVault.sol";
+import "./interfaces/IResiRegistry.sol";
+
+import "@openzeppelin/contracts-upgradeable/security/ReentrancyGuardUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
@@ -33,6 +36,8 @@ contract ResiVault is IResiVault, OwnableUpgradeable {
         emit ResiVaultInitialized(_serieId, _resiToken, _resiRegistry);
     }
 
+    /**************************** GETTERS  ****************************/
+
     function tokenBalance(bytes32 _name) external view returns (uint256) {
         require(tokens[_name] != address(0), "ResiVault: INVALID TOKEN NAME");
         return IERC20(tokens[_name]).balanceOf(address(this));
@@ -45,6 +50,12 @@ contract ResiVault is IResiVault, OwnableUpgradeable {
     function getMainToken() external view returns (address) {
         return TOKEN;
     }
+
+    function getCurrentExitQuote(uint256 _amount) external view returns (uint256) {
+        return _amount * _getExitQuote();
+    }
+
+    /**************************** INTERFACE  ****************************/
 
     function setMainToken(address _token) external onlyOwner {
         require(_token != address(0), "ResiVault: INVALID TOKEN ADDRESS");
@@ -68,11 +79,38 @@ contract ResiVault is IResiVault, OwnableUpgradeable {
         emit TokenRemoved(_name, _token);
     }
 
+    /***
+     *
+     * Logica
+     *
+     * Hip 1. Hay en el vault 1x106 usdt
+     *
+     * Hip 2. Vengo a claimear con un balance de 20 Resi tokens
+     *
+     *
+     * Resultado: 1x106 / CANTIDAD DE TOKENS EMITIDOS EN ESA SERIE * MI CANTIDAD ==> VALOR EN USD QUE ME CORRESPONDE.
+     *
+     */
     function release(uint256 _amount) external onlyResiRegistry {
         require(_amount > 0, "INVALID AMOUNT");
         require(IERC20(TOKEN).balanceOf(address(this)) >= _amount, "ResiVault: INVALID AMOUNT TO RELEASE");
-        IERC20(TOKEN).safeTransfer(RESI_REGISTRY, _amount);
+
+        uint256 quote = _getExitQuote();
+        require(quote > 0, "ResiVault: Invalid quote");
+
+        IERC20(TOKEN).safeTransfer(RESI_REGISTRY, quote * _amount);
+
         emit TokenReleased(TOKEN, _amount);
+    }
+
+    /**************************** INTERNALS  ****************************/
+
+    function _getExitQuote() internal view returns (uint256) {
+        uint256 serieSupply = IResiRegistry(RESI_REGISTRY).getSerieSupply(SERIE_ID);
+        require(serieSupply > 0, "ResiVault: SERIE WITH NO MINTED SUPPLY");
+        uint256 currentBalance = IERC20(TOKEN).balanceOf(address(this));
+        uint256 quote = currentBalance / serieSupply;
+        return quote;
     }
 
     receive() external payable {

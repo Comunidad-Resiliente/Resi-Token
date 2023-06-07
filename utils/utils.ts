@@ -29,7 +29,7 @@ export const getMockSerie = async (): Promise<ISerie> => {
   return {
     startDate,
     endDate,
-    numberOfProjects: 3,
+    numberOfProjects: 4,
     maxSupply: BigNumber.from('10000000000000000000')
   }
 }

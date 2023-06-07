@@ -50,6 +50,8 @@ interface IResiRegistry {
 
     function getSerieState(uint256 _serieId) external view returns (bool, uint256);
 
+    function getSerieSupply(uint256 _serieId) external view returns (uint256);
+
     function getSBTSerie(uint256 _serieId) external view returns (address);
 
     function withdrawFromVault(uint256 _serieId, uint256 _amount, address _to) external;

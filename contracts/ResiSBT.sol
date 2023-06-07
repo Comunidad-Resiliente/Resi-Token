@@ -21,6 +21,7 @@ contract ResiSBT is IResiSBT, IERC5192, OwnableUpgradeable, ERC721URIStorageUpgr
     address public RESI_TOKEN;
     address public RESI_REGISTRY;
 
+    mapping(address => bytes32) public userNickNames;
     mapping(address => uint256) private resiTokenBalances;
     mapping(uint256 => bool) private lockedSBTs;
     mapping(bytes32 => string) private defaultRoleUris;
@@ -48,6 +49,12 @@ contract ResiSBT is IResiSBT, IERC5192, OwnableUpgradeable, ERC721URIStorageUpgr
         emit ResiSBTInitialized(_name, _symbol, _serieId, _registry, _token);
     }
 
+    /**************************** GETTERS  ****************************/
+
+    /**************************** INTERFACE  ****************************/
+
+    /**************************** INTERNALS  ****************************/
+
     /// @notice Modify contractUri for NFT collection
     /// @param _contractUri contractUri
     function setContractURI(string memory _contractUri) external onlyOwner {
@@ -63,7 +70,7 @@ contract ResiSBT is IResiSBT, IERC5192, OwnableUpgradeable, ERC721URIStorageUpgr
 
     function setDefaultRoleUri(bytes32 _role, string calldata _uri) external onlyOwner {
         require(_role != bytes32(0), "ResiSBT: INVALID ROLE");
-        require(bytes(_uri).length > 0, "RESISBT: Empty URI");
+        require(bytes(_uri).length > 0, "ResiSBT: Empty URI");
         string memory oldUri = defaultRoleUris[_role];
         defaultRoleUris[_role] = _uri;
         emit DefaultRoleUriUpdated(oldUri, _uri);
@@ -89,7 +96,7 @@ contract ResiSBT is IResiSBT, IERC5192, OwnableUpgradeable, ERC721URIStorageUpgr
 
     function mintByResiToken(address _to, bytes32 _role) external onlyResiToken {
         string memory defaultUri = defaultRoleUris[_role];
-        require(bytes(defaultUri).length > 0, "Default Role Uri not set");
+        require(bytes(defaultUri).length > 0, "ResiSBT: Default Role Uri not set");
         uint256 tokenId = _mintSBT(_to, _role, defaultUri);
         emit SBTMintedByResiToken(_to, _role, tokenId);
     }
@@ -108,7 +115,8 @@ contract ResiSBT is IResiSBT, IERC5192, OwnableUpgradeable, ERC721URIStorageUpgr
         emit DecreaseResiBalance(_to, _amount);
     }
 
-    function _mintSBT(address _to, bytes32 _role, string memory _uri) internal onlyOwner returns (uint256) {
+    function _mintSBT(address _to, bytes32 _role, string memory _uri) internal returns (uint256) {
+        require(_msgSender() == owner() || _msgSender() == RESI_TOKEN, "ResiSBT: ONLY OWNER OR RESI TOKEN");
         _checkMint(_to, _role, _uri);
         uint256 _tokenId = _tokenIdCounter.current();
 
@@ -127,11 +135,12 @@ contract ResiSBT is IResiSBT, IERC5192, OwnableUpgradeable, ERC721URIStorageUpgr
         return lockedSBTs[tokenId];
     }
 
-    function _checkMint(address _to, bytes32 _role, string memory uri) internal view onlyOwner {
-        require(_to != address(0), "INVALID TO ADDRESS");
-        require(balanceOf(_to) == 0, "ResiSBT: User already has SBT");
-        require(bytes(uri).length > 0, "RESISBT: Empty URI");
-        require(IResiToken(RESI_TOKEN).isSBTReceiver(_to, _role, SERIE_ID), "INVALID SBT RECEIVER");
+    function _checkMint(address _to, bytes32 _role, string memory uri) internal view {
+        require(_msgSender() == owner() || _msgSender() == RESI_TOKEN, "ResiSBT: ONLY OWNER OR RESI TOKEN");
+        require(_to != address(0), "ResiSBT: INVALID TO ADDRESS");
+        require(balanceOf(_to) == 0, "ResiSBT: USER ALREADY HAS SBT");
+        require(bytes(uri).length > 0, "ResiSBT: EMPTY URI");
+        require(IResiToken(RESI_TOKEN).isSBTReceiver(_to, _role, SERIE_ID), "ResiSBT: INVALID SBT RECEIVER");
     }
 
     /**
@@ -142,24 +151,24 @@ contract ResiSBT is IResiSBT, IERC5192, OwnableUpgradeable, ERC721URIStorageUpgr
     }
 
     function transferFrom(address, address, uint256) public pure override {
-        revert TransferForbidden("NO TRANSFER FROM ALLOWED");
+        revert TransferForbidden("ResiSBT: NO TRANSFER FROM ALLOWED");
     }
 
     function safeTransferFrom(address, address, uint256) public pure override {
-        revert TransferForbidden("NO TRANSFER FROM ALLOWED");
+        revert TransferForbidden("ResiSBT: NO TRANSFER FROM ALLOWED");
     }
 
     function safeTransferFrom(address, address, uint256, bytes memory) public pure override {
-        revert TransferForbidden("NO TRANSFER FROM ALLOWED");
+        revert TransferForbidden("ResiSBT: NO TRANSFER FROM ALLOWED");
     }
 
     modifier onlyRegistry() {
-        require(_msgSender() == RESI_REGISTRY, "INVALID REGISTRY ADDRESS");
+        require(_msgSender() == RESI_REGISTRY, "ResiSBT: INVALID REGISTRY ADDRESS");
         _;
     }
 
     modifier onlyResiToken() {
-        require(_msgSender() == RESI_TOKEN, "INVALID RESI TOKEN ADDRESS");
+        require(_msgSender() == RESI_TOKEN, "ResiSBT: INVALID RESI TOKEN ADDRESS");
         _;
     }
 }
