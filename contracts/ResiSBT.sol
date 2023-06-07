@@ -115,7 +115,8 @@ contract ResiSBT is IResiSBT, IERC5192, OwnableUpgradeable, ERC721URIStorageUpgr
         emit DecreaseResiBalance(_to, _amount);
     }
 
-    function _mintSBT(address _to, bytes32 _role, string memory _uri) internal onlyOwner returns (uint256) {
+    function _mintSBT(address _to, bytes32 _role, string memory _uri) internal returns (uint256) {
+        require(_msgSender() == owner() || _msgSender() == RESI_TOKEN, "ResiSBT: ONLY OWNER OR RESI TOKEN");
         _checkMint(_to, _role, _uri);
         uint256 _tokenId = _tokenIdCounter.current();
 
@@ -134,7 +135,8 @@ contract ResiSBT is IResiSBT, IERC5192, OwnableUpgradeable, ERC721URIStorageUpgr
         return lockedSBTs[tokenId];
     }
 
-    function _checkMint(address _to, bytes32 _role, string memory uri) internal view onlyOwner {
+    function _checkMint(address _to, bytes32 _role, string memory uri) internal view {
+        require(_msgSender() == owner() || _msgSender() == RESI_TOKEN, "ResiSBT: ONLY OWNER OR RESI TOKEN");
         require(_to != address(0), "ResiSBT: INVALID TO ADDRESS");
         require(balanceOf(_to) == 0, "ResiSBT: USER ALREADY HAS SBT");
         require(bytes(uri).length > 0, "ResiSBT: EMPTY URI");

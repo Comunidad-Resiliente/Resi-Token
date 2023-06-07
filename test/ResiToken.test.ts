@@ -1,12 +1,11 @@
 import {expect} from 'chai'
 import {ethers, getNamedAccounts} from 'hardhat'
-import {getManualEnvironemntInitialization, resiMainFixture, resiManualFixture} from './fixtures'
+import {getManualEnvironemntInitialization, resiMainFixture} from './fixtures'
 import {Signer} from 'ethers'
 import {ResiRegistry, ResiSBT, ResiToken} from '../typechain-types'
 import {
   ADMIN_ROLE,
   MENTOR_ROLE,
-  MINTER_ROLE,
   PROJECT_BUILDER_ROLE,
   PROJECT_ONE,
   PROJECT_TWO,
@@ -288,9 +287,10 @@ describe('Inteface', async () => {
     expect(isMentorUserThree).to.be.true
   })
 
-  xit('Should allow to award', async () => {
+  it('Should allow to award', async () => {
     //GIVEN
     //WHEN
+    await ResiToken.award(await user.getAddress(), MENTOR_ROLE, '20000')
     //THEN
   })
 })
