@@ -169,6 +169,7 @@ contract ResiSBT is IResiSBT, IERC5192, OwnableUpgradeable, ERC721URIStorageUpgr
         return _tokenId;
     }
 
+
     function _checkMint(address _to, bytes32 _role, string memory uri) internal view {
         require(_msgSender() == owner() || _msgSender() == RESI_TOKEN, "ResiSBT: ONLY OWNER OR RESI TOKEN");
         require(_to != address(0), "ResiSBT: INVALID TO ADDRESS");
