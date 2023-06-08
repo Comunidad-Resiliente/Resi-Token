@@ -21,7 +21,8 @@ contract ResiToken is
     AccessControlEnumerableUpgradeable,
     ERC20Upgradeable,
     ERC20BurnableUpgradeable,
-    ERC20PausableUpgradeable
+    ERC20PausableUpgradeable,
+    ReentrancyGuardUpgradeable
 {
     ///@dev ADMIN ROLE
     bytes32 public constant ADMIN_ROLE = keccak256("ADMIN_ROLE");
@@ -45,6 +46,7 @@ contract ResiToken is
         require(_registry != address(0), "INVALID REGISTRY ADDRESS");
         __Context_init_unchained();
         __AccessControl_init_unchained();
+        __ReentrancyGuard_init_unchained();
         __ERC20_init_unchained("ResiToken", "RESI");
         __ERC20Burnable_init_unchained();
         __ERC20Pausable_init_unchained();
@@ -78,7 +80,6 @@ contract ResiToken is
         return _rolesSet.length();
     }
 
-    /// TODO: MOVE FUNCTION OUT OF HERE
     function isSBTReceiver(address _account, bytes32 _role, uint256 _serieId) external view returns (bool) {
         if (hasRole(_role, _account) && IResiRegistry(RESI_REGISTRY).activeSerie() == _serieId) {
             return true;
@@ -159,7 +160,7 @@ contract ResiToken is
         address _account,
         bytes32 _role,
         uint256 _amount
-    ) external isValidAddress(_account, "ResiToken: INVALID RECEIVER ADDR") onlyRole(ADMIN_ROLE) {
+    ) external isValidAddress(_account, "ResiToken: INVALID RECEIVER ADDR") onlyRole(ADMIN_ROLE) nonReentrant {
         require(hasRole(_role, _account), "ResiToken: ACCOUNT HAS NOT VALID ROLE");
         address SERIE_SBT = IResiRegistry(RESI_REGISTRY).getSBTSerie();
         if (IERC721Upgradeable(SERIE_SBT).balanceOf(_account) == 0) {
@@ -172,7 +173,7 @@ contract ResiToken is
         emit ResiMinted(_account, _amount);
     }
 
-    function exit(uint256 _serieId, bytes32 _role) external {
+    function exit(uint256 _serieId, bytes32 _role) external nonReentrant {
         _checkExit(_role);
         address SERIE_SBT = IResiRegistry(RESI_REGISTRY).getSBTSerie(_serieId);
         require(SERIE_SBT != address(0), "NO SBT SERIE SET");

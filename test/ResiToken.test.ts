@@ -147,6 +147,7 @@ describe('Inteface', async () => {
   let invalidSigner: Signer
   let ResiRegistry: ResiRegistry
   let ResiToken: ResiToken
+  let ResiSBT: ResiSBT
 
   before(async () => {
     const accounts = await getNamedAccounts()
@@ -158,9 +159,10 @@ describe('Inteface', async () => {
     userTwo = signers[17]
     userThree = signers[16]
 
-    const {ResiRegistryContract, ResiTokenContract} = await getManualEnvironemntInitialization()
+    const {ResiRegistryContract, ResiTokenContract, ResiSBTContract} = await getManualEnvironemntInitialization()
     ResiRegistry = ResiRegistryContract
     ResiToken = ResiTokenContract
+    ResiSBT = ResiSBTContract
   })
 
   it('Should allow to add mentor', async () => {
@@ -274,8 +276,32 @@ describe('Inteface', async () => {
 
   it('Should allow to award', async () => {
     //GIVEN
+    const userToAward = await user.getAddress()
+    const amountToAward = '20000'
+    const sbtBalance = await ResiSBT.balanceOf(userToAward)
+    const resiTokenBalance = await ResiToken.balanceOf(userToAward)
+    const serieResiMinted = await ResiRegistry.getSerieSupply('1')
+    const sbtResiTokenBalance = await ResiSBT.resiTokenBalances(userToAward)
+
     //WHEN
-    await ResiToken.award(await user.getAddress(), MENTOR_ROLE, '20000')
+    await expect(ResiToken.award(await user.getAddress(), MENTOR_ROLE, amountToAward))
+      .to.emit(ResiToken, 'ResiMinted')
+      .withArgs(userToAward, amountToAward)
+
+    const newSbtBalance = await ResiSBT.balanceOf(userToAward)
+    const newResiTokenBalance = await ResiToken.balanceOf(userToAward)
+    const newSerieResiMinted = await ResiRegistry.getSerieSupply('1')
+    const newSbtResiTokenBalance = await ResiSBT.resiTokenBalances(userToAward)
+
     //THEN
+    expect(sbtBalance).to.be.equal('0')
+    expect(resiTokenBalance).to.be.equal('0')
+    expect(serieResiMinted).to.be.equal('0')
+    expect(sbtResiTokenBalance).to.be.equal('0')
+
+    expect(newSbtBalance).to.be.equal('1')
+    expect(newResiTokenBalance).to.be.equal(amountToAward)
+    expect(newSerieResiMinted).to.be.equal(amountToAward)
+    expect(newSbtResiTokenBalance).to.be.equal(amountToAward)
   })
 })

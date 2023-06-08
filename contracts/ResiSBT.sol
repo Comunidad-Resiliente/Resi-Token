@@ -30,7 +30,7 @@ contract ResiSBT is IResiSBT, IERC5192, OwnableUpgradeable, ERC721URIStorageUpgr
     /// @dev user => nickname
     mapping(address => bytes32) public userNickNames;
     /// @dev user => resi erc20 balances
-    mapping(address => uint256) private resiTokenBalances;
+    mapping(address => uint256) public resiTokenBalances;
     /// @dev tokenId => isLocked
     mapping(uint256 => bool) private lockedSBTs;
     /// @dev role => uri
