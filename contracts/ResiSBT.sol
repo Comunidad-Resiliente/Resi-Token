@@ -10,20 +10,30 @@ import "./interfaces/IResiRegistry.sol";
 import "./interfaces/IResiToken.sol";
 import "./interfaces/IERC5192.sol";
 
+/// @title Resi SBT Contract
+/// @author Alejo Lovallo
+/// @notice SBT token linked to a Serie
 contract ResiSBT is IResiSBT, IERC5192, OwnableUpgradeable, ERC721URIStorageUpgradeable {
     using Counters for Counters.Counter;
     /// @dev Private counter to make internal security checks
     Counters.Counter private _tokenIdCounter;
 
-    /// @dev ContractUri
+    /// @dev Token ContractUri
     string public contractUri;
+    /// @dev Serie id
     uint256 public SERIE_ID;
+    /// @dev Resi ERC20 token contract
     address public RESI_TOKEN;
+    /// @dev Resi Registry contract
     address public RESI_REGISTRY;
 
+    /// @dev user => nickname
     mapping(address => bytes32) public userNickNames;
-    mapping(address => uint256) private resiTokenBalances;
+    /// @dev user => resi erc20 balances
+    mapping(address => uint256) public resiTokenBalances;
+    /// @dev tokenId => isLocked
     mapping(uint256 => bool) private lockedSBTs;
+    /// @dev role => uri
     mapping(bytes32 => string) private defaultRoleUris;
 
     function initialize(
@@ -50,10 +60,26 @@ contract ResiSBT is IResiSBT, IERC5192, OwnableUpgradeable, ERC721URIStorageUpgr
     }
 
     /**************************** GETTERS  ****************************/
+    /**
+     * @dev Retrieve token uri from id
+     * @param tokenId token id to retrieve uri
+     * @return uri
+     * @custom:experimental The following function is override required by Solidity.
+     */
+    function tokenURI(uint256 tokenId) public view override(ERC721URIStorageUpgradeable) returns (string memory) {
+        return super.tokenURI(tokenId);
+    }
+
+    /**
+     * @dev Know if a sbt is locked
+     * @param tokenId sbt token id
+     * @return is sbt locked
+     */
+    function locked(uint256 tokenId) external view returns (bool) {
+        return lockedSBTs[tokenId];
+    }
 
     /**************************** INTERFACE  ****************************/
-
-    /**************************** INTERNALS  ****************************/
 
     /// @notice Modify contractUri for NFT collection
     /// @param _contractUri contractUri
@@ -62,12 +88,21 @@ contract ResiSBT is IResiSBT, IERC5192, OwnableUpgradeable, ERC721URIStorageUpgr
         emit ContractURIUpdated(contractUri);
     }
 
+    /**
+     * @dev Set Resi Registry
+     * @param _registry registry address
+     */
     function setRegistry(address _registry) external onlyOwner {
         require(_registry != address(0), "INVALID REGISTRY ADDRESS");
         RESI_REGISTRY = _registry;
         emit RegistrySet(_registry);
     }
 
+    /**
+     * @dev Set default Resi Token Role URI
+     * @param _role role name
+     * @param _uri default uri
+     */
     function setDefaultRoleUri(bytes32 _role, string calldata _uri) external onlyOwner {
         require(_role != bytes32(0), "ResiSBT: INVALID ROLE");
         require(bytes(_uri).length > 0, "ResiSBT: Empty URI");
@@ -76,11 +111,12 @@ contract ResiSBT is IResiSBT, IERC5192, OwnableUpgradeable, ERC721URIStorageUpgr
         emit DefaultRoleUriUpdated(oldUri, _uri);
     }
 
-    /// @custom:notice The following function is override required by Solidity.
-    function tokenURI(uint256 tokenId) public view override(ERC721URIStorageUpgradeable) returns (string memory) {
-        return super.tokenURI(tokenId);
-    }
-
+    /**
+     * @dev Mint SBT to user with specific role and uri.
+     * @param _to user
+     * @param _role role name from Resi registry
+     * @param _uri uri
+     */
     function mint(address _to, bytes32 _role, string memory _uri) external onlyOwner returns (uint256) {
         uint256 tokenId = _mintSBT(_to, _role, _uri);
         emit MintSBT(_to, _role, tokenId);
@@ -115,6 +151,8 @@ contract ResiSBT is IResiSBT, IERC5192, OwnableUpgradeable, ERC721URIStorageUpgr
         emit DecreaseResiBalance(_to, _amount);
     }
 
+    /**************************** INTERNALS  ****************************/
+
     function _mintSBT(address _to, bytes32 _role, string memory _uri) internal returns (uint256) {
         require(_msgSender() == owner() || _msgSender() == RESI_TOKEN, "ResiSBT: ONLY OWNER OR RESI TOKEN");
         _checkMint(_to, _role, _uri);
@@ -131,9 +169,6 @@ contract ResiSBT is IResiSBT, IERC5192, OwnableUpgradeable, ERC721URIStorageUpgr
         return _tokenId;
     }
 
-    function locked(uint256 tokenId) external view returns (bool) {
-        return lockedSBTs[tokenId];
-    }
 
     function _checkMint(address _to, bytes32 _role, string memory uri) internal view {
         require(_msgSender() == owner() || _msgSender() == RESI_TOKEN, "ResiSBT: ONLY OWNER OR RESI TOKEN");
@@ -171,4 +206,8 @@ contract ResiSBT is IResiSBT, IERC5192, OwnableUpgradeable, ERC721URIStorageUpgr
         require(_msgSender() == RESI_TOKEN, "ResiSBT: INVALID RESI TOKEN ADDRESS");
         _;
     }
+
+    /// @dev Leave a gap betweeen inherited contracts variables in order
+    /// @dev to be able to add more variables in them later.
+    uint256[20] private upgradeGap;
 }

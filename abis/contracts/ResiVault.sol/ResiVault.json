@@ -35,25 +35,19 @@
     "anonymous": false,
     "inputs": [
       {
-        "indexed": false,
-        "internalType": "uint256",
-        "name": "_serieId",
-        "type": "uint256"
-      },
-      {
         "indexed": true,
         "internalType": "address",
-        "name": "_token",
+        "name": "oldToken",
         "type": "address"
       },
       {
         "indexed": true,
         "internalType": "address",
-        "name": "_resiToken",
+        "name": "TOKEN",
         "type": "address"
       }
     ],
-    "name": "Initialized",
+    "name": "MainTokenUpdated",
     "type": "event"
   },
   {
@@ -73,6 +67,31 @@
       }
     ],
     "name": "OwnershipTransferred",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "_serieId",
+        "type": "uint256"
+      },
+      {
+        "indexed": true,
+        "internalType": "address",
+        "name": "_token",
+        "type": "address"
+      },
+      {
+        "indexed": true,
+        "internalType": "address",
+        "name": "_resiToken",
+        "type": "address"
+      }
+    ],
+    "name": "ResiVaultInitialized",
     "type": "event"
   },
   {
@@ -216,6 +235,25 @@
     "type": "function"
   },
   {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "_amount",
+        "type": "uint256"
+      }
+    ],
+    "name": "getCurrentExitQuote",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
     "inputs": [],
     "name": "getMainToken",
     "outputs": [
@@ -298,6 +336,19 @@
   {
     "inputs": [],
     "name": "renounceOwnership",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "_token",
+        "type": "address"
+      }
+    ],
+    "name": "setMainToken",
     "outputs": [],
     "stateMutability": "nonpayable",
     "type": "function"

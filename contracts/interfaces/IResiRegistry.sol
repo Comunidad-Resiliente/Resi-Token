@@ -56,10 +56,15 @@ interface IResiRegistry {
 
     function withdrawFromVault(uint256 _serieId, uint256 _amount, address _to) external;
 
+    /// @notice Emitted when the Registry is initialized.
     event RegistryInitialized();
 
+    /// @notice Emitted when Resi Token Contract is set on Contract
+    /// @param _resiToken Resi Token address
     event ResiTokenSet(address indexed _resiToken);
 
+    /// @notice Emitted when Treasury Vault address is set on Contract
+    /// @param _treasuryVault Treasury Vault address
     event TreasuryVaultSet(address indexed _treasuryVault);
 
     event SerieSBTSet(uint256 activeSerieId, address indexed _sbt);

@@ -83,7 +83,7 @@ describe('Resi Registry', () => {
 
   it('Should not allow to set an invalid resi token address', async () => {
     await expect(ResiRegistry.setResiToken(ethers.constants.AddressZero)).to.be.revertedWith(
-      'RESIRegistry: INVALID TOKEN ADDRESS'
+      'ResiRegistry: INVALID TOKEN ADDRESS'
     )
   })
 
@@ -162,7 +162,7 @@ describe('Resi Registry', () => {
 
   it('Should not allow to register serieSBT', async () => {
     await expect(ResiRegistry.registerSerieSBT(ethers.constants.AddressZero)).to.be.revertedWith(
-      'RESIRegisty: SERIE NOT ACTIVE'
+      'ResiRegistry: SERIE NOT ACTIVE'
     )
   })
 
