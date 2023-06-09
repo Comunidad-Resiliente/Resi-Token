@@ -118,19 +118,6 @@
     "anonymous": false,
     "inputs": [
       {
-        "indexed": true,
-        "internalType": "address",
-        "name": "mentor",
-        "type": "address"
-      }
-    ],
-    "name": "MentorRemoved",
-    "type": "event"
-  },
-  {
-    "anonymous": false,
-    "inputs": [
-      {
         "indexed": false,
         "internalType": "address",
         "name": "account",
@@ -159,37 +146,11 @@
       {
         "indexed": true,
         "internalType": "address",
-        "name": "projectBuilder",
-        "type": "address"
-      }
-    ],
-    "name": "ProjectBuilderRemoved",
-    "type": "event"
-  },
-  {
-    "anonymous": false,
-    "inputs": [
-      {
-        "indexed": true,
-        "internalType": "address",
         "name": "resiBuilder",
         "type": "address"
       }
     ],
     "name": "ResiBuilderAdded",
-    "type": "event"
-  },
-  {
-    "anonymous": false,
-    "inputs": [
-      {
-        "indexed": true,
-        "internalType": "address",
-        "name": "resiBuilder",
-        "type": "address"
-      }
-    ],
-    "name": "ResiBuilderRemoved",
     "type": "event"
   },
   {
@@ -209,6 +170,25 @@
       }
     ],
     "name": "ResiMinted",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": false,
+        "internalType": "bytes32",
+        "name": "_role",
+        "type": "bytes32"
+      },
+      {
+        "indexed": true,
+        "internalType": "address",
+        "name": "_user",
+        "type": "address"
+      }
+    ],
+    "name": "ResiRoleRemoved",
     "type": "event"
   },
   {
@@ -904,38 +884,17 @@
   {
     "inputs": [
       {
-        "internalType": "address",
-        "name": "_mentor",
-        "type": "address"
-      }
-    ],
-    "name": "removeMentor",
-    "outputs": [],
-    "stateMutability": "nonpayable",
-    "type": "function"
-  },
-  {
-    "inputs": [
+        "internalType": "bytes32",
+        "name": "_role",
+        "type": "bytes32"
+      },
       {
         "internalType": "address",
-        "name": "_builder",
+        "name": "_user",
         "type": "address"
       }
     ],
-    "name": "removeProjectBuilder",
-    "outputs": [],
-    "stateMutability": "nonpayable",
-    "type": "function"
-  },
-  {
-    "inputs": [
-      {
-        "internalType": "address",
-        "name": "_builder",
-        "type": "address"
-      }
-    ],
-    "name": "removeResiBuilder",
+    "name": "removeUserRole",
     "outputs": [],
     "stateMutability": "nonpayable",
     "type": "function"

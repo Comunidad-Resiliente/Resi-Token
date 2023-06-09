@@ -2,6 +2,7 @@
 pragma solidity ^0.8.18;
 
 import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/security/ReentrancyGuardUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/token/ERC721/extensions/ERC721URIStorageUpgradeable.sol";
 import "@openzeppelin/contracts/utils/Counters.sol";
 
@@ -13,7 +14,7 @@ import "./interfaces/IERC5192.sol";
 /// @title Resi SBT Contract
 /// @author Alejo Lovallo
 /// @notice SBT token linked to a Serie
-contract ResiSBT is IResiSBT, IERC5192, OwnableUpgradeable, ERC721URIStorageUpgradeable {
+contract ResiSBT is IResiSBT, IERC5192, OwnableUpgradeable, ERC721URIStorageUpgradeable, ReentrancyGuardUpgradeable {
     using Counters for Counters.Counter;
     /// @dev Private counter to make internal security checks
     Counters.Counter private _tokenIdCounter;
@@ -48,6 +49,7 @@ contract ResiSBT is IResiSBT, IERC5192, OwnableUpgradeable, ERC721URIStorageUpgr
         require(_token != address(0), "INVALID RESI TOKEN ADDRESS");
         __Context_init_unchained();
         __Ownable_init_unchained();
+        __ReentrancyGuard_init_unchained();
         __ERC721_init_unchained(_name, _symbol);
         __ERC721URIStorage_init_unchained();
 
@@ -130,25 +132,16 @@ contract ResiSBT is IResiSBT, IERC5192, OwnableUpgradeable, ERC721URIStorageUpgr
         }
     }
 
-    function mintByResiToken(address _to, bytes32 _role) external onlyResiToken {
-        string memory defaultUri = defaultRoleUris[_role];
-        require(bytes(defaultUri).length > 0, "ResiSBT: Default Role Uri not set");
-        uint256 tokenId = _mintSBT(_to, _role, defaultUri);
-        emit SBTMintedByResiToken(_to, _role, tokenId);
+    function mintByResiToken(address _to, bytes32 _role) external onlyResiToken nonReentrant {
+        _mintByResiToken(_to, _role);
     }
 
-    function increaseResiTokenBalance(address _to, uint256 _amount) external onlyResiToken {
-        require(balanceOf(_to) == 1, "ResiSBT: User has no SBT");
-        require(_amount > 0, "ResiSBT: Invalid amount");
-        resiTokenBalances[_to] += _amount;
-        emit IncreaseResiBalance(_to, _amount);
+    function increaseResiTokenBalance(address _to, uint256 _amount) external onlyResiToken nonReentrant {
+        _increaseResiTokenBalance(_to, _amount);
     }
 
-    function decreaseResiTokenBalance(address _to, uint256 _amount) external onlyResiToken {
-        require(balanceOf(_to) == 1, "ResiSBT: User has no SBT");
-        require(_amount > 0, "ResiSBT: Invalid amount");
-        resiTokenBalances[_to] -= _amount;
-        emit DecreaseResiBalance(_to, _amount);
+    function decreaseResiTokenBalance(address _to, uint256 _amount) external onlyResiToken nonReentrant {
+        _decreaseResiTokenBalance(_to, _amount);
     }
 
     /**************************** INTERNALS  ****************************/
@@ -169,6 +162,26 @@ contract ResiSBT is IResiSBT, IERC5192, OwnableUpgradeable, ERC721URIStorageUpgr
         return _tokenId;
     }
 
+    function _mintByResiToken(address _to, bytes32 _role) private {
+        string memory defaultUri = defaultRoleUris[_role];
+        require(bytes(defaultUri).length > 0, "ResiSBT: Default Role Uri not set");
+        uint256 tokenId = _mintSBT(_to, _role, defaultUri);
+        emit SBTMintedByResiToken(_to, _role, tokenId);
+    }
+
+    function _increaseResiTokenBalance(address _to, uint256 _amount) private {
+        require(balanceOf(_to) == 1, "ResiSBT: User has no SBT");
+        require(_amount > 0, "ResiSBT: Invalid amount");
+        resiTokenBalances[_to] += _amount;
+        emit IncreaseResiBalance(_to, _amount);
+    }
+
+    function _decreaseResiTokenBalance(address _to, uint256 _amount) private {
+        require(balanceOf(_to) == 1, "ResiSBT: User has no SBT");
+        require(_amount > 0, "ResiSBT: Invalid amount");
+        resiTokenBalances[_to] -= _amount;
+        emit DecreaseResiBalance(_to, _amount);
+    }
 
     function _checkMint(address _to, bytes32 _role, string memory uri) internal view {
         require(_msgSender() == owner() || _msgSender() == RESI_TOKEN, "ResiSBT: ONLY OWNER OR RESI TOKEN");
