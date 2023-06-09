@@ -99,13 +99,6 @@ contract ResiToken is
         emit MentorAdded(_mentor, _project);
     }
 
-    function removeMentor(
-        address _mentor
-    ) external isValidAddress(_mentor, "ResiToken: INVALID MENTOR ADDRESS") onlyRole(ADMIN_ROLE) whenNotPaused {
-        _revokeRole(MENTOR_ROLE, _mentor);
-        emit MentorRemoved(_mentor);
-    }
-
     function addProjectBuilder(
         address _builder,
         uint256 _serieId,
@@ -116,13 +109,6 @@ contract ResiToken is
         emit ProjectBuilderAdded(_builder);
     }
 
-    function removeProjectBuilder(
-        address _builder
-    ) external isValidAddress(_builder, "ResiToken: INVALID BUILDER ADDRESS") onlyRole(ADMIN_ROLE) whenNotPaused {
-        _revokeRole(PROJECT_BUILDER_ROLE, _builder);
-        emit ProjectBuilderRemoved(_builder);
-    }
-
     function addResiBuilder(
         address _builder
     ) external isValidAddress(_builder, "ResiToken: INVALID BUILDER ADDRESS") onlyRole(ADMIN_ROLE) whenNotPaused {
@@ -130,15 +116,22 @@ contract ResiToken is
         emit ResiBuilderAdded(_builder);
     }
 
-    function removeResiBuilder(
-        address _builder
-    ) external isValidAddress(_builder, "ResiToken: INVALID BUILDER ADDRESS") onlyRole(ADMIN_ROLE) {
-        _revokeRole(RESI_BUILDER_ROLE, _builder);
-        emit ResiBuilderRemoved(_builder);
-    }
-
     function addRolesBatch(bytes32 _role, address[] memory _addresses) external onlyRole(ADMIN_ROLE) whenNotPaused {
         _addRolesBatch(_role, _addresses);
+    }
+
+    function removeUserRole(
+        bytes32 _role,
+        address _user
+    )
+        external
+        isValidAddress(_user, "ResiToken: INVALID USER ADDRESS")
+        validRole(_role)
+        onlyRole(ADMIN_ROLE)
+        whenNotPaused
+    {
+        _revokeRole(_role, _user);
+        emit ResiRoleRemoved(_role, _user);
     }
 
     function _checkSerieAndProject(uint256 _serieId, bytes32 _project) internal view onlyRole(ADMIN_ROLE) {
@@ -191,8 +184,10 @@ contract ResiToken is
 
     /**************************** INTERNALS  ****************************/
 
-    function _addRolesBatch(bytes32 role, address[] memory _addresses) internal onlyRole(ADMIN_ROLE) whenNotPaused {
-        require(role == MENTOR_ROLE || role == PROJECT_BUILDER_ROLE || role == RESI_BUILDER_ROLE, "RINVALID ROLE");
+    function _addRolesBatch(
+        bytes32 role,
+        address[] memory _addresses
+    ) internal onlyRole(ADMIN_ROLE) validRole(role) whenNotPaused {
         for (uint8 i = 0; i < _addresses.length; i++) {
             if (_addresses[i] == address(0)) {
                 revert InvalidAddress(_addresses[i]);
@@ -217,6 +212,14 @@ contract ResiToken is
 
     modifier isValidAddress(address _addr, string memory message) {
         require(_addr != address(0), message);
+        _;
+    }
+
+    modifier validRole(bytes32 _role) {
+        require(
+            _role == MENTOR_ROLE || _role == PROJECT_BUILDER_ROLE || _role == RESI_BUILDER_ROLE,
+            "ResiToken: INVALID ROLE"
+        );
         _;
     }
 
