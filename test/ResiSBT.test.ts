@@ -1,9 +1,17 @@
 import {expect} from 'chai'
 import {ethers, getNamedAccounts} from 'hardhat'
-import {resiMainFixture, resiManualFixture} from './fixtures'
+import {getManualEnvironemntInitialization, resiMainFixture, resiManualFixture} from './fixtures'
 import {Signer} from 'ethers'
 import {ResiRegistry, ResiSBT, ResiToken} from '../typechain-types'
-import {MENTOR_ROLE, MINTER_ROLE, PROJECT_BUILDER_ROLE, RESI_BUILDER_ROLE, TREASURY_ROLE} from './constants'
+import {
+  MENTOR_ROLE,
+  MINTER_ROLE,
+  PROJECT_BUILDER_ROLE,
+  PROJECT_ONE,
+  PROJECT_TWO,
+  RESI_BUILDER_ROLE,
+  TREASURY_ROLE
+} from './constants'
 import {keccak256, toUtf8Bytes} from 'ethers/lib/utils'
 
 describe('Resi SBT initial', () => {
@@ -156,5 +164,38 @@ describe('Resi SBT initial', () => {
         ResiSBT.connect(invalidSigner).mint(await invalidSigner.getAddress(), MINTER_ROLE, 'asdasas')
       ).to.be.revertedWith('Ownable: caller is not the owner')
     })
+  })
+})
+
+describe('Resi SBT interface', () => {
+  let deployer: Signer, user: Signer, userTwo: Signer
+  let treasury: string
+  let invalidSigner: Signer
+  let ResiRegistry: ResiRegistry
+  let ResiToken: ResiToken
+  let ResiSBT: ResiSBT
+
+  before(async () => {
+    const accounts = await getNamedAccounts()
+    const signers = await ethers.getSigners()
+    deployer = await ethers.getSigner(accounts.deployer)
+    user = await ethers.getSigner(accounts.user)
+    treasury = accounts.treasury
+    invalidSigner = signers[18]
+
+    const {ResiSBTContract, ResiTokenContract} = await getManualEnvironemntInitialization()
+    ResiSBT = ResiSBTContract
+    ResiToken = ResiTokenContract
+
+    await ResiToken.addMentor(await user.getAddress(), '1', PROJECT_ONE)
+    await ResiToken.addMentor(await userTwo.getAddress(), '1', PROJECT_TWO)
+  })
+
+  xit('Should allow to mint manually', async () => {
+    //GIVEN
+    const userOneSBTBalance = await ResiSBT.balanceOf(await user.getAddress())
+    const isValidSBTReceiver = await ResiToken.isSBTReceiver(await user.getAddress(), MENTOR_ROLE, '1')
+    //WHEN
+    //THEN
   })
 })

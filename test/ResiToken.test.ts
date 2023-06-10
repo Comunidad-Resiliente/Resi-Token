@@ -309,9 +309,34 @@ describe('Inteface', async () => {
     expect(newSbtResiTokenBalance).to.be.equal(amountToAward)
   })
 
-  xit('Award to someone with SBT should not mint a new one', async () => {
+  it('Award to someone with SBT should not mint a new one', async () => {
     //GIVEN
+    const userToAward = await user.getAddress()
+    const amountToAward = '20000'
+    const sbtBalance = await ResiSBT.balanceOf(userToAward)
+    const resiTokenBalance = await ResiToken.balanceOf(userToAward)
+    const serieResiMinted = await ResiRegistry.getSerieSupply('1')
+    const sbtResiTokenBalance = await ResiSBT.resiTokenBalances(userToAward)
+
     //WHEN
+    await expect(ResiToken.award(await user.getAddress(), MENTOR_ROLE, amountToAward))
+      .to.emit(ResiToken, 'ResiMinted')
+      .withArgs(userToAward, amountToAward)
+
+    const newSbtBalance = await ResiSBT.balanceOf(userToAward)
+    const newResiTokenBalance = await ResiToken.balanceOf(userToAward)
+    const newSerieResiMinted = await ResiRegistry.getSerieSupply('1')
+    const newSbtResiTokenBalance = await ResiSBT.resiTokenBalances(userToAward)
+
     //THEN
+    expect(sbtBalance).to.be.equal('1')
+    expect(resiTokenBalance).to.be.equal('20000')
+    expect(serieResiMinted).to.be.equal('20000')
+    expect(sbtResiTokenBalance).to.be.equal('20000')
+
+    expect(newSbtBalance).to.be.equal('1')
+    expect(newResiTokenBalance).to.be.equal('40000')
+    expect(newSerieResiMinted).to.be.equal('40000')
+    expect(newSbtResiTokenBalance).to.be.equal('40000')
   })
 })
