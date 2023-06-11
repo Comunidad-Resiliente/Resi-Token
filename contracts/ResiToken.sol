@@ -80,16 +80,6 @@ contract ResiToken is
         return _rolesSet.length();
     }
 
-    /**
-     * TODO: MOVE THIS FUNCTION TO SBT. IT SOUNDS MORE LOGICAL
-     */
-    function isSBTReceiver(address _account, bytes32 _role, uint256 _serieId) external view returns (bool) {
-        if (hasRole(_role, _account) && IResiRegistry(RESI_REGISTRY).activeSerie() == _serieId) {
-            return true;
-        }
-        return false;
-    }
-
     /**************************** INTERFACE  ****************************/
 
     function addMentor(

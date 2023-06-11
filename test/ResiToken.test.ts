@@ -67,10 +67,6 @@ describe('Resi Token initial', () => {
       expect(expectedRoleCount).to.be.equal(roleCount)
     })
 
-    it('Is sbt receiver should return false', async () => {
-      expect(await ResiToken.isSBTReceiver(await user.getAddress(), MENTOR_ROLE, 0)).to.be.false
-    })
-
     it('Should not add mentor', async () => {
       const fakeProject = keccak256(toUtf8Bytes('Fake project'))
       await expect(ResiToken.addMentor(await user.getAddress(), 0, fakeProject)).to.be.revertedWith(
@@ -191,7 +187,7 @@ describe('Inteface', async () => {
   })
 
   it('Is SBT Reciever should return true for added mentor', async () => {
-    expect(await ResiToken.isSBTReceiver(await user.getAddress(), MENTOR_ROLE, '1')).to.be.true
+    expect(await ResiSBT.isSBTReceiver(await user.getAddress(), MENTOR_ROLE, '1')).to.be.true
   })
 
   it('Should allow to remove mentor', async () => {
