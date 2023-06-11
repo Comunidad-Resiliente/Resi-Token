@@ -80,13 +80,6 @@ contract ResiToken is
         return _rolesSet.length();
     }
 
-    function isSBTReceiver(address _account, bytes32 _role, uint256 _serieId) external view returns (bool) {
-        if (hasRole(_role, _account) && IResiRegistry(RESI_REGISTRY).activeSerie() == _serieId) {
-            return true;
-        }
-        return false;
-    }
-
     /**************************** INTERFACE  ****************************/
 
     function addMentor(
@@ -176,8 +169,6 @@ contract ResiToken is
         IResiRegistry(RESI_REGISTRY).decreaseSerieSupply(_serieId, resiSerieBalance);
         IResiSBT(SERIE_SBT).decreaseResiTokenBalance(_msgSender(), resiSerieBalance);
         _transfer(_msgSender(), address(this), resiSerieBalance);
-
-        //BURN ????? TO ASK
 
         emit Exit(_msgSender(), resiSerieBalance, _serieId);
     }

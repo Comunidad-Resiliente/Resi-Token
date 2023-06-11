@@ -12,8 +12,6 @@ interface IResiToken {
 
     function getRoleCount() external view returns (uint256);
 
-    function isSBTReceiver(address _account, bytes32 _role, uint256 _serieId) external view returns (bool);
-
     event TokenInitialized(address indexed treasury, address indexed registry);
     event MentorAdded(address indexed mentor, bytes32 project);
     event ProjectBuilderAdded(address indexed projectBuilder);

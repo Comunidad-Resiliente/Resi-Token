@@ -12,6 +12,8 @@ interface IResiSBT {
 
     function mintByResiToken(address _to, bytes32 _role) external;
 
+    function isSBTReceiver(address _account, bytes32 _role, uint256 _serieId) external view returns (bool);
+
     function increaseResiTokenBalance(address _to, uint256 _amount) external;
 
     function decreaseResiTokenBalance(address _to, uint256 _amount) external;
@@ -23,6 +25,7 @@ interface IResiSBT {
     event SBTMintedByResiToken(address indexed _to, bytes32 _role, uint256 _tokenId);
     event IncreaseResiBalance(address indexed to, uint256 amount);
     event DecreaseResiBalance(address indexed to, uint256 amount);
+    event NicknameUpdated(address indexed user, bytes32 nickname);
 
     error TransferForbidden(string message);
 }

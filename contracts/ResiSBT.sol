@@ -2,6 +2,7 @@
 pragma solidity ^0.8.18;
 
 import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/access/IAccessControlUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/security/ReentrancyGuardUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/token/ERC721/extensions/ERC721URIStorageUpgradeable.sol";
 import "@openzeppelin/contracts/utils/Counters.sol";
@@ -81,7 +82,24 @@ contract ResiSBT is IResiSBT, IERC5192, OwnableUpgradeable, ERC721URIStorageUpgr
         return lockedSBTs[tokenId];
     }
 
+    function isSBTReceiver(address _account, bytes32 _role, uint256 _serieId) public view returns (bool) {
+        if (
+            IAccessControlUpgradeable(RESI_TOKEN).hasRole(_role, _account) &&
+            IResiRegistry(RESI_REGISTRY).activeSerie() == _serieId
+        ) {
+            return true;
+        }
+        return false;
+    }
+
     /**************************** INTERFACE  ****************************/
+
+    function setNickName(bytes32 _nickname) external {
+        require(balanceOf(_msgSender()) == 1, "ResiSBT: NOT AN SBT OWNER");
+        require(_nickname != bytes32(0), "ResiSBT: INVALID NICKNAME");
+        userNickNames[_msgSender()] = _nickname;
+        emit NicknameUpdated(_msgSender(), _nickname);
+    }
 
     /// @notice Modify contractUri for NFT collection
     /// @param _contractUri contractUri
@@ -188,7 +206,7 @@ contract ResiSBT is IResiSBT, IERC5192, OwnableUpgradeable, ERC721URIStorageUpgr
         require(_to != address(0), "ResiSBT: INVALID TO ADDRESS");
         require(balanceOf(_to) == 0, "ResiSBT: USER ALREADY HAS SBT");
         require(bytes(uri).length > 0, "ResiSBT: EMPTY URI");
-        require(IResiToken(RESI_TOKEN).isSBTReceiver(_to, _role, SERIE_ID), "ResiSBT: INVALID SBT RECEIVER");
+        require(isSBTReceiver(_to, _role, SERIE_ID), "ResiSBT: INVALID SBT RECEIVER");
     }
 
     /**
@@ -208,11 +226,6 @@ contract ResiSBT is IResiSBT, IERC5192, OwnableUpgradeable, ERC721URIStorageUpgr
 
     function safeTransferFrom(address, address, uint256, bytes memory) public pure override {
         revert TransferForbidden("ResiSBT: NO TRANSFER FROM ALLOWED");
-    }
-
-    modifier onlyRegistry() {
-        require(_msgSender() == RESI_REGISTRY, "ResiSBT: INVALID REGISTRY ADDRESS");
-        _;
     }
 
     modifier onlyResiToken() {

@@ -67,10 +67,6 @@ describe('Resi Token initial', () => {
       expect(expectedRoleCount).to.be.equal(roleCount)
     })
 
-    it('Is sbt receiver should return false', async () => {
-      expect(await ResiToken.isSBTReceiver(await user.getAddress(), MENTOR_ROLE, 0)).to.be.false
-    })
-
     it('Should not add mentor', async () => {
       const fakeProject = keccak256(toUtf8Bytes('Fake project'))
       await expect(ResiToken.addMentor(await user.getAddress(), 0, fakeProject)).to.be.revertedWith(
@@ -191,7 +187,7 @@ describe('Inteface', async () => {
   })
 
   it('Is SBT Reciever should return true for added mentor', async () => {
-    expect(await ResiToken.isSBTReceiver(await user.getAddress(), MENTOR_ROLE, '1')).to.be.true
+    expect(await ResiSBT.isSBTReceiver(await user.getAddress(), MENTOR_ROLE, '1')).to.be.true
   })
 
   it('Should allow to remove mentor', async () => {
@@ -309,9 +305,34 @@ describe('Inteface', async () => {
     expect(newSbtResiTokenBalance).to.be.equal(amountToAward)
   })
 
-  xit('Award to someone with SBT should not mint a new one', async () => {
+  it('Award to someone with SBT should not mint a new one', async () => {
     //GIVEN
+    const userToAward = await user.getAddress()
+    const amountToAward = '20000'
+    const sbtBalance = await ResiSBT.balanceOf(userToAward)
+    const resiTokenBalance = await ResiToken.balanceOf(userToAward)
+    const serieResiMinted = await ResiRegistry.getSerieSupply('1')
+    const sbtResiTokenBalance = await ResiSBT.resiTokenBalances(userToAward)
+
     //WHEN
+    await expect(ResiToken.award(await user.getAddress(), MENTOR_ROLE, amountToAward))
+      .to.emit(ResiToken, 'ResiMinted')
+      .withArgs(userToAward, amountToAward)
+
+    const newSbtBalance = await ResiSBT.balanceOf(userToAward)
+    const newResiTokenBalance = await ResiToken.balanceOf(userToAward)
+    const newSerieResiMinted = await ResiRegistry.getSerieSupply('1')
+    const newSbtResiTokenBalance = await ResiSBT.resiTokenBalances(userToAward)
+
     //THEN
+    expect(sbtBalance).to.be.equal('1')
+    expect(resiTokenBalance).to.be.equal('20000')
+    expect(serieResiMinted).to.be.equal('20000')
+    expect(sbtResiTokenBalance).to.be.equal('20000')
+
+    expect(newSbtBalance).to.be.equal('1')
+    expect(newResiTokenBalance).to.be.equal('40000')
+    expect(newSerieResiMinted).to.be.equal('40000')
+    expect(newSbtResiTokenBalance).to.be.equal('40000')
   })
 })
