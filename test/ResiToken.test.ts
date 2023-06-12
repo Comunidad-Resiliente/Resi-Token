@@ -336,3 +336,29 @@ describe('Inteface', async () => {
     expect(newSbtResiTokenBalance).to.be.equal('40000')
   })
 })
+
+describe('Finish serie', async () => {
+  let deployer: Signer
+  let user: Signer, userTwo: Signer, userThree: Signer
+  let treasury: string
+  let invalidSigner: Signer
+  let ResiRegistry: ResiRegistry
+  let ResiToken: ResiToken
+  let ResiSBT: ResiSBT
+
+  before(async () => {
+    const accounts = await getNamedAccounts()
+    const signers = await ethers.getSigners()
+    deployer = await ethers.getSigner(accounts.deployer)
+    user = await ethers.getSigner(accounts.user)
+    treasury = accounts.treasury
+    invalidSigner = signers[18]
+    userTwo = signers[17]
+    userThree = signers[16]
+
+    const {ResiRegistryContract, ResiTokenContract, ResiSBTContract} = await getManualEnvironemntInitialization()
+    ResiRegistry = ResiRegistryContract
+    ResiToken = ResiTokenContract
+    ResiSBT = ResiSBTContract
+  })
+})

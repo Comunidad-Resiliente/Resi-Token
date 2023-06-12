@@ -18,6 +18,7 @@ interface IResiToken {
     event ResiBuilderAdded(address indexed resiBuilder);
     event ResiRoleRemoved(bytes32 _role, address indexed _user);
     event ResiMinted(address indexed account, uint256 amount);
+    event ResiBurnt(address indexed account, uint256 amount);
     event Exit(address indexed account, uint256 _amount, uint256 _serieId);
 
     error InvalidAddress(address);

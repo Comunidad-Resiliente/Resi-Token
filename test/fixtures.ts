@@ -113,3 +113,50 @@ export const getManualEnvironemntInitialization = async () => {
     MockERC20TokenContract
   }
 }
+
+export const getEndingSerieEnvironmentInitialization = async () => {
+  const {ResiTokenContract, ResiRegistryContract, ResiVaultContract, ResiSBTContract, MockERC20TokenContract} =
+    await resiManualFixture()
+  const SerieToBeCreated = await getMockSerie()
+
+  //CREATE SERIE
+  await ResiRegistryContract.createSerie(
+    SerieToBeCreated.startDate,
+    SerieToBeCreated.endDate,
+    SerieToBeCreated.numberOfProjects,
+    SerieToBeCreated.maxSupply,
+    ResiVaultContract.address
+  )
+
+  //SET DEFAULT SBTs URIS
+  await ResiSBTContract.setDefaultRoleUri(MENTOR_ROLE, 'https://ipfs-metor-role')
+  await ResiSBTContract.setDefaultRoleUri(RESI_BUILDER_ROLE, 'https://ipfs-resi-builder-role')
+  await ResiSBTContract.setDefaultRoleUri(PROJECT_BUILDER_ROLE, 'https://ipfs-project-builder-role')
+
+  //REGISTER SERIE SBT
+  await ResiRegistryContract.registerSerieSBT(ResiSBTContract.address)
+
+  //SET RESI TOKEN
+  await ResiRegistryContract.setResiToken(ResiTokenContract.address)
+
+  //REGISTER PROJECTS
+  await ResiRegistryContract.addProjects([PROJECT_ONE, PROJECT_TWO, PROJECT_THREE])
+
+  //ASSIGN MENTORS
+
+  //ASSIGN PROJECT BUILDERS
+
+  //ASSIGN RESI BUILDERS
+
+  //ADD FUNDS TO RESI VAULT
+
+  //ADVANCE TIME TO END SERIE
+
+  return {
+    ResiTokenContract,
+    ResiRegistryContract,
+    ResiVaultContract,
+    ResiSBTContract,
+    MockERC20TokenContract
+  }
+}
