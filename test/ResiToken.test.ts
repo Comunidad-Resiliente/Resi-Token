@@ -1,6 +1,6 @@
 import {expect} from 'chai'
 import {ethers, getNamedAccounts} from 'hardhat'
-import {getManualEnvironemntInitialization, resiMainFixture} from './fixtures'
+import {getEndingSerieEnvironmentInitialization, getManualEnvironemntInitialization, resiMainFixture} from './fixtures'
 import {Signer} from 'ethers'
 import {ResiRegistry, ResiSBT, ResiToken} from '../typechain-types'
 import {
@@ -356,9 +356,26 @@ describe('Finish serie', async () => {
     userTwo = signers[17]
     userThree = signers[16]
 
-    const {ResiRegistryContract, ResiTokenContract, ResiSBTContract} = await getManualEnvironemntInitialization()
+    const {ResiRegistryContract, ResiTokenContract, ResiSBTContract} = await getEndingSerieEnvironmentInitialization()
     ResiRegistry = ResiRegistryContract
     ResiToken = ResiTokenContract
     ResiSBT = ResiSBTContract
   })
+
+  it('Active serie should return same value though it is closed', async () => {
+    expect(await ResiRegistry.activeSerie()).to.be.equal('1')
+  })
+
+  it('Get serie state should return is not active', async () => {
+    //GIVEN  //WHEN
+    const serieState = await ResiRegistry.getSerieState('1')
+    //THEN
+    expect(serieState[0]).to.be.false
+  })
+
+  it('Should return exit current quote', async () => {})
+
+  it('Should allow to perform an exit', async () => {})
+
+  it('Should not allow to make new exit if user has already make one', async () => {})
 })
