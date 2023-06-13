@@ -2,7 +2,7 @@ import {expect} from 'chai'
 import {ethers, getNamedAccounts} from 'hardhat'
 import {getEndingSerieEnvironmentInitialization, getManualEnvironemntInitialization, resiMainFixture} from './fixtures'
 import {Signer} from 'ethers'
-import {ResiRegistry, ResiSBT, ResiToken} from '../typechain-types'
+import {MockERC20, ResiRegistry, ResiSBT, ResiToken, ResiVault} from '../typechain-types'
 import {
   ADMIN_ROLE,
   MENTOR_ROLE,
@@ -339,12 +339,14 @@ describe('Inteface', async () => {
 
 describe('Finish serie', async () => {
   let deployer: Signer
-  let user: Signer, userTwo: Signer, userThree: Signer
+  let user: Signer
   let treasury: string
   let invalidSigner: Signer
   let ResiRegistry: ResiRegistry
   let ResiToken: ResiToken
   let ResiSBT: ResiSBT
+  let ResiVault: ResiVault
+  let MockERC20Token: MockERC20
 
   before(async () => {
     const accounts = await getNamedAccounts()
@@ -352,14 +354,14 @@ describe('Finish serie', async () => {
     deployer = await ethers.getSigner(accounts.deployer)
     user = await ethers.getSigner(accounts.user)
     treasury = accounts.treasury
-    invalidSigner = signers[18]
-    userTwo = signers[17]
-    userThree = signers[16]
 
-    const {ResiRegistryContract, ResiTokenContract, ResiSBTContract} = await getEndingSerieEnvironmentInitialization()
+    const {ResiRegistryContract, ResiTokenContract, ResiSBTContract, ResiVaultContract, MockERC20TokenContract} =
+      await getEndingSerieEnvironmentInitialization()
     ResiRegistry = ResiRegistryContract
     ResiToken = ResiTokenContract
     ResiSBT = ResiSBTContract
+    ResiVault = ResiVaultContract
+    MockERC20Token = MockERC20TokenContract
   })
 
   it('Active serie should return same value though it is closed', async () => {
@@ -373,9 +375,42 @@ describe('Finish serie', async () => {
     expect(serieState[0]).to.be.false
   })
 
-  it('Should return exit current quote', async () => {})
+  /**
+   * Vault - > 1000USD
+   * Serie supply -> 182 USD
+   * User -> 20 USD
+   * 1000 / 182 ~= 5 * 20 = 1000
+   */
+  it('Should return exit current quote', async () => {
+    //GIVEN
+    const user = await (await ethers.getSigners())[19].getAddress()
+    const userResiTokenBalance = await ResiSBT.resiTokenBalances(user)
+    const serieSupply = await ResiRegistry.getSerieSupply('1')
+    const vaultTokenBalance = await MockERC20Token.balanceOf(ResiVault.address)
 
-  it('Should allow to perform an exit', async () => {})
+    //WHEN
+    const exitQuote = await ResiVault.getCurrentExitQuote(userResiTokenBalance)
 
-  it('Should not allow to make new exit if user has already make one', async () => {})
+    //THEN
+    expect(ethers.utils.formatEther(userResiTokenBalance.toString())).to.be.equal('20.0')
+    expect(ethers.utils.formatEther(serieSupply.toString())).to.be.equal('182.0')
+    expect(ethers.utils.formatEther(vaultTokenBalance.toString())).to.be.equal('1000.0')
+    expect(ethers.utils.formatEther(exitQuote.toString())).to.be.equal('100.0')
+  })
+
+  it('Should allow to perform an exit', async () => {
+    //GIVEN
+    const user = (await ethers.getSigners())[19]
+    const userTokenBalance = await MockERC20Token.balanceOf(await user.getAddress())
+    //WHEN
+    expect(await ResiToken.connect(user).exit('1', MENTOR_ROLE))
+      .to.emit(ResiToken, 'Exit')
+      .withArgs(await user.getAddress(), '20', '1')
+    const newUserTokenBalance = await MockERC20Token.balanceOf(await user.getAddress())
+    //THEN
+    expect(userTokenBalance).to.be.equal('0')
+    expect(newUserTokenBalance).to.be.equal('5')
+  })
+
+  xit('Should not allow to make new exit if user has already make one', async () => {})
 })
