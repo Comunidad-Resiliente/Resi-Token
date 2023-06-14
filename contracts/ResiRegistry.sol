@@ -17,8 +17,8 @@ contract ResiRegistry is IResiRegistry, OwnableUpgradeable, ReentrancyGuardUpgra
     /// @dev Resi token address
     address public RESI_TOKEN;
 
-    /// @dev Treasury vault address
-    address public TREASURY_VAULT;
+    /// @dev Global Treasury vault address handled by admin protocol
+    address private TREASURY_VAULT;
 
     /// @dev current serie running
     uint256 private activeSerieId;
@@ -105,6 +105,10 @@ contract ResiRegistry is IResiRegistry, OwnableUpgradeable, ReentrancyGuardUpgra
      */
     function getSerieSupply(uint256 _serieId) external view returns (uint256) {
         return series[_serieId].currentSupply;
+    }
+
+    function getTreasuryVault() external view returns (address) {
+        return TREASURY_VAULT;
     }
 
     /**************************** INTERFACE  ****************************/

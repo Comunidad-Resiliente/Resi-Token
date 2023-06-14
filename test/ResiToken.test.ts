@@ -1,8 +1,8 @@
 import {expect} from 'chai'
 import {ethers, getNamedAccounts} from 'hardhat'
-import {getManualEnvironemntInitialization, resiMainFixture} from './fixtures'
+import {getEndingSerieEnvironmentInitialization, getManualEnvironemntInitialization, resiMainFixture} from './fixtures'
 import {Signer} from 'ethers'
-import {ResiRegistry, ResiSBT, ResiToken} from '../typechain-types'
+import {MockERC20, ResiRegistry, ResiSBT, ResiToken, ResiVault} from '../typechain-types'
 import {
   ADMIN_ROLE,
   MENTOR_ROLE,
@@ -334,5 +334,99 @@ describe('Inteface', async () => {
     expect(newResiTokenBalance).to.be.equal('40000')
     expect(newSerieResiMinted).to.be.equal('40000')
     expect(newSbtResiTokenBalance).to.be.equal('40000')
+  })
+
+  it('Should not allow to make exit if serie still active', async () => {
+    await expect(ResiToken.connect(user).exit('1', MENTOR_ROLE)).to.be.revertedWith('ResiRegistry: SERIE STILL ACTIVE')
+  })
+})
+
+describe('Finish serie', async () => {
+  let deployer: Signer
+  let user: Signer
+  let treasury: string
+  let invalidSigner: Signer
+  let ResiRegistry: ResiRegistry
+  let ResiToken: ResiToken
+  let ResiSBT: ResiSBT
+  let ResiVault: ResiVault
+  let MockERC20Token: MockERC20
+
+  before(async () => {
+    const accounts = await getNamedAccounts()
+    const signers = await ethers.getSigners()
+    deployer = await ethers.getSigner(accounts.deployer)
+    user = await ethers.getSigner(accounts.user)
+    treasury = accounts.treasury
+
+    const {ResiRegistryContract, ResiTokenContract, ResiSBTContract, ResiVaultContract, MockERC20TokenContract} =
+      await getEndingSerieEnvironmentInitialization()
+    ResiRegistry = ResiRegistryContract
+    ResiToken = ResiTokenContract
+    ResiSBT = ResiSBTContract
+    ResiVault = ResiVaultContract
+    MockERC20Token = MockERC20TokenContract
+  })
+
+  it('Active serie should return same value though it is closed', async () => {
+    expect(await ResiRegistry.activeSerie()).to.be.equal('1')
+  })
+
+  it('Get serie state should return is not active', async () => {
+    //GIVEN  //WHEN
+    const serieState = await ResiRegistry.getSerieState('1')
+    //THEN
+    expect(serieState[0]).to.be.false
+  })
+
+  /**
+   * Vault - > 1000USD
+   * Serie supply -> 182 USD
+   * User -> 20 USD
+   * 1000 / 182 ~= 5 * 20 = 1000
+   */
+  it('Should return exit current quote', async () => {
+    //GIVEN
+    const user = await (await ethers.getSigners())[19].getAddress()
+    const userResiTokenBalance = await ResiSBT.resiTokenBalances(user)
+    const serieSupply = await ResiRegistry.getSerieSupply('1')
+    const vaultTokenBalance = await MockERC20Token.balanceOf(ResiVault.address)
+
+    //WHEN
+    const exitQuote = await ResiVault.getCurrentExitQuote(userResiTokenBalance)
+
+    //THEN
+    expect(ethers.utils.formatEther(userResiTokenBalance.toString())).to.be.equal('20.0')
+    expect(ethers.utils.formatEther(serieSupply.toString())).to.be.equal('182.0')
+    expect(ethers.utils.formatEther(vaultTokenBalance.toString())).to.be.equal('1000.0')
+    expect(ethers.utils.formatEther(exitQuote.toString())).to.be.equal('100.0')
+  })
+
+  it('Should allow to perform an exit', async () => {
+    //GIVEN
+    const user = (await ethers.getSigners())[19]
+    const userTokenBalance = await MockERC20Token.balanceOf(await user.getAddress())
+    //WHEN
+    expect(await ResiToken.connect(user).exit('1', MENTOR_ROLE))
+      .to.emit(ResiToken, 'Exit')
+      .withArgs(await user.getAddress(), '20', '1')
+    const newUserTokenBalance = await MockERC20Token.balanceOf(await user.getAddress())
+    //THEN
+    expect(userTokenBalance).to.be.equal('0')
+    expect(newUserTokenBalance).to.be.equal(ethers.utils.parseEther('100'))
+  })
+
+  it('Should not allow to make new exit if user has already make one', async () => {
+    await expect(ResiToken.connect((await ethers.getSigners())[19]).exit('1', MENTOR_ROLE)).to.be.revertedWith(
+      'ResiToken: User HAS NO FUNDS TO EXIT'
+    )
+  })
+
+  it('Should allow to burn if is treasury or admin role', async () => {
+    /**
+     * This is possible because deployer is also the treasury vault address
+     **
+     **/
+    await ResiToken['burn(uint256,uint256)'](ethers.utils.parseEther('20'), '1')
   })
 })

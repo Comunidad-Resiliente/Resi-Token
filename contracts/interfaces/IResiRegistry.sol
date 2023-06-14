@@ -54,6 +54,8 @@ interface IResiRegistry {
 
     function getSBTSerie(uint256 _serieId) external view returns (address);
 
+    function getTreasuryVault() external view returns (address);
+
     function withdrawFromVault(uint256 _serieId, uint256 _amount, address _to) external;
 
     /// @notice Emitted when the Registry is initialized.

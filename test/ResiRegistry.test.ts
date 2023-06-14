@@ -109,9 +109,6 @@ describe('Resi Registry', () => {
     expect(newResiAddress).to.be.equal(resiAddressToSet)
   })
 
-  //TODO: REVIEW TREASURY VAULT FUNCTIONALITY
-  xit('Should not allow to set an invalid treasury vault', async () => {})
-
   it('Should not allow add project to an invalid serie', async () => {
     //GIVEN
     const fakeProjectName = keccak256(toUtf8Bytes('Fake project'))
@@ -206,12 +203,12 @@ describe('Resi Registry', () => {
   it('Should allow to set treasury vault', async () => {
     //GIVEN
     const treasuryVaultToSet = await treasuryVault.getAddress()
-    const curentTreasuryVault = await ResiRegistry.TREASURY_VAULT()
+    const curentTreasuryVault = await ResiRegistry.getTreasuryVault()
     //WHEN
     expect(await ResiRegistry.setTreasuryVault(await treasuryVault.getAddress()))
       .to.emit(ResiRegistry, 'TreasuryVaultSet')
       .withArgs(treasuryVaultToSet)
-    const newTreasuryVault = await ResiRegistry.TREASURY_VAULT()
+    const newTreasuryVault = await ResiRegistry.getTreasuryVault()
     //THEN
     expect(curentTreasuryVault).to.be.equal(ethers.constants.AddressZero)
     expect(newTreasuryVault).to.be.equal(treasuryVaultToSet)

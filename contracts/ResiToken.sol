@@ -162,15 +162,26 @@ contract ResiToken is
     function exit(uint256 _serieId, bytes32 _role) external nonReentrant {
         _checkExit(_role);
         address SERIE_SBT = IResiRegistry(RESI_REGISTRY).getSBTSerie(_serieId);
-        require(SERIE_SBT != address(0), "NO SBT SERIE SET");
-        uint256 resiSerieBalance = IERC20(SERIE_SBT).balanceOf(_msgSender());
+        require(SERIE_SBT != address(0), "ResiToken: NO SBT SERIE SET");
+        require(IERC20(SERIE_SBT).balanceOf(_msgSender()) == 1, "ResiToken: USER HAS NO SBT");
+        uint256 resiSerieBalance = this.balanceOf(_msgSender());
 
         IResiRegistry(RESI_REGISTRY).withdrawFromVault(_serieId, resiSerieBalance, _msgSender());
-        IResiRegistry(RESI_REGISTRY).decreaseSerieSupply(_serieId, resiSerieBalance);
         IResiSBT(SERIE_SBT).decreaseResiTokenBalance(_msgSender(), resiSerieBalance);
-        _transfer(_msgSender(), address(this), resiSerieBalance);
+        _transfer(_msgSender(), IResiRegistry(RESI_REGISTRY).getTreasuryVault(), resiSerieBalance);
 
         emit Exit(_msgSender(), resiSerieBalance, _serieId);
+    }
+
+    /**
+     *
+     * @param _amount amount to burn
+     */
+    function burn(uint256 _amount, uint256 _serieId) external {
+        require(hasRole(TREASURY_ROLE, _msgSender()) || hasRole(ADMIN_ROLE, _msgSender()), "ResiToken: INVALID ROLE");
+        ERC20BurnableUpgradeable.burn(_amount);
+        IResiRegistry(RESI_REGISTRY).decreaseSerieSupply(_serieId, _amount);
+        emit ResiBurnt(_msgSender(), _amount);
     }
 
     /**************************** INTERNALS  ****************************/
@@ -188,9 +199,9 @@ contract ResiToken is
     }
 
     function _checkExit(bytes32 _role) internal view {
-        require(_role != TREASURY_ROLE, "ResiToken: INVALID ACTION");
+        require(_role != TREASURY_ROLE && _role != ADMIN_ROLE, "ResiToken: INVALID ACTION");
         require(hasRole(_role, _msgSender()), "ResiToken: ACCOUNT HAS NOT VALID ROLE");
-        require(balanceOf(_msgSender()) > 0, "ResiToken: NO BALANCE");
+        require(balanceOf(_msgSender()) > 0, "ResiToken: User HAS NO FUNDS TO EXIT");
     }
 
     function _beforeTokenTransfer(
