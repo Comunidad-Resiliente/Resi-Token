@@ -106,8 +106,8 @@ yarn size
 ### Roadmap
 
 - [x] Development
-- [] Test >= 90% (Current coverage ~60%)
-- [] Deploy to testnet mumbai
+- [x] Test coverage >= 90%
+- [x] Deploy to testnet mumbai
 - [] Development of associated subgraphs
 - [] Front end develpment
 - [] SC Auditory

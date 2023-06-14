@@ -335,6 +335,10 @@ describe('Inteface', async () => {
     expect(newSerieResiMinted).to.be.equal('40000')
     expect(newSbtResiTokenBalance).to.be.equal('40000')
   })
+
+  it('Should not allow to make exit if serie still active', async () => {
+    await expect(ResiToken.connect(user).exit('1', MENTOR_ROLE)).to.be.revertedWith('ResiRegistry: SERIE STILL ACTIVE')
+  })
 })
 
 describe('Finish serie', async () => {
@@ -409,8 +413,20 @@ describe('Finish serie', async () => {
     const newUserTokenBalance = await MockERC20Token.balanceOf(await user.getAddress())
     //THEN
     expect(userTokenBalance).to.be.equal('0')
-    expect(newUserTokenBalance).to.be.equal('5')
+    expect(newUserTokenBalance).to.be.equal(ethers.utils.parseEther('100'))
   })
 
-  xit('Should not allow to make new exit if user has already make one', async () => {})
+  it('Should not allow to make new exit if user has already make one', async () => {
+    await expect(ResiToken.connect((await ethers.getSigners())[19]).exit('1', MENTOR_ROLE)).to.be.revertedWith(
+      'ResiToken: User HAS NO FUNDS TO EXIT'
+    )
+  })
+
+  it('Should allow to burn if is treasury or admin role', async () => {
+    /**
+     * This is possible because deployer is also the treasury vault address
+     **
+     **/
+    await ResiToken['burn(uint256,uint256)'](ethers.utils.parseEther('20'), '1')
+  })
 })

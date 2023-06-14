@@ -145,6 +145,9 @@ export const getEndingSerieEnvironmentInitialization = async () => {
   //REGISTER PROJECTS
   await ResiRegistryContract.addProjects([PROJECT_ONE, PROJECT_TWO, PROJECT_THREE])
 
+  //SET TREASURY VAULT ADDRESS
+  await ResiRegistryContract.setTreasuryVault(await signers[0].getAddress())
+
   //ASSIGN MENTORS (ONE PER PROJECT)
   const mentors = [await signers[19].getAddress(), await signers[18].getAddress(), await signers[17].getAddress()]
   await ResiTokenContract.addRolesBatch(MENTOR_ROLE, mentors)
