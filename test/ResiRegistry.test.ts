@@ -373,7 +373,7 @@ describe('Resi Registry administration', () => {
   it('Added project should return is valid', async () => {
     expect(await ResiRegistry['isValidProject(bytes32)'](PROJECT_TWO)).to.be.true
   })
-
+  
   it('Should not add project if invalid name', async () => {
     await expect(ResiRegistry.addProject(ethers.utils.formatBytes32String(''))).to.be.revertedWith(
       'ResiRegistry: INVALID NAME'

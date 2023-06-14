@@ -224,7 +224,7 @@ contract ResiToken is
         );
         _;
     }
-
+    
     // Leave a gap betweeen inherited contracts variables in order
     // to be able to add more variables in them later.
     uint256[20] private upgradeGap;

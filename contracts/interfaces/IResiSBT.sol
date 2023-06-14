@@ -13,7 +13,6 @@ interface IResiSBT {
     function mintByResiToken(address _to, bytes32 _role) external;
 
     function isSBTReceiver(address _account, bytes32 _role, uint256 _serieId) external view returns (bool);
-
     function increaseResiTokenBalance(address _to, uint256 _amount) external;
 
     function decreaseResiTokenBalance(address _to, uint256 _amount) external;

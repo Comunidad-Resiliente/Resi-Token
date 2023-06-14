@@ -8,7 +8,6 @@ const ERC20Abi = ['function balanceOf(address owner) view returns (uint256)']
 export const advanceBlock = () => {
   return ethers.provider.send('evm_mine', [])
 }
-
 export const getBlockTimestamp = async () => {
   const block = await ethers.provider.getBlock('latest')
   return BigNumber.from(block.timestamp)
