@@ -9,6 +9,6 @@ contract MockERC20 is ERC20 {
     }
 
     function mint() external {
-        _mint(msg.sender, 10 ether);
+        _mint(msg.sender, 10000000 ether);
     }
 }

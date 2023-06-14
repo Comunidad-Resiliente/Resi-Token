@@ -10,7 +10,7 @@ import {PROJECT_ONE} from './constants'
 import {PROJECT_TWO} from './constants'
 
 describe('Resi Registry', () => {
-  let deployer: Signer
+  let deployer: Signer, treasuryVault: Signer
   let invalidSigner: Signer
   let ResiRegistry: ResiRegistry
 
@@ -18,6 +18,7 @@ describe('Resi Registry', () => {
     const accounts = await getNamedAccounts()
     const signers = await ethers.getSigners()
     deployer = await ethers.getSigner(accounts.deployer)
+    treasuryVault = await ethers.getSigner(accounts.treasury)
     invalidSigner = signers[18]
   })
 
@@ -108,9 +109,6 @@ describe('Resi Registry', () => {
     expect(newResiAddress).to.be.equal(resiAddressToSet)
   })
 
-  //TODO: REVIEW TREASURY VAULT FUNCTIONALITY
-  xit('Should not allow to set an invalid treasury vault', async () => {})
-
   it('Should not allow add project to an invalid serie', async () => {
     //GIVEN
     const fakeProjectName = keccak256(toUtf8Bytes('Fake project'))
@@ -188,6 +186,32 @@ describe('Resi Registry', () => {
     await expect(ResiRegistry.connect(invalidSigner).closeSerie()).to.be.revertedWith(
       'Ownable: caller is not the owner'
     )
+  })
+
+  it('Should not allow to set treasury vault to anyone', async () => {
+    await expect(
+      ResiRegistry.connect(invalidSigner).setTreasuryVault(await invalidSigner.getAddress())
+    ).to.be.revertedWith('Ownable: caller is not the owner')
+  })
+
+  it('Should not allow to set treasury vault invalid address', async () => {
+    await expect(ResiRegistry.setTreasuryVault(ethers.constants.AddressZero)).to.be.revertedWith(
+      'ResiRegistry: INVALID VAULT ADDRESS'
+    )
+  })
+
+  it('Should allow to set treasury vault', async () => {
+    //GIVEN
+    const treasuryVaultToSet = await treasuryVault.getAddress()
+    const curentTreasuryVault = await ResiRegistry.getTreasuryVault()
+    //WHEN
+    expect(await ResiRegistry.setTreasuryVault(await treasuryVault.getAddress()))
+      .to.emit(ResiRegistry, 'TreasuryVaultSet')
+      .withArgs(treasuryVaultToSet)
+    const newTreasuryVault = await ResiRegistry.getTreasuryVault()
+    //THEN
+    expect(curentTreasuryVault).to.be.equal(ethers.constants.AddressZero)
+    expect(newTreasuryVault).to.be.equal(treasuryVaultToSet)
   })
 })
 
@@ -306,6 +330,10 @@ describe('Resi Registry administration', () => {
     expect(serieVault).to.be.equal(ResiVault.address)
   })
 
+  it('Should return zero address for sbt serie', async () => {
+    expect(await ResiRegistry['getSBTSerie(uint256)'](1)).to.be.equal(ethers.constants.AddressZero)
+  })
+
   it('Should not create serie if ongoing serie', async () => {
     const getLastBlock = await getBlockTimestamp()
     await expect(
@@ -342,6 +370,10 @@ describe('Resi Registry administration', () => {
       .withArgs(projectToAdd, activeSerie)
   })
 
+  it('Added project should return is valid', async () => {
+    expect(await ResiRegistry['isValidProject(bytes32)'](PROJECT_TWO)).to.be.true
+  })
+  
   it('Should not add project if invalid name', async () => {
     await expect(ResiRegistry.addProject(ethers.utils.formatBytes32String(''))).to.be.revertedWith(
       'ResiRegistry: INVALID NAME'

@@ -22,5 +22,8 @@ export const SBTConfig = {
     SERIE_ID: 1,
     CONTRACT_URI: 'localhost:3000'
   },
-  80001: {}
+  80001: {
+    SERIE_ID: 1,
+    CONTRACT_URI: 'ipfs://bafkreiekwh56q64cau7xbcc5vcnvv4ooktop5qotl3ebl22xvix2hppjry'
+  }
 }

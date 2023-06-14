@@ -80,13 +80,6 @@ contract ResiToken is
         return _rolesSet.length();
     }
 
-    function isSBTReceiver(address _account, bytes32 _role, uint256 _serieId) external view returns (bool) {
-        if (hasRole(_role, _account) && IResiRegistry(RESI_REGISTRY).activeSerie() == _serieId) {
-            return true;
-        }
-        return false;
-    }
-
     /**************************** INTERFACE  ****************************/
 
     function addMentor(
@@ -99,13 +92,6 @@ contract ResiToken is
         emit MentorAdded(_mentor, _project);
     }
 
-    function removeMentor(
-        address _mentor
-    ) external isValidAddress(_mentor, "ResiToken: INVALID MENTOR ADDRESS") onlyRole(ADMIN_ROLE) whenNotPaused {
-        _revokeRole(MENTOR_ROLE, _mentor);
-        emit MentorRemoved(_mentor);
-    }
-
     function addProjectBuilder(
         address _builder,
         uint256 _serieId,
@@ -116,13 +102,6 @@ contract ResiToken is
         emit ProjectBuilderAdded(_builder);
     }
 
-    function removeProjectBuilder(
-        address _builder
-    ) external isValidAddress(_builder, "ResiToken: INVALID BUILDER ADDRESS") onlyRole(ADMIN_ROLE) whenNotPaused {
-        _revokeRole(PROJECT_BUILDER_ROLE, _builder);
-        emit ProjectBuilderRemoved(_builder);
-    }
-
     function addResiBuilder(
         address _builder
     ) external isValidAddress(_builder, "ResiToken: INVALID BUILDER ADDRESS") onlyRole(ADMIN_ROLE) whenNotPaused {
@@ -130,15 +109,22 @@ contract ResiToken is
         emit ResiBuilderAdded(_builder);
     }
 
-    function removeResiBuilder(
-        address _builder
-    ) external isValidAddress(_builder, "ResiToken: INVALID BUILDER ADDRESS") onlyRole(ADMIN_ROLE) {
-        _revokeRole(RESI_BUILDER_ROLE, _builder);
-        emit ResiBuilderRemoved(_builder);
-    }
-
     function addRolesBatch(bytes32 _role, address[] memory _addresses) external onlyRole(ADMIN_ROLE) whenNotPaused {
         _addRolesBatch(_role, _addresses);
+    }
+
+    function removeUserRole(
+        bytes32 _role,
+        address _user
+    )
+        external
+        isValidAddress(_user, "ResiToken: INVALID USER ADDRESS")
+        validRole(_role)
+        onlyRole(ADMIN_ROLE)
+        whenNotPaused
+    {
+        _revokeRole(_role, _user);
+        emit ResiRoleRemoved(_role, _user);
     }
 
     function _checkSerieAndProject(uint256 _serieId, bytes32 _project) internal view onlyRole(ADMIN_ROLE) {
@@ -176,23 +162,34 @@ contract ResiToken is
     function exit(uint256 _serieId, bytes32 _role) external nonReentrant {
         _checkExit(_role);
         address SERIE_SBT = IResiRegistry(RESI_REGISTRY).getSBTSerie(_serieId);
-        require(SERIE_SBT != address(0), "NO SBT SERIE SET");
-        uint256 resiSerieBalance = IERC20(SERIE_SBT).balanceOf(_msgSender());
+        require(SERIE_SBT != address(0), "ResiToken: NO SBT SERIE SET");
+        require(IERC20(SERIE_SBT).balanceOf(_msgSender()) == 1, "ResiToken: USER HAS NO SBT");
+        uint256 resiSerieBalance = this.balanceOf(_msgSender());
 
         IResiRegistry(RESI_REGISTRY).withdrawFromVault(_serieId, resiSerieBalance, _msgSender());
-        IResiRegistry(RESI_REGISTRY).decreaseSerieSupply(_serieId, resiSerieBalance);
         IResiSBT(SERIE_SBT).decreaseResiTokenBalance(_msgSender(), resiSerieBalance);
-        _transfer(_msgSender(), address(this), resiSerieBalance);
-
-        //BURN ????? TO ASK
+        _transfer(_msgSender(), IResiRegistry(RESI_REGISTRY).getTreasuryVault(), resiSerieBalance);
 
         emit Exit(_msgSender(), resiSerieBalance, _serieId);
     }
 
+    /**
+     *
+     * @param _amount amount to burn
+     */
+    function burn(uint256 _amount, uint256 _serieId) external {
+        require(hasRole(TREASURY_ROLE, _msgSender()) || hasRole(ADMIN_ROLE, _msgSender()), "ResiToken: INVALID ROLE");
+        ERC20BurnableUpgradeable.burn(_amount);
+        IResiRegistry(RESI_REGISTRY).decreaseSerieSupply(_serieId, _amount);
+        emit ResiBurnt(_msgSender(), _amount);
+    }
+
     /**************************** INTERNALS  ****************************/
 
-    function _addRolesBatch(bytes32 role, address[] memory _addresses) internal onlyRole(ADMIN_ROLE) whenNotPaused {
-        require(role == MENTOR_ROLE || role == PROJECT_BUILDER_ROLE || role == RESI_BUILDER_ROLE, "RINVALID ROLE");
+    function _addRolesBatch(
+        bytes32 role,
+        address[] memory _addresses
+    ) internal onlyRole(ADMIN_ROLE) validRole(role) whenNotPaused {
         for (uint8 i = 0; i < _addresses.length; i++) {
             if (_addresses[i] == address(0)) {
                 revert InvalidAddress(_addresses[i]);
@@ -202,9 +199,9 @@ contract ResiToken is
     }
 
     function _checkExit(bytes32 _role) internal view {
-        require(_role != TREASURY_ROLE, "ResiToken: INVALID ACTION");
+        require(_role != TREASURY_ROLE && _role != ADMIN_ROLE, "ResiToken: INVALID ACTION");
         require(hasRole(_role, _msgSender()), "ResiToken: ACCOUNT HAS NOT VALID ROLE");
-        require(balanceOf(_msgSender()) > 0, "ResiToken: NO BALANCE");
+        require(balanceOf(_msgSender()) > 0, "ResiToken: User HAS NO FUNDS TO EXIT");
     }
 
     function _beforeTokenTransfer(
@@ -220,6 +217,14 @@ contract ResiToken is
         _;
     }
 
+    modifier validRole(bytes32 _role) {
+        require(
+            _role == MENTOR_ROLE || _role == PROJECT_BUILDER_ROLE || _role == RESI_BUILDER_ROLE,
+            "ResiToken: INVALID ROLE"
+        );
+        _;
+    }
+    
     // Leave a gap betweeen inherited contracts variables in order
     // to be able to add more variables in them later.
     uint256[20] private upgradeGap;
