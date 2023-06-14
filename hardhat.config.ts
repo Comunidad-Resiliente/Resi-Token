@@ -24,7 +24,9 @@ const config: HardhatUserConfig = {
   networks,
   namedAccounts,
   etherscan: {
-    apiKey: process.env.ETHERSCAN_API_KEY
+    apiKey: {
+      polygonMumbai: process.env.MUMBAI_ETHERSCAN_API_KEY ? process.env.MUMBAI_ETHERSCAN_API_KEY : ''
+    }
   },
   abiExporter: {
     path: './abis',
