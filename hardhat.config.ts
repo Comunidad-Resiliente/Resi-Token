@@ -9,12 +9,14 @@ import {tasks as AdminSerieTasks} from './tasks/adminSerie'
 import {tasks as AddProjectTasks} from './tasks/addProject'
 import {tasks as DisableProjectTask} from './tasks/disableProject'
 import {tasks as CreateSerieTask} from './tasks/createSerie'
+import {tasks as DeploySBTTask} from './tasks/deployResiSBT'
 
 AdminRegistryTasks()
 AdminSerieTasks()
 AddProjectTasks()
 DisableProjectTask()
 CreateSerieTask()
+DeploySBTTask()
 
 import networks from './hardhat.networks'
 import namedAccounts from './hardhat.accounts'
