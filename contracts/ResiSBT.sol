@@ -194,6 +194,15 @@ contract ResiSBT is IResiSBT, IERC5192, OwnableUpgradeable, ERC721URIStorageUpgr
         _decreaseResiTokenBalance(_to, _amount);
     }
 
+    function supportsInterface(bytes4 interfaceId) public view override(ERC721Upgradeable) returns (bool) {
+        return super.supportsInterface(interfaceId);
+    }
+
+    /// @notice openSea integration royalty. See https://docs.opensea.io/docs/contract-level-metadata
+    function contractURI() public view returns (string memory) {
+        return contractUri;
+    }
+
     /**************************** INTERNALS  ****************************/
 
     /**

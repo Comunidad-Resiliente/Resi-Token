@@ -103,6 +103,30 @@ yarn abis
 yarn size
 ```
 
+---
+
+### Tasks
+
+1. Create serie
+
+```
+
+```
+
+2. Set default role uri
+
+3. Register Serie SBT
+
+4. Set ResiToken
+
+5. Add Project
+
+6. Set Treasury Vault
+
+7. Add role
+
+8. Award
+
 ### Roadmap
 
 - [x] Development
