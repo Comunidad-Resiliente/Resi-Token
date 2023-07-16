@@ -109,23 +109,58 @@ yarn size
 
 1. Create serie
 
+```bash
+npx hardhat create-serie --start-date <YYYY/MM/DD> --end-date <YYYY/MM/DD> --projects <NUMBER> --max-supply <VALUE IN WEI> --vault <VAULT_ADDRESS> --network <NETWORK>
 ```
 
-```
+2. Set default role uri: This task has to be done per role.
 
-2. Set default role uri
+```bash
+npx hardhat set-default-role-uri --role <ROLE_NAME> --uri <URI> --network <NETWORK>
+```
 
 3. Register Serie SBT
 
+```bash
+npx hardhat register-serie-sbt --sbt <SBT_ADDRESS> --network <NETWORK>
+```
+
 4. Set ResiToken
 
-5. Add Project
+```bash
+npx hardhat set-resi-token --resi-token <RESI_TOKEN_ADDRESS> --network <NETWORK>
+```
 
-6. Set Treasury Vault
+5. Set Treasury Vault
+
+```bash
+npx hardhat set-treasury-vault --treasury-vault <TREASURY_ADDRESS> --network mumbai
+```
+
+6. Add Project
+
+```bash
+npx hardhat add-project --name <PROJECT_NAME> --network <NETWORK>
+```
 
 7. Add role
 
-8. Award
+```bash
+
+```
+
+8. Add roles batch
+
+```bash
+
+```
+
+9. Award
+
+```bash
+
+
+```
 
 ### Roadmap
 
