@@ -103,6 +103,20 @@ yarn abis
 yarn size
 ```
 
+- Verify contracts: due to they are all upgradeable contracts, we just need to provide the address of the deployed contract and the network. Also, do not forget to provide the api key of your network to your hardhat.config.ts. For instance, to verify on Polygon Mumbai testnet:
+
+```js
+etherscan: {
+    apiKey: {
+      polygonMumbai: process.env.MUMBAI_ETHERSCAN_API_KEY ? process.env.MUMBAI_ETHERSCAN_API_KEY : ''
+    }
+  },
+```
+
+```bash
+npx hardhat verify --network <NETWORK> <CONTRACT_ADDRESS>
+```
+
 ---
 
 ### Tasks
