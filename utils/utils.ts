@@ -61,3 +61,7 @@ export const awardBatch = async (
     i++
   }
 }
+
+export const ethersToWei = (value: string): string => {
+  return ethers.utils.parseEther(value).toString()
+}

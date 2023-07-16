@@ -21,4 +21,22 @@ export const tasks = () => {
         console.log(chalk.red('Failed!'))
       }
     })
+
+  task('mint-sbt', 'Mint SBT')
+    .addParam('to', 'Address to receive SBT')
+    .addParam('role', 'User role')
+    .addParam('uri', 'sbt uri')
+    .setAction(async ({to, role, uri}, {ethers}) => {
+      const [admin]: SignerWithAddress[] = await ethers.getSigners()
+      const ResiSBT: ResiSBT = await ethers.getContract('ResiSBT')
+      const response = await ResiSBT.connect(admin).mint(to, role, uri)
+
+      console.log(chalk.yellow(`Transaction hash: ${response.hash}`))
+      const receipt = await response.wait()
+      if (receipt.status !== 0) {
+        console.log(chalk.green('Done!'))
+      } else {
+        console.log(chalk.red('Failed!'))
+      }
+    })
 }

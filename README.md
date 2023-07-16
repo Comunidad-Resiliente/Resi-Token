@@ -103,6 +103,79 @@ yarn abis
 yarn size
 ```
 
+- Verify contracts: due to they are all upgradeable contracts, we just need to provide the address of the deployed contract and the network. Also, do not forget to provide the api key of your network to your hardhat.config.ts. For instance, to verify on Polygon Mumbai testnet:
+
+```js
+etherscan: {
+    apiKey: {
+      polygonMumbai: process.env.MUMBAI_ETHERSCAN_API_KEY ? process.env.MUMBAI_ETHERSCAN_API_KEY : ''
+    }
+  },
+```
+
+```bash
+npx hardhat verify --network <NETWORK> <CONTRACT_ADDRESS>
+```
+
+---
+
+### Tasks
+
+1. Create serie
+
+```bash
+npx hardhat create-serie --start-date <YYYY/MM/DD> --end-date <YYYY/MM/DD> --projects <NUMBER> --max-supply <VALUE IN WEI> --vault <VAULT_ADDRESS> --network <NETWORK>
+```
+
+2. Set default role uri: This task has to be done per role.
+
+```bash
+npx hardhat set-default-role-uri --role <ROLE_NAME> --uri <URI> --network <NETWORK>
+```
+
+3. Register Serie SBT
+
+```bash
+npx hardhat register-serie-sbt --sbt <SBT_ADDRESS> --network <NETWORK>
+```
+
+4. Set ResiToken
+
+```bash
+npx hardhat set-resi-token --resi-token <RESI_TOKEN_ADDRESS> --network <NETWORK>
+```
+
+5. Set Treasury Vault
+
+```bash
+npx hardhat set-treasury-vault --treasury-vault <TREASURY_ADDRESS> --network mumbai
+```
+
+6. Add Project
+
+```bash
+npx hardhat add-project --name <PROJECT_NAME> --network <NETWORK>
+```
+
+7. Add role
+
+```bash
+
+```
+
+8. Add roles batch
+
+```bash
+
+```
+
+9. Award
+
+```bash
+
+
+```
+
 ### Roadmap
 
 - [x] Development

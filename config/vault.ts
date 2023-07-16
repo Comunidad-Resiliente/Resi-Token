@@ -5,5 +5,8 @@ export const VaultConfig = {
   },
   80001: {
     SERIE_ID: 1
+  },
+  274: {
+    SERIE_ID: 1
   }
 }
