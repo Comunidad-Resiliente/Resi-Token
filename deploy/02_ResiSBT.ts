@@ -27,8 +27,8 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
     skipIfAlreadyDeployed: false
   })
 
-  const sbtName = SBTConfig.NAMES[process.env.SBT_ROLE_NAME].NAME
-  const sbtSymbol = SBTConfig.NAMES[process.env.SBT_ROLE_NAME].SYMBOL
+  const sbtName = `ResiSBT-${SBTConfig[chainId].SERIE_ID}`
+  const sbtSymbol = `RSBT-${SBTConfig[chainId].SERIE_ID}`
   if (!sbtName || !sbtSymbol) {
     throw Error('Please provide a valid SBT Role to deploy')
   }

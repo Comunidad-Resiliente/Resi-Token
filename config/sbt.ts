@@ -25,5 +25,9 @@ export const SBTConfig = {
   80001: {
     SERIE_ID: 1,
     CONTRACT_URI: 'ipfs://bafkreiekwh56q64cau7xbcc5vcnvv4ooktop5qotl3ebl22xvix2hppjry'
+  },
+  274: {
+    SERIE_ID: 1,
+    CONTRACT_URI: 'ipfs://bafkreiekwh56q64cau7xbcc5vcnvv4ooktop5qotl3ebl22xvix2hppjry'
   }
 }

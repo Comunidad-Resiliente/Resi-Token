@@ -9,7 +9,6 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   const {deployments, getNamedAccounts, network, getChainId} = hre
   const {deploy} = deployments
   const {deployer} = await getNamedAccounts()
-  console.log(network)
 
   if (!network.tags.testnet) {
     return

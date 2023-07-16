@@ -82,6 +82,12 @@ contract ResiToken is
 
     /**************************** INTERFACE  ****************************/
 
+    /**
+     * @dev assign MENTOR ROLE to user for specific project
+     * @param _mentor user address
+     * @param _serieId serie id
+     * @param _project project name
+     */
     function addMentor(
         address _mentor,
         uint256 _serieId,
@@ -92,6 +98,12 @@ contract ResiToken is
         emit MentorAdded(_mentor, _project);
     }
 
+    /**
+     * @dev assign PROJECT BUILDER role to a user for specific project
+     * @param _builder user address
+     * @param _serieId serie id
+     * @param _project project name
+     */
     function addProjectBuilder(
         address _builder,
         uint256 _serieId,
@@ -102,6 +114,10 @@ contract ResiToken is
         emit ProjectBuilderAdded(_builder);
     }
 
+    /**
+     * @dev assign RESI BUILDER role to user
+     * @param _builder user address
+     */
     function addResiBuilder(
         address _builder
     ) external isValidAddress(_builder, "ResiToken: INVALID BUILDER ADDRESS") onlyRole(ADMIN_ROLE) whenNotPaused {
@@ -109,10 +125,20 @@ contract ResiToken is
         emit ResiBuilderAdded(_builder);
     }
 
+    /**
+     *  @dev assign specific role to more than one user
+     * @param _role role to assign
+     * @param _addresses users array
+     */
     function addRolesBatch(bytes32 _role, address[] memory _addresses) external onlyRole(ADMIN_ROLE) whenNotPaused {
         _addRolesBatch(_role, _addresses);
     }
 
+    /**
+     *  @dev unassign role for user
+     * @param _role role
+     * @param _user user address to remove
+     */
     function removeUserRole(
         bytes32 _role,
         address _user
@@ -127,6 +153,11 @@ contract ResiToken is
         emit ResiRoleRemoved(_role, _user);
     }
 
+    /**
+     *  @dev internal function to check state of serie and project
+     * @param _serieId serie id
+     * @param _project project name
+     */
     function _checkSerieAndProject(uint256 _serieId, bytes32 _project) internal view onlyRole(ADMIN_ROLE) {
         require(
             IResiRegistry(RESI_REGISTRY).isValidProject(_serieId, _project),
@@ -134,14 +165,26 @@ contract ResiToken is
         );
     }
 
+    /**
+     *  @dev It is not allowed to transfer resi token
+     */
     function transfer(address, uint256) public pure override(ERC20Upgradeable) returns (bool) {
         revert TransferForbidden("RESIToken: NO TRANSFER ALLOWED");
     }
 
+    /**
+     * @dev It is not allowed to transfer resi token
+     */
     function transferFrom(address, address, uint256) public pure override(ERC20Upgradeable) returns (bool) {
         revert TransferFromForbidden("RESIToken: NO TRANSFER FROM ALLOWED");
     }
 
+    /**
+     *  @dev Award user with ResiTokens
+     * @param _account user to award
+     * @param _role user role
+     * @param _amount amount to award
+     */
     function award(
         address _account,
         bytes32 _role,
@@ -159,6 +202,11 @@ contract ResiToken is
         emit ResiMinted(_account, _amount);
     }
 
+    /**
+     * @dev Perform exit to receive serie funds
+     * @param _serieId serie id
+     * @param _role user role
+     */
     function exit(uint256 _serieId, bytes32 _role) external nonReentrant {
         _checkExit(_role);
         address SERIE_SBT = IResiRegistry(RESI_REGISTRY).getSBTSerie(_serieId);
@@ -174,7 +222,7 @@ contract ResiToken is
     }
 
     /**
-     *
+     *  @dev burn Resi Token
      * @param _amount amount to burn
      */
     function burn(uint256 _amount, uint256 _serieId) external {
@@ -186,6 +234,11 @@ contract ResiToken is
 
     /**************************** INTERNALS  ****************************/
 
+    /**
+     * @dev Internal function to add roles batch function
+     * @param role role to add
+     * @param _addresses users array
+     */
     function _addRolesBatch(
         bytes32 role,
         address[] memory _addresses
@@ -198,6 +251,10 @@ contract ResiToken is
         }
     }
 
+    /**
+     * @dev Internal function to perform valid exit
+     * @param _role user role
+     */
     function _checkExit(bytes32 _role) internal view {
         require(_role != TREASURY_ROLE && _role != ADMIN_ROLE, "ResiToken: INVALID ACTION");
         require(hasRole(_role, _msgSender()), "ResiToken: ACCOUNT HAS NOT VALID ROLE");
@@ -212,11 +269,17 @@ contract ResiToken is
         super._beforeTokenTransfer(from, to, amount);
     }
 
+    /**
+     * @dev check address is not the zero address
+     */
     modifier isValidAddress(address _addr, string memory message) {
         require(_addr != address(0), message);
         _;
     }
 
+    /**
+     * @dev check user has valid role
+     */
     modifier validRole(bytes32 _role) {
         require(
             _role == MENTOR_ROLE || _role == PROJECT_BUILDER_ROLE || _role == RESI_BUILDER_ROLE,
@@ -224,7 +287,7 @@ contract ResiToken is
         );
         _;
     }
-    
+
     // Leave a gap betweeen inherited contracts variables in order
     // to be able to add more variables in them later.
     uint256[20] private upgradeGap;

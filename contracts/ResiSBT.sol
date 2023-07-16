@@ -82,6 +82,13 @@ contract ResiSBT is IResiSBT, IERC5192, OwnableUpgradeable, ERC721URIStorageUpgr
         return lockedSBTs[tokenId];
     }
 
+    /**
+     * @dev check if user is able to receive SBT
+     * @param _account receiver address
+     * @param _role acount role granted by ResiToken
+     * @param _serieId serie where sbt belongs to
+     * @return whether is sbt receiver
+     */
     function isSBTReceiver(address _account, bytes32 _role, uint256 _serieId) public view returns (bool) {
         if (
             IAccessControlUpgradeable(RESI_TOKEN).hasRole(_role, _account) &&
@@ -94,6 +101,10 @@ contract ResiSBT is IResiSBT, IERC5192, OwnableUpgradeable, ERC721URIStorageUpgr
 
     /**************************** INTERFACE  ****************************/
 
+    /**
+     * @dev Set SBT owner nickname/username
+     * @param _nickname sbt username
+     */
     function setNickName(bytes32 _nickname) external {
         require(balanceOf(_msgSender()) == 1, "ResiSBT: NOT AN SBT OWNER");
         require(_nickname != bytes32(0), "ResiSBT: INVALID NICKNAME");
@@ -143,6 +154,12 @@ contract ResiSBT is IResiSBT, IERC5192, OwnableUpgradeable, ERC721URIStorageUpgr
         return tokenId;
     }
 
+    /**
+     * @dev Mint to more than one user sbts by specific role
+     * @param _to array of users
+     * @param _uri token uri for the sbts
+     * @param _role role that all users must have
+     */
     function mintBatchByRole(address[] memory _to, string memory _uri, bytes32 _role) external onlyOwner {
         for (uint256 i = 0; i < _to.length; i++) {
             _checkMint(_to[i], _role, _uri);
@@ -150,20 +167,51 @@ contract ResiSBT is IResiSBT, IERC5192, OwnableUpgradeable, ERC721URIStorageUpgr
         }
     }
 
+    /**
+     * @dev Mint function performed only by ResiToken contract
+     * @param _to user to mint sbt
+     * @param _role user role
+     */
     function mintByResiToken(address _to, bytes32 _role) external onlyResiToken nonReentrant {
         _mintByResiToken(_to, _role);
     }
 
+    /**
+     *  @dev Increase resi token balance
+     * @param _to user address
+     * @param _amount amount to increase
+     */
     function increaseResiTokenBalance(address _to, uint256 _amount) external onlyResiToken nonReentrant {
         _increaseResiTokenBalance(_to, _amount);
     }
 
+    /**
+     * @dev Decrease resi token balance
+     * @param _to user address
+     * @param _amount amoutn to decrease
+     */
     function decreaseResiTokenBalance(address _to, uint256 _amount) external onlyResiToken nonReentrant {
         _decreaseResiTokenBalance(_to, _amount);
     }
 
+    function supportsInterface(bytes4 interfaceId) public view override(ERC721Upgradeable) returns (bool) {
+        return super.supportsInterface(interfaceId);
+    }
+
+    /// @notice openSea integration royalty. See https://docs.opensea.io/docs/contract-level-metadata
+    function contractURI() public view returns (string memory) {
+        return contractUri;
+    }
+
     /**************************** INTERNALS  ****************************/
 
+    /**
+     * @dev Internal function to mint an sbt to a user
+     * @param _to user address
+     * @param _role user role
+     * @param _uri sbt uri
+     * @return sbt id
+     */
     function _mintSBT(address _to, bytes32 _role, string memory _uri) internal returns (uint256) {
         require(_msgSender() == owner() || _msgSender() == RESI_TOKEN, "ResiSBT: ONLY OWNER OR RESI TOKEN");
         _checkMint(_to, _role, _uri);
@@ -180,6 +228,11 @@ contract ResiSBT is IResiSBT, IERC5192, OwnableUpgradeable, ERC721URIStorageUpgr
         return _tokenId;
     }
 
+    /**
+     *  @dev Internal function to mint sbt by ResiToken contract
+     * @param _to user address
+     * @param _role user role
+     */
     function _mintByResiToken(address _to, bytes32 _role) private {
         string memory defaultUri = defaultRoleUris[_role];
         require(bytes(defaultUri).length > 0, "ResiSBT: Default Role Uri not set");
@@ -187,6 +240,11 @@ contract ResiSBT is IResiSBT, IERC5192, OwnableUpgradeable, ERC721URIStorageUpgr
         emit SBTMintedByResiToken(_to, _role, tokenId);
     }
 
+    /**
+     * @dev internal function to increase resitoken balance
+     * @param _to user address
+     * @param _amount amouunt to increase
+     */
     function _increaseResiTokenBalance(address _to, uint256 _amount) private {
         require(balanceOf(_to) == 1, "ResiSBT: User has no SBT");
         require(_amount > 0, "ResiSBT: Invalid amount");
@@ -194,6 +252,11 @@ contract ResiSBT is IResiSBT, IERC5192, OwnableUpgradeable, ERC721URIStorageUpgr
         emit IncreaseResiBalance(_to, _amount);
     }
 
+    /**
+     *  @dev internal function to decrease resitoken balance
+     * @param _to user address
+     * @param _amount amount to decrease
+     */
     function _decreaseResiTokenBalance(address _to, uint256 _amount) private {
         require(balanceOf(_to) == 1, "ResiSBT: User has no SBT");
         require(_amount > 0, "ResiSBT: Invalid amount");
@@ -201,6 +264,12 @@ contract ResiSBT is IResiSBT, IERC5192, OwnableUpgradeable, ERC721URIStorageUpgr
         emit DecreaseResiBalance(_to, _amount);
     }
 
+    /**
+     *  @dev internal function to check mint conditions
+     * @param _to user address
+     * @param _role user role
+     * @param uri sbt uri
+     */
     function _checkMint(address _to, bytes32 _role, string memory uri) internal view {
         require(_msgSender() == owner() || _msgSender() == RESI_TOKEN, "ResiSBT: ONLY OWNER OR RESI TOKEN");
         require(_to != address(0), "ResiSBT: INVALID TO ADDRESS");
@@ -216,18 +285,30 @@ contract ResiSBT is IResiSBT, IERC5192, OwnableUpgradeable, ERC721URIStorageUpgr
         super._beforeTokenTransfer(from, to, firstTokenId, batchSize);
     }
 
+    /**
+     *  @dev Transfer from is forbidden in SBT contract
+     */
     function transferFrom(address, address, uint256) public pure override {
         revert TransferForbidden("ResiSBT: NO TRANSFER FROM ALLOWED");
     }
 
+    /**
+     * @dev Safe transfer from is forbidden in SBT contract
+     */
     function safeTransferFrom(address, address, uint256) public pure override {
         revert TransferForbidden("ResiSBT: NO TRANSFER FROM ALLOWED");
     }
 
+    /**
+     * @dev Safe transfer from is forbidden in SBT contract
+     */
     function safeTransferFrom(address, address, uint256, bytes memory) public pure override {
         revert TransferForbidden("ResiSBT: NO TRANSFER FROM ALLOWED");
     }
 
+    /**
+     * @dev Modifier to perform actions only by ResiToken contract
+     */
     modifier onlyResiToken() {
         require(_msgSender() == RESI_TOKEN, "ResiSBT: INVALID RESI TOKEN ADDRESS");
         _;

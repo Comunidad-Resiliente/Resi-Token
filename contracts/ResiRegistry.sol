@@ -92,6 +92,12 @@ contract ResiRegistry is IResiRegistry, OwnableUpgradeable, ReentrancyGuardUpgra
         return seriesSBTs[_serieId];
     }
 
+    /**
+     * @dev Get serie active state and current supply emitted
+     * @param _serieId serie id to get state
+     * @return wether serie is active
+     * @return currenty serie supply emitted
+     */
     function getSerieState(uint256 _serieId) external view returns (bool, uint256) {
         bool isActive = series[_serieId].active;
         uint256 currentSupply = series[_serieId].currentSupply;
@@ -107,6 +113,10 @@ contract ResiRegistry is IResiRegistry, OwnableUpgradeable, ReentrancyGuardUpgra
         return series[_serieId].currentSupply;
     }
 
+    /**
+     * @dev Get Treasury vault address
+     * @return treasury addresss
+     */
     function getTreasuryVault() external view returns (address) {
         return TREASURY_VAULT;
     }
@@ -204,14 +214,28 @@ contract ResiRegistry is IResiRegistry, OwnableUpgradeable, ReentrancyGuardUpgra
         emit SerieSBTSet(activeSerieId, _sbt);
     }
 
+    /**
+     * @dev Increase serie supply. Only performed by ResiToken
+     * @param _serieId serie id
+     * @param _amount amount to increase
+     */
     function increaseSerieSupply(uint256 _serieId, uint256 _amount) external onlyRESIToken nonReentrant {
         _increaseSerieSupply(_serieId, _amount);
     }
 
+    /**
+     *
+     * @dev Decrease serie supply. Only performed by ResiToken
+     * @param _serieId serie id
+     * @param _amount amount to decrease
+     */
     function decreaseSerieSupply(uint256 _serieId, uint256 _amount) external onlyRESIToken nonReentrant {
         _decreaseSerieSupply(_serieId, _amount);
     }
 
+    /**
+     * @dev Close serie. This will mean all kind of operations to a serie could not be done anymore.
+     */
     function closeSerie() external onlyOwner {
         require(series[activeSerieId].created, "ResiRegistry: SERIE NOT CREATED YET");
         require(block.timestamp >= series[activeSerieId].endDate, "ResiRegistry: SERIE STILL ACTIVE");
@@ -219,6 +243,12 @@ contract ResiRegistry is IResiRegistry, OwnableUpgradeable, ReentrancyGuardUpgra
         emit SerieClosed(activeSerieId);
     }
 
+    /**
+     * @dev
+     * @param _serieId serie id
+     * @param _amount amount to withdrawn from vault
+     * @param _to address who will receive the assets
+     */
     function withdrawFromVault(uint256 _serieId, uint256 _amount, address _to) external onlyRESIToken {
         require(!series[_serieId].active, "ResiRegistry: SERIE STILL ACTIVE");
         require(_amount > 0, "ResiRegistry: INVALID AMOUNT");
@@ -241,6 +271,14 @@ contract ResiRegistry is IResiRegistry, OwnableUpgradeable, ReentrancyGuardUpgra
 
     /**************************** INTERNALS  ****************************/
 
+    /**
+     * @dev performs security check before adding a new serie
+     * @param _startDate timestamp serie will start
+     * @param _endDate tiemstamp serie will end
+     * @param _numberOfProjects number of projects allowed to be in the serie
+     * @param _maxSupply max supply to emit through serie
+     * @param _vault vault address
+     */
     function _checkSerie(
         uint256 _startDate,
         uint256 _endDate,
@@ -257,6 +295,10 @@ contract ResiRegistry is IResiRegistry, OwnableUpgradeable, ReentrancyGuardUpgra
         // TODO: review here require(isContract(_vault), "VAULT MUST BE CONTRACT");
     }
 
+    /**
+     * @dev internal function for addProject
+     * @param _name project name
+     */
     function _addProject(bytes32 _name) internal onlyOwner {
         require(series[activeSerieId].created, "ResiRegistry: SERIE INACTIVE");
         require(_name != bytes32(0), "ResiRegistry: INVALID NAME");
@@ -270,6 +312,11 @@ contract ResiRegistry is IResiRegistry, OwnableUpgradeable, ReentrancyGuardUpgra
         emit ProjectAdded(_name, activeSerieId);
     }
 
+    /**
+     * @dev private function for increaseSerieSupply
+     * @param _serieId serie id
+     * @param _amount amount to increase
+     */
     function _increaseSerieSupply(uint256 _serieId, uint256 _amount) private {
         require(series[_serieId].created, "ResiRegistry: INVALID SERIE");
         require(series[_serieId].active, "ResiRegistry: SERIE INACTIVE");
@@ -283,6 +330,11 @@ contract ResiRegistry is IResiRegistry, OwnableUpgradeable, ReentrancyGuardUpgra
         emit SerieSupplyUpdated(oldSupply, series[_serieId].currentSupply);
     }
 
+    /**
+     * @dev private function for decreaseSerieSupply
+     * @param _serieId serie id
+     * @param _amount amount to decrease
+     */
     function _decreaseSerieSupply(uint256 _serieId, uint256 _amount) private {
         require(series[_serieId].created, "ResiRegistry: INVALID SERIE");
         require(_amount > 0, "ResiRegistry: INVALID AMOUNT");
@@ -291,6 +343,9 @@ contract ResiRegistry is IResiRegistry, OwnableUpgradeable, ReentrancyGuardUpgra
         emit SerieSupplyUpdated(oldSupply, series[_serieId].currentSupply);
     }
 
+    /**
+     * @dev Modifier to perform actions only by ResiToken contract
+     */
     modifier onlyRESIToken() {
         require(_msgSender() == RESI_TOKEN, "ResiRegistry: ONLY RESI TOKEN");
         _;
