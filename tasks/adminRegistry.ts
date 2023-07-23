@@ -35,4 +35,15 @@ export const tasks = () => {
         console.log(chalk.red('Failed!'))
       }
     })
+
+  task('get-active-serie', 'Get active serie state').setAction(async ({serieId}, {ethers}) => {
+    const [admin]: SignerWithAddress[] = await ethers.getSigners()
+    const ResiRegistry: ResiRegistry = await ethers.getContract('ResiRegistry')
+    const activeSerie = await ResiRegistry.connect(admin).activeSerie()
+    const serieState = await ResiRegistry.connect(admin).getSerieState(activeSerie)
+
+    console.log(activeSerie)
+    console.log('-------')
+    console.log(serieState)
+  })
 }
