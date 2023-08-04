@@ -2,13 +2,13 @@
 pragma solidity ^0.8.18;
 
 interface IResiToken {
-    function addMentor(address _mentor, uint256 _serieId, bytes32 _project) external;
+    function addMentor(address mentor, uint256 serieId, bytes32 project) external;
 
-    function addProjectBuilder(address _builder, uint256 _serieId, bytes32 _project) external;
+    function addProjectBuilder(address builder, uint256 serieId, bytes32 project) external;
 
-    function addResiBuilder(address _builder) external;
+    function addResiBuilder(address builder) external;
 
-    function removeUserRole(bytes32 _role, address _user) external;
+    function removeUserRole(bytes32 role, address user) external;
 
     function getRoleCount() external view returns (uint256);
 
@@ -16,10 +16,10 @@ interface IResiToken {
     event MentorAdded(address indexed mentor, bytes32 project);
     event ProjectBuilderAdded(address indexed projectBuilder);
     event ResiBuilderAdded(address indexed resiBuilder);
-    event ResiRoleRemoved(bytes32 _role, address indexed _user);
+    event ResiRoleRemoved(bytes32 role, address indexed user);
     event ResiMinted(address indexed account, uint256 amount);
     event ResiBurnt(address indexed account, uint256 amount);
-    event Exit(address indexed account, uint256 _amount, uint256 _serieId);
+    event Exit(address indexed account, uint256 amount, uint256 serieId);
 
     error InvalidAddress(address);
     error TransferForbidden(string message);

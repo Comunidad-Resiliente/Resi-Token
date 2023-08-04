@@ -46,4 +46,12 @@ export const tasks = () => {
     console.log('-------')
     console.log(serieState)
   })
+  task('get-project', 'Get active serie').setAction(async ({}, {ethers}) => {
+    const [admin]: SignerWithAddress[] = await ethers.getSigners()
+    const ResiRegistry: ResiRegistry = await ethers.getContract('ResiRegistry')
+    const response = await ResiRegistry.connect(admin).projects(ethers.utils.formatBytes32String('PROJECT_1'))
+
+    console.log(response)
+    console.log('-------')
+  })
 }

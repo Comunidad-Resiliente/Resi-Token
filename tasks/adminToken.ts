@@ -12,7 +12,11 @@ export const tasks = () => {
     .setAction(async ({mentor, serieId, project}, {ethers}) => {
       const [admin]: SignerWithAddress[] = await ethers.getSigners()
       const ResiToken: ResiToken = await ethers.getContract('ResiToken')
-      const response = await ResiToken.connect(admin).addMentor(mentor, serieId, keccak256(toUtf8Bytes(project)))
+      const response = await ResiToken.connect(admin).addMentor(
+        mentor,
+        serieId,
+        ethers.utils.formatBytes32String(project)
+      )
       console.log(chalk.yellow(`Transaction hash: ${response.hash}`))
       const receipt = await response.wait()
       if (receipt.status !== 0) {
@@ -32,7 +36,7 @@ export const tasks = () => {
       const response = await ResiToken.connect(admin).addProjectBuilder(
         builder,
         serieId,
-        keccak256(toUtf8Bytes(project))
+        ethers.utils.formatBytes32String(project)
       )
       console.log(chalk.yellow(`Transaction hash: ${response.hash}`))
       const receipt = await response.wait()
@@ -92,5 +96,15 @@ export const tasks = () => {
       } else {
         console.log(chalk.red('Failed!'))
       }
+    })
+
+  task('get-balance', 'Get ResiToken balance')
+    .addParam('user', 'Address to award')
+    .setAction(async ({user, role, amount}, {ethers}) => {
+      const [admin]: SignerWithAddress[] = await ethers.getSigners()
+      const ResiToken: ResiToken = await ethers.getContract('ResiToken')
+      const response = await ResiToken.connect(admin).balanceOf(user)
+
+      console.log(response.toString())
     })
 }

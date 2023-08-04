@@ -21,11 +21,11 @@ interface IResiRegistry {
     }
 
     function createSerie(
-        uint256 _startDate,
-        uint256 _endDate,
-        uint256 _numberOfProjects,
-        uint256 _maxSupply,
-        address _vault
+        uint256 startDate,
+        uint256 endDate,
+        uint256 numberOfProjects,
+        uint256 maxSupply,
+        address vault
     ) external;
 
     function addProject(bytes32 _name) external;
