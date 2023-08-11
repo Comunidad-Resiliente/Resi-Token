@@ -4,12 +4,12 @@ pragma solidity ^0.8.18;
 interface IResiVault {
     function getMainToken() external view returns (address);
 
-    function release(uint256 _amount) external;
+    function release(uint256 amount) external;
 
-    event ResiVaultInitialized(uint256 _serieId, address indexed _token, address indexed _resiToken);
+    event ResiVaultInitialized(uint256 serieId, address indexed token, address indexed resiToken);
     event MainTokenUpdated(address indexed oldToken, address indexed TOKEN);
-    event TokenAdded(bytes32 _name, address indexed _token);
-    event TokenRemoved(bytes32 _name, address indexed _token);
-    event EtherReceived(address indexed _from, uint256 _value);
-    event TokenReleased(address indexed TOKEN, uint256 _amount);
+    event TokenAdded(bytes32 name, address indexed token);
+    event TokenRemoved(bytes32 name, address indexed token);
+    event EtherReceived(address indexed from, uint256 value);
+    event TokenReleased(address indexed TOKEN, uint256 amount);
 }

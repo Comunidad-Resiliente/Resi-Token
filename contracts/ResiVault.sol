@@ -31,6 +31,7 @@ contract ResiVault is IResiVault, OwnableUpgradeable, ReentrancyGuardUpgradeable
     ) public initializer {
         require(_resiToken != address(0), "ResiVault: INVALID RESI TOKEN ADDRESS");
         require(_resiRegistry != address(0), "ResiVault: INVALID RESI REGISTRY ADDRESS");
+        require(_token != address(0), "ResiVault: INVALID TOKEN ADDRESS");
         __Context_init_unchained();
         __Ownable_init_unchained();
         __ReentrancyGuard_init_unchained();
@@ -119,16 +120,8 @@ contract ResiVault is IResiVault, OwnableUpgradeable, ReentrancyGuardUpgradeable
      * @dev Transfer vault funds to ResiRegistry
      * @param _amount amount to transfer
      */
-    function release(uint256 _amount) external onlyResiRegistry {
-        require(_amount > 0, "INVALID AMOUNT");
-        require(IERC20(TOKEN).balanceOf(address(this)) >= _amount, "ResiVault: INVALID AMOUNT TO RELEASE");
-
-        uint256 quote = _getExitQuote();
-        require(quote > 0, "ResiVault: Invalid quote");
-
-        IERC20(TOKEN).safeTransfer(RESI_REGISTRY, quote * _amount);
-
-        emit TokenReleased(TOKEN, _amount);
+    function release(uint256 _amount) external onlyResiRegistry nonReentrant {
+        _release(_amount);
     }
 
     /**************************** INTERNALS  ****************************/
@@ -142,6 +135,22 @@ contract ResiVault is IResiVault, OwnableUpgradeable, ReentrancyGuardUpgradeable
         uint256 currentBalance = IERC20(TOKEN).balanceOf(address(this));
         uint256 quote = currentBalance / serieSupply;
         return quote;
+    }
+
+    /**
+     *  @dev internal function to transfer vault funds to ResiRegistry
+     * @param _amount amount to transfer
+     */
+    function _release(uint256 _amount) private {
+        require(_amount > 0, "INVALID AMOUNT");
+        require(IERC20(TOKEN).balanceOf(address(this)) >= _amount, "ResiVault: INVALID AMOUNT TO RELEASE");
+
+        uint256 quote = _getExitQuote();
+        require(quote > 0, "ResiVault: Invalid quote");
+
+        IERC20(TOKEN).safeTransfer(RESI_REGISTRY, quote * _amount);
+
+        emit TokenReleased(TOKEN, _amount);
     }
 
     /**

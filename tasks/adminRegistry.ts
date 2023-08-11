@@ -35,4 +35,23 @@ export const tasks = () => {
         console.log(chalk.red('Failed!'))
       }
     })
+
+  task('get-active-serie', 'Get active serie state').setAction(async ({serieId}, {ethers}) => {
+    const [admin]: SignerWithAddress[] = await ethers.getSigners()
+    const ResiRegistry: ResiRegistry = await ethers.getContract('ResiRegistry')
+    const activeSerie = await ResiRegistry.connect(admin).activeSerie()
+    const serieState = await ResiRegistry.connect(admin).getSerieState(activeSerie)
+
+    console.log(activeSerie)
+    console.log('-------')
+    console.log(serieState)
+  })
+  task('get-project', 'Get active serie').setAction(async ({}, {ethers}) => {
+    const [admin]: SignerWithAddress[] = await ethers.getSigners()
+    const ResiRegistry: ResiRegistry = await ethers.getContract('ResiRegistry')
+    const response = await ResiRegistry.connect(admin).projects(ethers.utils.formatBytes32String('PROJECT_1'))
+
+    console.log(response)
+    console.log('-------')
+  })
 }

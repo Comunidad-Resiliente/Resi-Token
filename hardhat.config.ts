@@ -37,7 +37,7 @@ const config: HardhatUserConfig = {
   abiExporter: {
     path: './abis',
     runOnCompile: false,
-    only: [':ResiRegistry$', ':ResiReSBT$', ':ResiToken$', ':ResiVault$']
+    only: [':ResiRegistry$', ':ResiSBT$', ':ResiToken$', ':ResiVault$']
   },
   contractSizer: {
     alphaSort: true,

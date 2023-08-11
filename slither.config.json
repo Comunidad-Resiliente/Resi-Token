@@ -1,0 +1,4 @@
+{
+    "filter_paths": "contracts/test,contracts/interface,contracts/mock,node_modules",
+    "exclude_informational": true
+}

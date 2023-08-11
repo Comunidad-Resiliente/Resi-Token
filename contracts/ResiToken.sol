@@ -225,7 +225,7 @@ contract ResiToken is
      *  @dev burn Resi Token
      * @param _amount amount to burn
      */
-    function burn(uint256 _amount, uint256 _serieId) external {
+    function burn(uint256 _amount, uint256 _serieId) external nonReentrant {
         require(hasRole(TREASURY_ROLE, _msgSender()) || hasRole(ADMIN_ROLE, _msgSender()), "ResiToken: INVALID ROLE");
         ERC20BurnableUpgradeable.burn(_amount);
         IResiRegistry(RESI_REGISTRY).decreaseSerieSupply(_serieId, _amount);

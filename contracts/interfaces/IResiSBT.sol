@@ -3,25 +3,26 @@ pragma solidity ^0.8.18;
 
 interface IResiSBT {
     event ResiSBTInitialized(
-        string _name,
-        string _symbol,
-        uint256 _serieId,
-        address indexed _registry,
-        address indexed _resiToken
+        string name,
+        string symbol,
+        uint256 serieId,
+        address indexed registry,
+        address indexed resiToken
     );
 
-    function mintByResiToken(address _to, bytes32 _role) external;
+    function mintByResiToken(address to, bytes32 role) external;
 
-    function isSBTReceiver(address _account, bytes32 _role, uint256 _serieId) external view returns (bool);
-    function increaseResiTokenBalance(address _to, uint256 _amount) external;
+    function isSBTReceiver(address account, bytes32 role, uint256 serieId) external view returns (bool);
 
-    function decreaseResiTokenBalance(address _to, uint256 _amount) external;
+    function increaseResiTokenBalance(address to, uint256 amount) external;
 
-    event RegistrySet(address indexed _registry);
+    function decreaseResiTokenBalance(address to, uint256 amount) external;
+
+    event RegistrySet(address indexed registry);
     event ContractURIUpdated(string contractUri);
-    event MintSBT(address indexed _to, bytes32 _role, uint256 _tokenId);
+    event MintSBT(address indexed to, bytes32 role, uint256 tokenId);
     event DefaultRoleUriUpdated(string oldUri, string newUri);
-    event SBTMintedByResiToken(address indexed _to, bytes32 _role, uint256 _tokenId);
+    event SBTMintedByResiToken(address indexed to, bytes32 role, uint256 tokenId);
     event IncreaseResiBalance(address indexed to, uint256 amount);
     event DecreaseResiBalance(address indexed to, uint256 amount);
     event NicknameUpdated(address indexed user, bytes32 nickname);

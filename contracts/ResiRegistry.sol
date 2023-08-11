@@ -249,24 +249,8 @@ contract ResiRegistry is IResiRegistry, OwnableUpgradeable, ReentrancyGuardUpgra
      * @param _amount amount to withdrawn from vault
      * @param _to address who will receive the assets
      */
-    function withdrawFromVault(uint256 _serieId, uint256 _amount, address _to) external onlyRESIToken {
-        require(!series[_serieId].active, "ResiRegistry: SERIE STILL ACTIVE");
-        require(_amount > 0, "ResiRegistry: INVALID AMOUNT");
-        require(_to != address(0), "ResiRegistry: INVALID RECEIVER");
-        require(series[_serieId].currentSupply > 0, "ResiRegistry: NO MORE SUPPLY TO WITHDRAW");
-        require(series[_serieId].currentSupply - _amount > 0, "ResiRegistry: INVALID WITHDRAW AMOUNT");
-
-        address vaultToken = IResiVault(series[_serieId].vault).getMainToken();
-
-        uint256 beforeBalance = IERC20(vaultToken).balanceOf(address(this));
-        IResiVault(series[_serieId].vault).release(_amount);
-        uint256 afterBalance = IERC20(vaultToken).balanceOf(address(this));
-
-        require(afterBalance > beforeBalance, "ResiRegistry: SOMETHING WENT WRONG WITHDRAWING FROM VAULT");
-
-        IERC20(vaultToken).safeTransfer(_to, afterBalance);
-
-        emit WithdrawFromVault(_serieId, _amount, _to);
+    function withdrawFromVault(uint256 _serieId, uint256 _amount, address _to) external onlyRESIToken nonReentrant {
+        _withdrawFromVault(_serieId, _amount, _to);
     }
 
     /**************************** INTERNALS  ****************************/
@@ -341,6 +325,32 @@ contract ResiRegistry is IResiRegistry, OwnableUpgradeable, ReentrancyGuardUpgra
         uint256 oldSupply = series[_serieId].currentSupply;
         series[_serieId].currentSupply -= _amount;
         emit SerieSupplyUpdated(oldSupply, series[_serieId].currentSupply);
+    }
+
+    /**
+     * @dev internal function to withdraw from vault
+     * @param _serieId serie id
+     * @param _amount amount to withdrawn from vault
+     * @param _to address who will receive the assets
+     */
+    function _withdrawFromVault(uint256 _serieId, uint256 _amount, address _to) private {
+        require(!series[_serieId].active, "ResiRegistry: SERIE STILL ACTIVE");
+        require(_amount > 0, "ResiRegistry: INVALID AMOUNT");
+        require(_to != address(0), "ResiRegistry: INVALID RECEIVER");
+        require(series[_serieId].currentSupply > 0, "ResiRegistry: NO MORE SUPPLY TO WITHDRAW");
+        require(series[_serieId].currentSupply - _amount > 0, "ResiRegistry: INVALID WITHDRAW AMOUNT");
+
+        address vaultToken = IResiVault(series[_serieId].vault).getMainToken();
+
+        uint256 beforeBalance = IERC20(vaultToken).balanceOf(address(this));
+        IResiVault(series[_serieId].vault).release(_amount);
+        uint256 afterBalance = IERC20(vaultToken).balanceOf(address(this));
+
+        require(afterBalance > beforeBalance, "ResiRegistry: SOMETHING WENT WRONG WITHDRAWING FROM VAULT");
+
+        IERC20(vaultToken).safeTransfer(_to, afterBalance);
+
+        emit WithdrawFromVault(_serieId, _amount, _to);
     }
 
     /**
