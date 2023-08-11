@@ -37,7 +37,7 @@
       {
         "indexed": false,
         "internalType": "bytes32",
-        "name": "_name",
+        "name": "name",
         "type": "bytes32"
       },
       {
@@ -56,7 +56,7 @@
       {
         "indexed": false,
         "internalType": "bytes32",
-        "name": "_name",
+        "name": "name",
         "type": "bytes32"
       }
     ],
@@ -75,7 +75,7 @@
       {
         "indexed": true,
         "internalType": "address",
-        "name": "_resiToken",
+        "name": "resiToken",
         "type": "address"
       }
     ],
@@ -88,7 +88,7 @@
       {
         "indexed": false,
         "internalType": "uint256",
-        "name": "_id",
+        "name": "id",
         "type": "uint256"
       }
     ],
@@ -101,37 +101,37 @@
       {
         "indexed": false,
         "internalType": "uint256",
-        "name": "_id",
+        "name": "id",
         "type": "uint256"
       },
       {
         "indexed": false,
         "internalType": "uint256",
-        "name": "_startDate",
+        "name": "startDate",
         "type": "uint256"
       },
       {
         "indexed": false,
         "internalType": "uint256",
-        "name": "_endDate",
+        "name": "endDate",
         "type": "uint256"
       },
       {
         "indexed": false,
         "internalType": "uint256",
-        "name": "_numberOfProjects",
+        "name": "numberOfProjects",
         "type": "uint256"
       },
       {
         "indexed": false,
         "internalType": "uint256",
-        "name": "_maxSupply",
+        "name": "maxSupply",
         "type": "uint256"
       },
       {
         "indexed": true,
         "internalType": "address",
-        "name": "_vault",
+        "name": "vault",
         "type": "address"
       }
     ],
@@ -150,7 +150,7 @@
       {
         "indexed": true,
         "internalType": "address",
-        "name": "_sbt",
+        "name": "sbt",
         "type": "address"
       }
     ],
@@ -182,7 +182,7 @@
       {
         "indexed": true,
         "internalType": "address",
-        "name": "_treasuryVault",
+        "name": "treasuryVault",
         "type": "address"
       }
     ],
@@ -195,19 +195,19 @@
       {
         "indexed": false,
         "internalType": "uint256",
-        "name": "_serieId",
+        "name": "serieId",
         "type": "uint256"
       },
       {
         "indexed": false,
         "internalType": "uint256",
-        "name": "_amount",
+        "name": "amount",
         "type": "uint256"
       },
       {
         "indexed": true,
         "internalType": "address",
-        "name": "_to",
+        "name": "to",
         "type": "address"
       }
     ],
