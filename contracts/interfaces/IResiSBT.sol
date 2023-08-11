@@ -3,9 +3,9 @@ pragma solidity ^0.8.18;
 
 interface IResiSBT {
     event ResiSBTInitialized(
-        string _name,
-        string _symbol,
-        uint256 _serieId,
+        string name,
+        string symbol,
+        uint256 serieId,
         address indexed registry,
         address indexed resiToken
     );

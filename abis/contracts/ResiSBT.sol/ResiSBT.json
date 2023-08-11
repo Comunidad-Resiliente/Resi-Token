@@ -238,19 +238,19 @@
       {
         "indexed": false,
         "internalType": "string",
-        "name": "_name",
+        "name": "name",
         "type": "string"
       },
       {
         "indexed": false,
         "internalType": "string",
-        "name": "_symbol",
+        "name": "symbol",
         "type": "string"
       },
       {
         "indexed": false,
         "internalType": "uint256",
-        "name": "_serieId",
+        "name": "serieId",
         "type": "uint256"
       },
       {

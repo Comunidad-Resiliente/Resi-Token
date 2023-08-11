@@ -1,6 +1,4 @@
-# $RESI-TOKEN
-
-- Resi Token de la Comunidad Resiliente.
+# $RESI-TOKENOMICS
 
 [![GitHub tag](https://img.shields.io/github/tag/Comunidad-Resiliente/Resi-Token?include_prereleases=&sort=semver&color=blue)](https://github.com/Comunidad-Resiliente/Resi-Token/releases/)
 [![License](https://img.shields.io/badge/License-MIT-blue)](#license)
@@ -24,17 +22,19 @@
 
 ![ResiToken-two](./docs/imgs/ResiToken-two.png)
 
-### Tokenomics
+![ResiToken-three](./docs/imgs/ResiToken-three.png)
 
-**Roles**:
+![ResiToken-four](./docs/imgs/ResiToken-four.png)
 
-- MENTOR:
+### Roles
 
-- PROJECT BUILDER:
+- MENTOR: Mentors are bound to a project in a particular Serie. They could be from devs to lawyers.
 
-- RESI BUILDER:
+- PROJECT BUILDER: For builders of each project internally.
 
-- TREASURY:
+- RESI BUILDER: For builders of the Resiliente Community.
+
+- TREASURY: Role for community treasury management.
 
 ---
 
@@ -159,21 +159,34 @@ npx hardhat add-project --name <PROJECT_NAME> --network <NETWORK>
 
 7. Add role
 
-```bash
+- Mentor
 
+```bash
+npx hardhat add-mentor --mentor <USER_ADDRESS> --serieId <SERIE ID> --project <PROJECT_NAME> --network <NETWORK>
+```
+
+- Project builder:
+
+```bash
+npx hardhat add-project-builder --builder <USER_ADDRESS> --serieId <SERIE ID> --project <PROJECT_NAME> --network <NETWORK>
+```
+
+- Resi builder:
+
+```bash
+npx hardhat add-resi-builder --buidler <USER_ADDRESS> --network <NETWORK>
 ```
 
 8. Add roles batch
 
 ```bash
-
+npx hardhat add-roles --role <ROLE_NAME> --users <USER1_ADDRESS,USER2_ADDRESS> --network <NETWORK>
 ```
 
 9. Award
 
 ```bash
-
-
+npx hardhat award --user <USER_ADDRESS> --role <ROLE_NAME> --amount <AMOUNT_IN_WEI> --network <NETWORK>
 ```
 
 ### Roadmap
@@ -181,14 +194,20 @@ npx hardhat add-project --name <PROJECT_NAME> --network <NETWORK>
 - [x] Development
 - [x] Test coverage >= 90%
 - [x] Deploy to testnet mumbai
-- [] Development of associated subgraphs
-- [] Front end develpment
+- [] Development of associated subgraphs (IN PROGRESS, see https://github.com/Comunidad-Resiliente/Resi-Subgraph)
 - [] SC Auditory
+- [] Front end develpment
 - [] Mainnet deploy
 
-### Autores
+### Authors
 
 - Alejo Lovallo
 
   - [Github](https://github.com/AlejoLovallo)
   - [Medium](https://alejolovallo.medium.com/)
+
+### Contribution
+
+Thank you for considering helping out with the source code! We welcome contributions from anyone on the internet, and are grateful for even the smallest of fixes!
+
+If you'd like to contribute to resi-tokenomics, please fork, fix, commit and send a pull request for the maintainers to review and merge into the main code base.
