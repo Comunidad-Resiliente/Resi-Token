@@ -72,7 +72,7 @@ interface IResiRegistry {
     event SerieSBTSet(uint256 activeSerieId, address indexed sbt);
 
     event SerieCreated(
-        uint256 id,
+        uint256 serieId,
         uint256 startDate,
         uint256 endDate,
         uint256 numberOfProjects,
@@ -82,7 +82,7 @@ interface IResiRegistry {
 
     event SerieSupplyUpdated(uint256 oldSupply, uint256 newSupply);
 
-    event SerieClosed(uint256 id);
+    event SerieClosed(uint256 serieId);
 
     event ProjectAdded(bytes32 name, uint256 serieId);
 
