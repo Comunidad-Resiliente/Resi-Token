@@ -88,7 +88,7 @@
       {
         "indexed": false,
         "internalType": "uint256",
-        "name": "id",
+        "name": "serieId",
         "type": "uint256"
       }
     ],
@@ -101,7 +101,7 @@
       {
         "indexed": false,
         "internalType": "uint256",
-        "name": "id",
+        "name": "serieId",
         "type": "uint256"
       },
       {
