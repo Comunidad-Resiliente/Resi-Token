@@ -67,7 +67,7 @@ describe('Resi Registry', () => {
   })
 
   it('Get sbt serie should return zero address', async () => {
-    expect(await ResiRegistry['getSBTSerie()']()).to.be.equal(ethers.constants.AddressZero)
+    expect(await ResiRegistry['getActiveSBTSerie()']()).to.be.equal(ethers.constants.AddressZero)
   })
 
   it('Get serie state should return not active and none supply', async () => {
