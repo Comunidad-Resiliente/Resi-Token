@@ -76,7 +76,7 @@ contract ResiVault is IResiVault, OwnableUpgradeable, ReentrancyGuardUpgradeable
      * @return exit quote
      */
     function getCurrentExitQuote(uint256 _amount) external view returns (uint256) {
-        return _amount * _getExitQuote();
+        return _getExitQuote(_amount);
     }
 
     /**************************** INTERFACE  ****************************/
@@ -129,12 +129,12 @@ contract ResiVault is IResiVault, OwnableUpgradeable, ReentrancyGuardUpgradeable
     /**
      * @dev Internal function to view current exit quote
      */
-    function _getExitQuote() internal view returns (uint256) {
+    function _getExitQuote(uint256 _amount) internal view returns (uint256) {
         uint256 serieSupply = IResiRegistry(RESI_REGISTRY).getSerieSupply(SERIE_ID);
         require(serieSupply > 0, "ResiVault: SERIE WITH NO MINTED SUPPLY");
         uint256 currentBalance = IERC20(TOKEN).balanceOf(address(this));
-        uint256 quote = currentBalance / serieSupply;
-        return quote;
+        //uint256 quote = currentBalance / serieSupply;
+        return (_amount * currentBalance) / serieSupply;
     }
 
     /**
@@ -145,7 +145,7 @@ contract ResiVault is IResiVault, OwnableUpgradeable, ReentrancyGuardUpgradeable
         require(_amount > 0, "INVALID AMOUNT");
         require(IERC20(TOKEN).balanceOf(address(this)) >= _amount, "ResiVault: INVALID AMOUNT TO RELEASE");
 
-        uint256 quote = _getExitQuote();
+        uint256 quote = _getExitQuote(_amount);
         require(quote > 0, "ResiVault: Invalid quote");
 
         IERC20(TOKEN).safeTransfer(RESI_REGISTRY, quote * _amount);

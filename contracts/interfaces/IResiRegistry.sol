@@ -5,14 +5,13 @@ interface IResiRegistry {
     struct Serie {
         bool active;
         bool created;
-        uint256 id;
-        uint256 startDate;
-        uint256 endDate;
-        uint256 currentProjects;
-        uint256 numberOfProjects;
+        address vault;
+        uint40 startDate;
+        uint40 endDate;
+        uint128 currentProjects;
+        uint128 numberOfProjects;
         uint256 currentSupply;
         uint256 maxSupply;
-        address vault;
     }
 
     struct Project {
@@ -21,9 +20,9 @@ interface IResiRegistry {
     }
 
     function createSerie(
-        uint256 startDate,
-        uint256 endDate,
-        uint256 numberOfProjects,
+        uint40 startDate,
+        uint40 endDate,
+        uint128 numberOfProjects,
         uint256 maxSupply,
         address vault
     ) external;
@@ -46,7 +45,7 @@ interface IResiRegistry {
 
     function isValidProject(bytes32 project) external view returns (bool);
 
-    function getSBTSerie() external view returns (address);
+    function getActiveSBTSerie() external view returns (address);
 
     function getSerieState(uint256 serieId) external view returns (bool, uint256);
 

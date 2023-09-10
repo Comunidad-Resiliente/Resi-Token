@@ -90,13 +90,8 @@ contract ResiSBT is IResiSBT, IERC5192, OwnableUpgradeable, ERC721URIStorageUpgr
      * @return whether is sbt receiver
      */
     function isSBTReceiver(address _account, bytes32 _role, uint256 _serieId) public view returns (bool) {
-        if (
-            IAccessControlUpgradeable(RESI_TOKEN).hasRole(_role, _account) &&
-            IResiRegistry(RESI_REGISTRY).activeSerie() == _serieId
-        ) {
-            return true;
-        }
-        return false;
+        return (IAccessControlUpgradeable(RESI_TOKEN).hasRole(_role, _account) &&
+            IResiRegistry(RESI_REGISTRY).activeSerie() == _serieId);
     }
 
     /**************************** INTERFACE  ****************************/
@@ -160,7 +155,7 @@ contract ResiSBT is IResiSBT, IERC5192, OwnableUpgradeable, ERC721URIStorageUpgr
      * @param _uri token uri for the sbts
      * @param _role role that all users must have
      */
-    function mintBatchByRole(address[] memory _to, string memory _uri, bytes32 _role) external onlyOwner {
+    function mintBatchByRole(address[] calldata _to, string memory _uri, bytes32 _role) external onlyOwner {
         for (uint256 i = 0; i < _to.length; i++) {
             _checkMint(_to[i], _role, _uri);
             _mintSBT(_to[i], _role, _uri);

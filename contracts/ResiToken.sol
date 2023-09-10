@@ -191,7 +191,7 @@ contract ResiToken is
         uint256 _amount
     ) external isValidAddress(_account, "ResiToken: INVALID RECEIVER ADDR") onlyRole(ADMIN_ROLE) nonReentrant {
         require(hasRole(_role, _account), "ResiToken: ACCOUNT HAS NOT VALID ROLE");
-        address SERIE_SBT = IResiRegistry(RESI_REGISTRY).getSBTSerie();
+        address SERIE_SBT = IResiRegistry(RESI_REGISTRY).getActiveSBTSerie();
         if (IERC721Upgradeable(SERIE_SBT).balanceOf(_account) == 0) {
             IResiSBT(SERIE_SBT).mintByResiToken(_account, _role);
         }

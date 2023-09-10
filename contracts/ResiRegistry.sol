@@ -6,7 +6,6 @@ import "./interfaces/IResiVault.sol";
 
 import "@openzeppelin/contracts-upgradeable/security/ReentrancyGuardUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
-import "@openzeppelin/contracts/utils/Address.sol";
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 
@@ -56,10 +55,9 @@ contract ResiRegistry is IResiRegistry, OwnableUpgradeable, ReentrancyGuardUpgra
      * @return if valid
      */
     function isValidProject(uint256 _serie, bytes32 _project) external view returns (bool) {
-        if (_serie == activeSerieId && projects[_project].serie == activeSerieId && projects[_project].active) {
-            return true;
-        }
-        return false;
+        Project storage proj = projects[_project];
+        uint256 _activeSerieId = activeSerieId;
+        return (_serie == _activeSerieId && proj.serie == _activeSerieId && proj.active);
     }
 
     /**
@@ -68,18 +66,15 @@ contract ResiRegistry is IResiRegistry, OwnableUpgradeable, ReentrancyGuardUpgra
      * @return if valid
      */
     function isValidProject(bytes32 _project) external view returns (bool) {
-        Project memory proj = projects[_project];
-        if (proj.serie == activeSerieId && proj.active == true) {
-            return true;
-        }
-        return false;
+        Project storage proj = projects[_project];
+        return (proj.serie == activeSerieId && proj.active);
     }
 
     /**
      * @dev Get active serie sbt token
      * @return sbt address
      */
-    function getSBTSerie() external view returns (address) {
+    function getActiveSBTSerie() external view returns (address) {
         return seriesSBTs[activeSerieId];
     }
 
@@ -95,13 +90,12 @@ contract ResiRegistry is IResiRegistry, OwnableUpgradeable, ReentrancyGuardUpgra
     /**
      * @dev Get serie active state and current supply emitted
      * @param _serieId serie id to get state
-     * @return wether serie is active
-     * @return currenty serie supply emitted
+     * @return isActive wether serie is active
+     * @return currentSupply currenty serie supply emitted
      */
-    function getSerieState(uint256 _serieId) external view returns (bool, uint256) {
-        bool isActive = series[_serieId].active;
-        uint256 currentSupply = series[_serieId].currentSupply;
-        return (isActive, currentSupply);
+    function getSerieState(uint256 _serieId) external view returns (bool isActive, uint256 currentSupply) {
+        isActive = series[_serieId].active;
+        currentSupply = series[_serieId].currentSupply;
     }
 
     /**
@@ -152,16 +146,15 @@ contract ResiRegistry is IResiRegistry, OwnableUpgradeable, ReentrancyGuardUpgra
      * @param _vault address of the serie vault
      */
     function createSerie(
-        uint256 _startDate,
-        uint256 _endDate,
-        uint256 _numberOfProjects,
+        uint40 _startDate,
+        uint40 _endDate,
+        uint128 _numberOfProjects,
         uint256 _maxSupply,
         address _vault
     ) external onlyOwner {
         _checkSerie(_startDate, _endDate, _numberOfProjects, _maxSupply, _vault);
         activeSerieId += 1;
         Serie memory newSerie = Serie({
-            id: activeSerieId,
             startDate: _startDate,
             endDate: _endDate,
             numberOfProjects: _numberOfProjects,
@@ -188,7 +181,7 @@ contract ResiRegistry is IResiRegistry, OwnableUpgradeable, ReentrancyGuardUpgra
      * @dev Add projects to current serie
      * @param names projects names
      */
-    function addProjects(bytes32[] memory names) external onlyOwner {
+    function addProjects(bytes32[] calldata names) external onlyOwner {
         for (uint256 i = 0; i < names.length; i++) {
             _addProject(names[i]);
         }
@@ -321,7 +314,6 @@ contract ResiRegistry is IResiRegistry, OwnableUpgradeable, ReentrancyGuardUpgra
      */
     function _decreaseSerieSupply(uint256 _serieId, uint256 _amount) private {
         require(series[_serieId].created, "ResiRegistry: INVALID SERIE");
-        require(_amount > 0, "ResiRegistry: INVALID AMOUNT");
         uint256 oldSupply = series[_serieId].currentSupply;
         series[_serieId].currentSupply -= _amount;
         emit SerieSupplyUpdated(oldSupply, series[_serieId].currentSupply);
