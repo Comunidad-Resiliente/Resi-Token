@@ -53,7 +53,7 @@ interface IResiRegistry {
 
     function seriesSBTs(uint256 serieId) external view returns (address);
 
-    function getTreasuryVault() external view returns (address);
+    function treasuryVault() external view returns (address);
 
     function withdrawFromVault(uint256 serieId, uint256 amount, address to) external;
 

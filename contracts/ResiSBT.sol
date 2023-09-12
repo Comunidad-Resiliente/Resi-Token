@@ -1,16 +1,17 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.18;
 
-import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
-import "@openzeppelin/contracts-upgradeable/access/IAccessControlUpgradeable.sol";
-import "@openzeppelin/contracts-upgradeable/security/ReentrancyGuardUpgradeable.sol";
-import "@openzeppelin/contracts-upgradeable/token/ERC721/extensions/ERC721URIStorageUpgradeable.sol";
-import "@openzeppelin/contracts/utils/Counters.sol";
+import {OwnableUpgradeable} from "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
+import {IAccessControlUpgradeable} from "@openzeppelin/contracts-upgradeable/access/IAccessControlUpgradeable.sol";
+import {ReentrancyGuardUpgradeable} from "@openzeppelin/contracts-upgradeable/security/ReentrancyGuardUpgradeable.sol";
+import {ERC721URIStorageUpgradeable} from "@openzeppelin/contracts-upgradeable/token/ERC721/extensions/ERC721URIStorageUpgradeable.sol";
+import {ERC721Upgradeable} from "@openzeppelin/contracts-upgradeable/token/ERC721/ERC721Upgradeable.sol";
+import {Counters} from "@openzeppelin/contracts/utils/Counters.sol";
 
-import "./interfaces/IResiSBT.sol";
-import "./interfaces/IResiRegistry.sol";
-import "./interfaces/IResiToken.sol";
-import "./interfaces/IERC5192.sol";
+import {IResiSBT} from "./interfaces/IResiSBT.sol";
+import {IResiRegistry} from "./interfaces/IResiRegistry.sol";
+import {IResiToken} from "./interfaces/IResiToken.sol";
+import {IERC5192} from "./interfaces/IERC5192.sol";
 
 /// @title Resi SBT Contract
 /// @author Alejo Lovallo
@@ -30,7 +31,7 @@ contract ResiSBT is IResiSBT, IERC5192, OwnableUpgradeable, ERC721URIStorageUpgr
     address public RESI_REGISTRY;
 
     /// @dev user => nickname
-    mapping(address => bytes32) public userNickNames;
+    mapping(address user => bytes32 nickname) public userNickNames;
     /// @dev user => resi erc20 balances
     mapping(address => uint256) public resiTokenBalances;
     /// @dev tokenId => isLocked

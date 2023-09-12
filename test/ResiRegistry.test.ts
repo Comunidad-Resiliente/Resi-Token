@@ -203,12 +203,12 @@ describe('Resi Registry', () => {
   it('Should allow to set treasury vault', async () => {
     //GIVEN
     const treasuryVaultToSet = await treasuryVault.getAddress()
-    const curentTreasuryVault = await ResiRegistry.getTreasuryVault()
+    const curentTreasuryVault = await ResiRegistry.treasuryVault()
     //WHEN
     expect(await ResiRegistry.setTreasuryVault(await treasuryVault.getAddress()))
       .to.emit(ResiRegistry, 'TreasuryVaultSet')
       .withArgs(treasuryVaultToSet)
-    const newTreasuryVault = await ResiRegistry.getTreasuryVault()
+    const newTreasuryVault = await ResiRegistry.treasuryVault()
     //THEN
     expect(curentTreasuryVault).to.be.equal(ethers.constants.AddressZero)
     expect(newTreasuryVault).to.be.equal(treasuryVaultToSet)
