@@ -20,7 +20,7 @@ contract ResiRegistry is IResiRegistry, OwnableUpgradeable, ReentrancyGuardUpgra
     address private TREASURY_VAULT;
 
     /// @dev current serie running
-    uint256 private activeSerieId;
+    uint256 public activeSerieId;
 
     /// @dev serieId => Serie info
     mapping(uint256 => Serie) public series;
@@ -76,15 +76,6 @@ contract ResiRegistry is IResiRegistry, OwnableUpgradeable, ReentrancyGuardUpgra
      */
     function getActiveSBTSerie() external view returns (address) {
         return seriesSBTs[activeSerieId];
-    }
-
-    /**
-     * @dev Get serie SBT token for a specific serie
-     * @param _serieId serie id to get sbt
-     * @return sbt address
-     */
-    function getSBTSerie(uint256 _serieId) external view returns (address) {
-        return seriesSBTs[_serieId];
     }
 
     /**

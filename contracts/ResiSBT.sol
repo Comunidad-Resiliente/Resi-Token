@@ -91,7 +91,7 @@ contract ResiSBT is IResiSBT, IERC5192, OwnableUpgradeable, ERC721URIStorageUpgr
      */
     function isSBTReceiver(address _account, bytes32 _role, uint256 _serieId) public view returns (bool) {
         return (IAccessControlUpgradeable(RESI_TOKEN).hasRole(_role, _account) &&
-            IResiRegistry(RESI_REGISTRY).activeSerie() == _serieId);
+            IResiRegistry(RESI_REGISTRY).activeSerieId() == _serieId);
     }
 
     /**************************** INTERFACE  ****************************/
@@ -281,23 +281,10 @@ contract ResiSBT is IResiSBT, IERC5192, OwnableUpgradeable, ERC721URIStorageUpgr
     }
 
     /**
+     *
      *  @dev Transfer from is forbidden in SBT contract
      */
-    function transferFrom(address, address, uint256) public pure override {
-        revert TransferForbidden("ResiSBT: NO TRANSFER FROM ALLOWED");
-    }
-
-    /**
-     * @dev Safe transfer from is forbidden in SBT contract
-     */
-    function safeTransferFrom(address, address, uint256) public pure override {
-        revert TransferForbidden("ResiSBT: NO TRANSFER FROM ALLOWED");
-    }
-
-    /**
-     * @dev Safe transfer from is forbidden in SBT contract
-     */
-    function safeTransferFrom(address, address, uint256, bytes memory) public pure override {
+    function _transfer(address, address, uint256) internal pure override {
         revert TransferForbidden("ResiSBT: NO TRANSFER FROM ALLOWED");
     }
 

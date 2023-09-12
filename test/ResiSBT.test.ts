@@ -106,33 +106,6 @@ describe('Resi SBT initial', () => {
       )
     })
 
-    it('Transfer from should be not allowed', async () => {
-      await expect(
-        ResiSBT.transferFrom(await deployer.getAddress(), await deployer.getAddress(), '10000')
-      ).to.be.revertedWithCustomError(ResiSBT, 'TransferForbidden')
-    })
-
-    it('Transfer from should not be allowed', async () => {
-      await expect(
-        ResiSBT['safeTransferFrom(address,address,uint256)'](
-          await deployer.getAddress(),
-          await deployer.getAddress(),
-          '10000'
-        )
-      ).to.be.revertedWithCustomError(ResiSBT, 'TransferForbidden')
-    })
-
-    it('Transfer from with bytes data should not be allowed', async () => {
-      await expect(
-        ResiSBT['safeTransferFrom(address,address,uint256,bytes)'](
-          await deployer.getAddress(),
-          await deployer.getAddress(),
-          '10000',
-          keccak256(toUtf8Bytes('asdas'))
-        )
-      ).to.be.revertedWithCustomError(ResiSBT, 'TransferForbidden')
-    })
-
     it('Should not allow to mint if invalid address', async () => {
       await expect(ResiSBT.mint(ethers.constants.AddressZero, MINTER_ROLE, 'bla')).to.be.revertedWith(
         'ResiSBT: INVALID TO ADDRESS'
@@ -224,6 +197,33 @@ describe('Resi SBT interface', () => {
 
   it('Not minted sbt should return false', async () => {
     expect(await ResiSBT.locked('1')).to.be.false
+  })
+
+  it('Transfer from should be not allowed', async () => {
+    await expect(
+      ResiSBT.connect(await user).transferFrom(await deployer.getAddress(), await deployer.getAddress(), '0')
+    ).to.be.revertedWithCustomError(ResiSBT, 'TransferForbidden')
+  })
+
+  it('Transfer from should not be allowed', async () => {
+    await expect(
+      ResiSBT.connect(await user)['safeTransferFrom(address,address,uint256)'](
+        await deployer.getAddress(),
+        await deployer.getAddress(),
+        '0'
+      )
+    ).to.be.revertedWithCustomError(ResiSBT, 'TransferForbidden')
+  })
+
+  it('Transfer from with bytes data should not be allowed', async () => {
+    await expect(
+      ResiSBT.connect(await user)['safeTransferFrom(address,address,uint256,bytes)'](
+        await deployer.getAddress(),
+        await deployer.getAddress(),
+        '0',
+        keccak256(toUtf8Bytes('asdas'))
+      )
+    ).to.be.revertedWithCustomError(ResiSBT, 'TransferForbidden')
   })
 
   it('Should not allow to set nickname if invalid name', async () => {

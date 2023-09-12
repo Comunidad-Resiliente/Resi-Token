@@ -39,7 +39,7 @@ interface IResiRegistry {
 
     function closeSerie() external;
 
-    function activeSerie() external view returns (uint256 id);
+    function activeSerieId() external view returns (uint256 id);
 
     function isValidProject(uint256 serie, bytes32 project) external view returns (bool);
 
@@ -51,7 +51,7 @@ interface IResiRegistry {
 
     function getSerieSupply(uint256 serieId) external view returns (uint256);
 
-    function getSBTSerie(uint256 serieId) external view returns (address);
+    function seriesSBTs(uint256 serieId) external view returns (address);
 
     function getTreasuryVault() external view returns (address);
 

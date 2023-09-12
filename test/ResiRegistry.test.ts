@@ -67,7 +67,7 @@ describe('Resi Registry', () => {
   })
 
   it('Get sbt serie should return zero address', async () => {
-    expect(await ResiRegistry['getActiveSBTSerie()']()).to.be.equal(ethers.constants.AddressZero)
+    expect(await ResiRegistry['activeSerieId()']()).to.be.equal(ethers.constants.AddressZero)
   })
 
   it('Get serie state should return not active and none supply', async () => {
@@ -331,7 +331,7 @@ describe('Resi Registry administration', () => {
   })
 
   it('Should return zero address for sbt serie', async () => {
-    expect(await ResiRegistry['getSBTSerie(uint256)'](1)).to.be.equal(ethers.constants.AddressZero)
+    expect(await ResiRegistry['seriesSBTs(uint256)'](1)).to.be.equal(ethers.constants.AddressZero)
   })
 
   it('Should not create serie if ongoing serie', async () => {
@@ -373,7 +373,7 @@ describe('Resi Registry administration', () => {
   it('Added project should return is valid', async () => {
     expect(await ResiRegistry['isValidProject(bytes32)'](PROJECT_TWO)).to.be.true
   })
-  
+
   it('Should not add project if invalid name', async () => {
     await expect(ResiRegistry.addProject(ethers.utils.formatBytes32String(''))).to.be.revertedWith(
       'ResiRegistry: INVALID NAME'

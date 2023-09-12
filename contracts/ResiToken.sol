@@ -196,7 +196,7 @@ contract ResiToken is
             IResiSBT(SERIE_SBT).mintByResiToken(_account, _role);
         }
         _mint(_account, _amount);
-        uint256 activeSerie = IResiRegistry(RESI_REGISTRY).activeSerie();
+        uint256 activeSerie = IResiRegistry(RESI_REGISTRY).activeSerieId();
         IResiSBT(SERIE_SBT).increaseResiTokenBalance(_account, _amount);
         IResiRegistry(RESI_REGISTRY).increaseSerieSupply(activeSerie, _amount);
         emit ResiMinted(_account, _amount);
@@ -209,7 +209,7 @@ contract ResiToken is
      */
     function exit(uint256 _serieId, bytes32 _role) external nonReentrant {
         _checkExit(_role);
-        address SERIE_SBT = IResiRegistry(RESI_REGISTRY).getSBTSerie(_serieId);
+        address SERIE_SBT = IResiRegistry(RESI_REGISTRY).seriesSBTs(_serieId);
         require(SERIE_SBT != address(0), "ResiToken: NO SBT SERIE SET");
         require(IERC20(SERIE_SBT).balanceOf(_msgSender()) == 1, "ResiToken: USER HAS NO SBT");
         uint256 resiSerieBalance = this.balanceOf(_msgSender());
