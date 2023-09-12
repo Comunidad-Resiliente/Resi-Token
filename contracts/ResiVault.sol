@@ -1,13 +1,13 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.18;
 
-import "./interfaces/IResiVault.sol";
-import "./interfaces/IResiRegistry.sol";
+import {IResiVault} from "./interfaces/IResiVault.sol";
+import {IResiRegistry} from "./interfaces/IResiRegistry.sol";
 
-import "@openzeppelin/contracts-upgradeable/security/ReentrancyGuardUpgradeable.sol";
-import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
-import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
-import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
+import {ReentrancyGuardUpgradeable} from "@openzeppelin/contracts-upgradeable/security/ReentrancyGuardUpgradeable.sol";
+import {OwnableUpgradeable} from "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
+import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
+import {SafeERC20} from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 
 contract ResiVault is IResiVault, OwnableUpgradeable, ReentrancyGuardUpgradeable {
     ///@dev Main token address
@@ -151,13 +151,6 @@ contract ResiVault is IResiVault, OwnableUpgradeable, ReentrancyGuardUpgradeable
         IERC20(TOKEN).safeTransfer(RESI_REGISTRY, quote * _amount);
 
         emit TokenReleased(TOKEN, _amount);
-    }
-
-    /**
-     * @dev recieve eth function
-     */
-    receive() external payable {
-        emit EtherReceived(_msgSender(), msg.value);
     }
 
     /**

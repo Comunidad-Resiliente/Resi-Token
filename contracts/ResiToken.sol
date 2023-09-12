@@ -1,17 +1,18 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.18;
 
-import "./interfaces/IResiToken.sol";
-import "./interfaces/IResiRegistry.sol";
-import "./interfaces/IResiSBT.sol";
+import {IResiToken} from "./interfaces/IResiToken.sol";
+import {IResiRegistry} from "./interfaces/IResiRegistry.sol";
+import {IResiSBT} from "./interfaces/IResiSBT.sol";
 
-import "@openzeppelin/contracts-upgradeable/security/ReentrancyGuardUpgradeable.sol";
-import "@openzeppelin/contracts-upgradeable/access/AccessControlEnumerableUpgradeable.sol";
-import "@openzeppelin/contracts-upgradeable/token/ERC20/ERC20Upgradeable.sol";
-import "@openzeppelin/contracts-upgradeable/token/ERC20/extensions/ERC20BurnableUpgradeable.sol";
-import "@openzeppelin/contracts-upgradeable/token/ERC20/extensions/ERC20PausableUpgradeable.sol";
-import "@openzeppelin/contracts-upgradeable/token/ERC721/IERC721Upgradeable.sol";
-import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
+import {ReentrancyGuardUpgradeable} from "@openzeppelin/contracts-upgradeable/security/ReentrancyGuardUpgradeable.sol";
+import {AccessControlEnumerableUpgradeable} from "@openzeppelin/contracts-upgradeable/access/AccessControlEnumerableUpgradeable.sol";
+import {EnumerableSetUpgradeable} from "@openzeppelin/contracts-upgradeable/utils/structs/EnumerableSetUpgradeable.sol";
+import {ERC20Upgradeable} from "@openzeppelin/contracts-upgradeable/token/ERC20/ERC20Upgradeable.sol";
+import {ERC20BurnableUpgradeable} from "@openzeppelin/contracts-upgradeable/token/ERC20/extensions/ERC20BurnableUpgradeable.sol";
+import {ERC20PausableUpgradeable} from "@openzeppelin/contracts-upgradeable/token/ERC20/extensions/ERC20PausableUpgradeable.sol";
+import {IERC721Upgradeable} from "@openzeppelin/contracts-upgradeable/token/ERC721/IERC721Upgradeable.sol";
+import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 
 /// @title Resi Token Contract
 /// @author Alejo Lovallo
@@ -60,7 +61,6 @@ contract ResiToken is
         _grantRole(TREASURY_ROLE, _treasury);
 
         ///@dev Admin role can add/remove admins in addition to add/remove all other roles
-        _setRoleAdmin(ADMIN_ROLE, ADMIN_ROLE);
         _setRoleAdmin(TREASURY_ROLE, ADMIN_ROLE);
         _setRoleAdmin(PROJECT_BUILDER_ROLE, ADMIN_ROLE);
         _setRoleAdmin(RESI_BUILDER_ROLE, ADMIN_ROLE);
@@ -216,7 +216,7 @@ contract ResiToken is
 
         IResiRegistry(RESI_REGISTRY).withdrawFromVault(_serieId, resiSerieBalance, _msgSender());
         IResiSBT(SERIE_SBT).decreaseResiTokenBalance(_msgSender(), resiSerieBalance);
-        _transfer(_msgSender(), IResiRegistry(RESI_REGISTRY).getTreasuryVault(), resiSerieBalance);
+        _transfer(_msgSender(), IResiRegistry(RESI_REGISTRY).treasuryVault(), resiSerieBalance);
 
         emit Exit(_msgSender(), resiSerieBalance, _serieId);
     }

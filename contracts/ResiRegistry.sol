@@ -1,13 +1,13 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.18;
 
-import "./interfaces/IResiRegistry.sol";
-import "./interfaces/IResiVault.sol";
+import {IResiRegistry} from "./interfaces/IResiRegistry.sol";
+import {IResiVault} from "./interfaces/IResiVault.sol";
 
-import "@openzeppelin/contracts-upgradeable/security/ReentrancyGuardUpgradeable.sol";
-import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
-import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
-import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
+import {ReentrancyGuardUpgradeable} from "@openzeppelin/contracts-upgradeable/security/ReentrancyGuardUpgradeable.sol";
+import {OwnableUpgradeable} from "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
+import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
+import {SafeERC20} from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 
 /// @title Resi Registry Contract
 /// @author Alejo Lovallo
@@ -17,7 +17,7 @@ contract ResiRegistry is IResiRegistry, OwnableUpgradeable, ReentrancyGuardUpgra
     address public RESI_TOKEN;
 
     /// @dev Global Treasury vault address handled by admin protocol
-    address private TREASURY_VAULT;
+    address public treasuryVault;
 
     /// @dev current serie running
     uint256 public activeSerieId;
@@ -98,14 +98,6 @@ contract ResiRegistry is IResiRegistry, OwnableUpgradeable, ReentrancyGuardUpgra
         return series[_serieId].currentSupply;
     }
 
-    /**
-     * @dev Get Treasury vault address
-     * @return treasury addresss
-     */
-    function getTreasuryVault() external view returns (address) {
-        return TREASURY_VAULT;
-    }
-
     /**************************** INTERFACE  ****************************/
 
     /**
@@ -124,7 +116,7 @@ contract ResiRegistry is IResiRegistry, OwnableUpgradeable, ReentrancyGuardUpgra
      */
     function setTreasuryVault(address _treasuryVault) external onlyOwner {
         require(_treasuryVault != address(0), "ResiRegistry: INVALID VAULT ADDRESS");
-        TREASURY_VAULT = _treasuryVault;
+        treasuryVault = _treasuryVault;
         emit TreasuryVaultSet(_treasuryVault);
     }
 
