@@ -58,15 +58,6 @@ describe('Resi Token initial', () => {
       )
     })
 
-    it('Should get role count', async () => {
-      //GIVEN
-      const expectedRoleCount = 3
-      //WHEN
-      const roleCount = await ResiToken.getRoleCount()
-      //THEN
-      expect(expectedRoleCount).to.be.equal(roleCount)
-    })
-
     it('Should not add mentor', async () => {
       const fakeProject = keccak256(toUtf8Bytes('Fake project'))
       await expect(ResiToken.addMentor(await user.getAddress(), 0, fakeProject)).to.be.revertedWith(
@@ -222,7 +213,7 @@ describe('Inteface', async () => {
     //GIVEN
     const projectBuilderToRemove = await userThree.getAddress()
     //WHEN
-    await ResiToken.removeUserRole(PROJECT_BUILDER_ROLE, projectBuilderToRemove)
+    await ResiToken.revokeRole(PROJECT_BUILDER_ROLE, projectBuilderToRemove)
     const amountOfProjectBuilders = await ResiToken.getRoleMemberCount(PROJECT_BUILDER_ROLE)
     const isProjectBuilder = await ResiToken.hasRole(PROJECT_BUILDER_ROLE, projectBuilderToRemove)
     //THEN

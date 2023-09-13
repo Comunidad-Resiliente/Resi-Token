@@ -65,16 +65,6 @@ contract ResiSBT is IResiSBT, IERC5192, OwnableUpgradeable, ERC721URIStorageUpgr
 
     /**************************** GETTERS  ****************************/
     /**
-     * @dev Retrieve token uri from id
-     * @param tokenId token id to retrieve uri
-     * @return uri
-     * @custom:experimental The following function is override required by Solidity.
-     */
-    function tokenURI(uint256 tokenId) public view override(ERC721URIStorageUpgradeable) returns (string memory) {
-        return super.tokenURI(tokenId);
-    }
-
-    /**
      * @dev Know if a sbt is locked
      * @param tokenId sbt token id
      * @return is sbt locked
