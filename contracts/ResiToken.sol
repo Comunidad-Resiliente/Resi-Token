@@ -45,7 +45,6 @@ contract ResiToken is
     function initialize(address _treasury, address _registry) public initializer {
         require(_treasury != address(0), "INVALID TREASURY ADDRESS");
         require(_registry != address(0), "INVALID REGISTRY ADDRESS");
-        __Context_init_unchained();
         __AccessControl_init_unchained();
         __ReentrancyGuard_init_unchained();
         __ERC20_init_unchained("ResiToken", "RESI");
@@ -68,16 +67,6 @@ contract ResiToken is
         RESI_REGISTRY = _registry;
 
         emit TokenInitialized(_treasury, _registry);
-    }
-
-    /**************************** GETTERS  ****************************/
-
-    /**
-     * @dev Get amount of roles
-     * @return amount of roles
-     */
-    function getRoleCount() external view returns (uint256) {
-        return _rolesSet.length();
     }
 
     /**************************** INTERFACE  ****************************/
@@ -132,25 +121,6 @@ contract ResiToken is
      */
     function addRolesBatch(bytes32 _role, address[] memory _addresses) external onlyRole(ADMIN_ROLE) whenNotPaused {
         _addRolesBatch(_role, _addresses);
-    }
-
-    /**
-     *  @dev unassign role for user
-     * @param _role role
-     * @param _user user address to remove
-     */
-    function removeUserRole(
-        bytes32 _role,
-        address _user
-    )
-        external
-        isValidAddress(_user, "ResiToken: INVALID USER ADDRESS")
-        validRole(_role)
-        onlyRole(ADMIN_ROLE)
-        whenNotPaused
-    {
-        _revokeRole(_role, _user);
-        emit ResiRoleRemoved(_role, _user);
     }
 
     /**
@@ -225,7 +195,7 @@ contract ResiToken is
      *  @dev burn Resi Token
      * @param _amount amount to burn
      */
-    function burn(uint256 _amount, uint256 _serieId) external nonReentrant {
+    function burn(uint256 _amount, uint256 _serieId) external {
         require(hasRole(TREASURY_ROLE, _msgSender()) || hasRole(ADMIN_ROLE, _msgSender()), "ResiToken: INVALID ROLE");
         ERC20BurnableUpgradeable.burn(_amount);
         IResiRegistry(RESI_REGISTRY).decreaseSerieSupply(_serieId, _amount);

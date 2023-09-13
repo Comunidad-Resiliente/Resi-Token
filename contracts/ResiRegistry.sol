@@ -31,10 +31,9 @@ contract ResiRegistry is IResiRegistry, OwnableUpgradeable, ReentrancyGuardUpgra
 
     using SafeERC20 for IERC20;
 
-    function initialize() public initializer {
-        __Context_init_unchained();
-        __Ownable_init_unchained();
-        __ReentrancyGuard_init_unchained();
+    /// @custom:oz-upgrades-unsafe-allow constructor
+    constructor() {
+        _disableInitializers();
         emit RegistryInitialized();
     }
 
@@ -195,7 +194,7 @@ contract ResiRegistry is IResiRegistry, OwnableUpgradeable, ReentrancyGuardUpgra
      * @param _serieId serie id
      * @param _amount amount to increase
      */
-    function increaseSerieSupply(uint256 _serieId, uint256 _amount) external onlyRESIToken nonReentrant {
+    function increaseSerieSupply(uint256 _serieId, uint256 _amount) external onlyRESIToken {
         _increaseSerieSupply(_serieId, _amount);
     }
 
@@ -205,7 +204,7 @@ contract ResiRegistry is IResiRegistry, OwnableUpgradeable, ReentrancyGuardUpgra
      * @param _serieId serie id
      * @param _amount amount to decrease
      */
-    function decreaseSerieSupply(uint256 _serieId, uint256 _amount) external onlyRESIToken nonReentrant {
+    function decreaseSerieSupply(uint256 _serieId, uint256 _amount) external onlyRESIToken {
         _decreaseSerieSupply(_serieId, _amount);
     }
 
@@ -248,7 +247,7 @@ contract ResiRegistry is IResiRegistry, OwnableUpgradeable, ReentrancyGuardUpgra
     ) internal view onlyOwner {
         require(!(series[activeSerieId].active), "ResiRegistry: CURRENT SERIE IS NOT CLOSED YET");
         require(_startDate >= block.timestamp, "ResiRegistry: INVALID START DATE");
-        require(_endDate >= _startDate, "ResiRegistry: INVALID END DATE");
+        require(_endDate > _startDate, "ResiRegistry: INVALID END DATE");
         require(_numberOfProjects > 0, "ResiRegistry: PROJECTS MUST BE MORE THAN ZERO");
         require(_maxSupply > 0, "ResiRegistry: MAX SUPPLY TO EMIT MSUT BE GREATER THAN ZERO");
         require(_vault != address(0), "ResiRegistry: INVALID VAULT CONTRACT");
@@ -313,7 +312,7 @@ contract ResiRegistry is IResiRegistry, OwnableUpgradeable, ReentrancyGuardUpgra
         require(_amount > 0, "ResiRegistry: INVALID AMOUNT");
         require(_to != address(0), "ResiRegistry: INVALID RECEIVER");
         require(series[_serieId].currentSupply > 0, "ResiRegistry: NO MORE SUPPLY TO WITHDRAW");
-        require(series[_serieId].currentSupply - _amount > 0, "ResiRegistry: INVALID WITHDRAW AMOUNT");
+        require(series[_serieId].currentSupply - _amount >= 0, "ResiRegistry: INVALID WITHDRAW AMOUNT");
 
         address vaultToken = IResiVault(series[_serieId].vault).getMainToken();
 
@@ -323,7 +322,7 @@ contract ResiRegistry is IResiRegistry, OwnableUpgradeable, ReentrancyGuardUpgra
 
         require(afterBalance > beforeBalance, "ResiRegistry: SOMETHING WENT WRONG WITHDRAWING FROM VAULT");
 
-        IERC20(vaultToken).safeTransfer(_to, afterBalance);
+        IERC20(vaultToken).safeTransfer(_to, afterBalance - beforeBalance);
 
         emit WithdrawFromVault(_serieId, _amount, _to);
     }
