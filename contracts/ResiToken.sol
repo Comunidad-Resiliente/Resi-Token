@@ -69,6 +69,15 @@ contract ResiToken is
         emit TokenInitialized(_treasury, _registry);
     }
 
+    /**************************** SETTERS  ****************************/
+    function pause() external onlyRole(ADMIN_ROLE) whenNotPaused {
+        _pause();
+    }
+
+    function unpause() external onlyRole(ADMIN_ROLE) whenPaused {
+        _unpause();
+    }
+
     /**************************** INTERFACE  ****************************/
 
     /**
@@ -177,7 +186,7 @@ contract ResiToken is
      * @param _serieId serie id
      * @param _role user role
      */
-    function exit(uint256 _serieId, bytes32 _role) external nonReentrant {
+    function exit(uint256 _serieId, bytes32 _role) external nonReentrant whenNotPaused {
         _checkExit(_role);
         address SERIE_SBT = IResiRegistry(RESI_REGISTRY).seriesSBTs(_serieId);
         require(SERIE_SBT != address(0), "ResiToken: NO SBT SERIE SET");

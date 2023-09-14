@@ -27,13 +27,13 @@ contract ResiRegistry is IResiRegistry, OwnableUpgradeable, ReentrancyGuardUpgra
     /// @dev serieId => SBT
     mapping(uint256 => address) public seriesSBTs;
     /// @dev project name => Project info
-    mapping(bytes32 => Project) public projects;
+    mapping(bytes32 projectName => Project) public projects;
 
     using SafeERC20 for IERC20;
 
-    /// @custom:oz-upgrades-unsafe-allow constructor
-    constructor() {
-        _disableInitializers();
+    function initialize() public initializer {
+        __Ownable_init_unchained();
+        __ReentrancyGuard_init_unchained();
         emit RegistryInitialized();
     }
 
@@ -261,12 +261,13 @@ contract ResiRegistry is IResiRegistry, OwnableUpgradeable, ReentrancyGuardUpgra
     function _addProject(bytes32 _name) internal onlyOwner {
         require(series[activeSerieId].created, "ResiRegistry: SERIE INACTIVE");
         require(_name != bytes32(0), "ResiRegistry: INVALID NAME");
+        require(!projects[_name].created, "ResiRegistry: PROJECT ALREADY EXISTS");
         require(
             series[activeSerieId].currentProjects < series[activeSerieId].numberOfProjects,
             "ResiRegistry: MAX PROJECTS SERIES REACHED"
         );
         series[activeSerieId].currentProjects++;
-        Project memory newProject = Project({serie: activeSerieId, active: true});
+        Project memory newProject = Project({serie: activeSerieId, active: true, created: true});
         projects[_name] = newProject;
         emit ProjectAdded(_name, activeSerieId);
     }

@@ -17,6 +17,7 @@ interface IResiRegistry {
     struct Project {
         uint256 serie;
         bool active;
+        bool created;
     }
 
     function createSerie(
