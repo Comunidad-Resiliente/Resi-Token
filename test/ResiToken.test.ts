@@ -76,7 +76,7 @@ describe('Resi Token initial', () => {
 
     it('Should not allow to remove mentor to anybody', async () => {
       await expect(
-        ResiToken.connect(invalidSigner).removeUserRole(MENTOR_ROLE, await deployer.getAddress())
+        ResiToken.connect(invalidSigner).revokeRole(MENTOR_ROLE, await deployer.getAddress())
       ).to.be.revertedWith(
         `AccessControl: account ${(await invalidSigner.getAddress()).toLowerCase()} is missing role ${ADMIN_ROLE}`
       )
@@ -98,7 +98,7 @@ describe('Resi Token initial', () => {
 
     it('Should not allow to remove resi builder to anybody', async () => {
       await expect(
-        ResiToken.connect(invalidSigner).removeUserRole(RESI_BUILDER_ROLE, await deployer.getAddress())
+        ResiToken.connect(invalidSigner).revokeRole(RESI_BUILDER_ROLE, await deployer.getAddress())
       ).to.be.revertedWith(
         `AccessControl: account ${(await invalidSigner.getAddress()).toLowerCase()} is missing role ${ADMIN_ROLE}`
       )
@@ -186,7 +186,7 @@ describe('Inteface', async () => {
     const mentorToRemove = await userTwo.getAddress()
     const mentorCount = await ResiToken.getRoleMemberCount(MENTOR_ROLE)
     //WHEN
-    await ResiToken.removeUserRole(MENTOR_ROLE, mentorToRemove)
+    await ResiToken.revokeRole(MENTOR_ROLE, mentorToRemove)
     const newMentorCount = await ResiToken.getRoleMemberCount(MENTOR_ROLE)
     const isMentor = await ResiToken.hasRole(MENTOR_ROLE, mentorToRemove)
     //THEN
@@ -237,7 +237,7 @@ describe('Inteface', async () => {
     //GIVEN
     const resiBuilderToRemove = await userThree.getAddress()
     //WHEN
-    await ResiToken.removeUserRole(RESI_BUILDER_ROLE, resiBuilderToRemove)
+    await ResiToken.revokeRole(RESI_BUILDER_ROLE, resiBuilderToRemove)
     const amountOfResiBuilders = await ResiToken.getRoleMemberCount(RESI_BUILDER_ROLE)
     const isResiBuilder = await ResiToken.hasRole(RESI_BUILDER_ROLE, resiBuilderToRemove)
     //THEN
