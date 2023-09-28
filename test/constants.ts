@@ -2,6 +2,7 @@ import {keccak256, toUtf8Bytes} from 'ethers/lib/utils'
 import {BigNumber} from 'ethers'
 import {ethers} from 'hardhat'
 
+export const DEFAULT_ADMIN_ROLE = '0x0000000000000000000000000000000000000000000000000000000000000000'
 export const ADMIN_ROLE = keccak256(toUtf8Bytes('ADMIN_ROLE'))
 export const MINTER_ROLE = keccak256(toUtf8Bytes('MINTER_ROLE'))
 export const MENTOR_ROLE = keccak256(toUtf8Bytes('MENTOR_ROLE'))

@@ -3,11 +3,13 @@ const networks: any = {
     chainId: 31337,
     url: 'http://127.0.0.1:8545',
     allowUnlimitedContractSize: true,
-    timeout: 1000 * 60
+    timeout: 1000 * 60,
+    saveDeployments: true
   },
   hardhat: {
     live: false,
     allowUnlimitedContractSize: true,
+    saveDeployments: true,
     tags: ['test', 'local']
   },
   polygon: {

@@ -85,6 +85,13 @@ contract ResiSBT is IResiSBT, IERC5192, OwnableUpgradeable, ERC721URIStorageUpgr
             IResiRegistry(RESI_REGISTRY).activeSerieId() == _serieId);
     }
 
+    /**
+     * @dev Function for upgradeability.
+     */
+    function version() external pure returns (uint256) {
+        return 1;
+    }
+
     /**************************** INTERFACE  ****************************/
 
     /**

@@ -4,7 +4,7 @@ import {printDeploySuccessful, printInfo} from '../utils'
 import {ethers} from 'hardhat'
 
 const version = 'v1.0.0'
-const ContractName = 'ResiRegistry'
+const ContractName = 'ResiProxyAdmin'
 
 const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   const {deployments, getNamedAccounts, network} = hre
@@ -13,21 +13,16 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
 
   printInfo(`\n Deploying ${ContractName} contract on ${network.name}...`)
 
-  const RegistryResult = await deploy(ContractName, {
-    args: [],
+  const ResiProxyAdminResult = await deploy(ContractName, {
+    args: [deployer],
     contract: ContractName,
     from: deployer,
     skipIfAlreadyDeployed: false
   })
 
-  const resiRegistryAddress = RegistryResult.address
-  const RegistryContract = await ethers.getContract(ContractName)
+  const resiProxyAdminAddress = ResiProxyAdminResult.address
 
-  if (RegistryResult.newlyDeployed) {
-    await RegistryContract.initialize()
-  }
-
-  printDeploySuccessful(ContractName, resiRegistryAddress)
+  printDeploySuccessful(ContractName, resiProxyAdminAddress)
 
   return true
 }

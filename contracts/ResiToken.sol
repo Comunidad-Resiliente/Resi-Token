@@ -69,6 +69,13 @@ contract ResiToken is
         emit TokenInitialized(_treasury, _registry);
     }
 
+    /**
+     * @dev Function for upgradeability.
+     */
+    function version() external pure returns (uint256) {
+        return 1;
+    }
+
     /**************************** SETTERS  ****************************/
     function pause() external onlyRole(ADMIN_ROLE) whenNotPaused {
         _pause();

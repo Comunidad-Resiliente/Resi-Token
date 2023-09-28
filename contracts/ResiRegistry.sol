@@ -97,6 +97,13 @@ contract ResiRegistry is IResiRegistry, OwnableUpgradeable, ReentrancyGuardUpgra
         return series[_serieId].currentSupply;
     }
 
+    /**
+     * @dev Function for upgradeability.
+     */
+    function version() external pure returns (uint256) {
+        return 1;
+    }
+
     /**************************** INTERFACE  ****************************/
 
     /**
