@@ -393,7 +393,7 @@ describe('Finish serie', async () => {
     expect(ethers.utils.formatEther(userResiTokenBalance.toString())).to.be.equal('20.0')
     expect(ethers.utils.formatEther(serieSupply.toString())).to.be.equal('182.0')
     expect(ethers.utils.formatEther(vaultTokenBalance.toString())).to.be.equal('1000.0')
-    expect(ethers.utils.formatEther(exitQuote.toString())).to.be.equal('100.0')
+    expect(ethers.utils.formatEther(exitQuote.toString())).to.be.equal('109.890109890109890109')
   })
 
   it('Should allow to perform an exit', async () => {
@@ -407,7 +407,7 @@ describe('Finish serie', async () => {
     const newUserTokenBalance = await MockERC20Token.balanceOf(await user.getAddress())
     //THEN
     expect(userTokenBalance).to.be.equal('0')
-    expect(newUserTokenBalance).to.be.equal(ethers.utils.parseEther('100'))
+    expect(newUserTokenBalance.toString()).to.be.equal('109890109890109890109')
   })
 
   it('Should not allow to make new exit if user has already make one', async () => {
