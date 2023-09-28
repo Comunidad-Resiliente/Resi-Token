@@ -241,6 +241,19 @@
     "type": "function"
   },
   {
+    "inputs": [],
+    "name": "activeSerieId",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
     "inputs": [
       {
         "internalType": "bytes32",
@@ -276,19 +289,19 @@
   {
     "inputs": [
       {
-        "internalType": "uint256",
+        "internalType": "uint40",
         "name": "_startDate",
-        "type": "uint256"
+        "type": "uint40"
       },
       {
-        "internalType": "uint256",
+        "internalType": "uint40",
         "name": "_endDate",
-        "type": "uint256"
+        "type": "uint40"
       },
       {
-        "internalType": "uint256",
+        "internalType": "uint128",
         "name": "_numberOfProjects",
-        "type": "uint256"
+        "type": "uint128"
       },
       {
         "internalType": "uint256",
@@ -338,27 +351,8 @@
     "type": "function"
   },
   {
-    "inputs": [
-      {
-        "internalType": "uint256",
-        "name": "_serieId",
-        "type": "uint256"
-      }
-    ],
-    "name": "getSBTSerie",
-    "outputs": [
-      {
-        "internalType": "address",
-        "name": "",
-        "type": "address"
-      }
-    ],
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
     "inputs": [],
-    "name": "getSBTSerie",
+    "name": "getActiveSBTSerie",
     "outputs": [
       {
         "internalType": "address",
@@ -381,12 +375,12 @@
     "outputs": [
       {
         "internalType": "bool",
-        "name": "",
+        "name": "isActive",
         "type": "bool"
       },
       {
         "internalType": "uint256",
-        "name": "",
+        "name": "currentSupply",
         "type": "uint256"
       }
     ],
@@ -407,19 +401,6 @@
         "internalType": "uint256",
         "name": "",
         "type": "uint256"
-      }
-    ],
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
-    "inputs": [],
-    "name": "getTreasuryVault",
-    "outputs": [
-      {
-        "internalType": "address",
-        "name": "",
-        "type": "address"
       }
     ],
     "stateMutability": "view",
@@ -510,7 +491,7 @@
     "inputs": [
       {
         "internalType": "bytes32",
-        "name": "",
+        "name": "projectName",
         "type": "bytes32"
       }
     ],
@@ -524,6 +505,11 @@
       {
         "internalType": "bool",
         "name": "active",
+        "type": "bool"
+      },
+      {
+        "internalType": "bool",
+        "name": "created",
         "type": "bool"
       }
     ],
@@ -571,29 +557,29 @@
         "type": "bool"
       },
       {
-        "internalType": "uint256",
-        "name": "id",
-        "type": "uint256"
+        "internalType": "address",
+        "name": "vault",
+        "type": "address"
       },
       {
-        "internalType": "uint256",
+        "internalType": "uint40",
         "name": "startDate",
-        "type": "uint256"
+        "type": "uint40"
       },
       {
-        "internalType": "uint256",
+        "internalType": "uint40",
         "name": "endDate",
-        "type": "uint256"
+        "type": "uint40"
       },
       {
-        "internalType": "uint256",
+        "internalType": "uint128",
         "name": "currentProjects",
-        "type": "uint256"
+        "type": "uint128"
       },
       {
-        "internalType": "uint256",
+        "internalType": "uint128",
         "name": "numberOfProjects",
-        "type": "uint256"
+        "type": "uint128"
       },
       {
         "internalType": "uint256",
@@ -604,11 +590,6 @@
         "internalType": "uint256",
         "name": "maxSupply",
         "type": "uint256"
-      },
-      {
-        "internalType": "address",
-        "name": "vault",
-        "type": "address"
       }
     ],
     "stateMutability": "view",
@@ -670,6 +651,32 @@
     "name": "transferOwnership",
     "outputs": [],
     "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "treasuryVault",
+    "outputs": [
+      {
+        "internalType": "address",
+        "name": "",
+        "type": "address"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "version",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "pure",
     "type": "function"
   },
   {

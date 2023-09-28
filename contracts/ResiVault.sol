@@ -155,7 +155,7 @@ contract ResiVault is IResiVault, OwnableUpgradeable, ReentrancyGuardUpgradeable
         uint256 quote = _getExitQuote(_amount);
         require(quote > 0, "ResiVault: Invalid quote");
 
-        IERC20(TOKEN).safeTransfer(RESI_REGISTRY, quote * _amount);
+        IERC20(TOKEN).safeTransfer(RESI_REGISTRY, quote);
 
         emit TokenReleased(TOKEN, _amount);
     }

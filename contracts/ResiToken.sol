@@ -57,7 +57,7 @@ contract ResiToken is
         _rolesSet.add(RESI_BUILDER_ROLE);
 
         _grantRole(ADMIN_ROLE, _msgSender());
-        _grantRole(DEFAULT_ADMIN_ROLE,_msgSender());
+        _grantRole(DEFAULT_ADMIN_ROLE, _msgSender());
         _grantRole(TREASURY_ROLE, _treasury);
 
         ///@dev Admin role can add/remove admins in addition to add/remove all other roles
