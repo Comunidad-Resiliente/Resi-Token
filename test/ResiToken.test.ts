@@ -4,6 +4,7 @@ import {getEndingSerieEnvironmentInitialization, getManualEnvironemntInitializat
 import {Signer} from 'ethers'
 import {MockERC20, ResiRegistry, ResiSBT, ResiToken, ResiVault} from '../typechain-types'
 import {
+  DEFAULT_ADMIN_ROLE,
   ADMIN_ROLE,
   MENTOR_ROLE,
   PROJECT_BUILDER_ROLE,
@@ -58,15 +59,6 @@ describe('Resi Token initial', () => {
       )
     })
 
-    it('Should get role count', async () => {
-      //GIVEN
-      const expectedRoleCount = 3
-      //WHEN
-      const roleCount = await ResiToken.getRoleCount()
-      //THEN
-      expect(expectedRoleCount).to.be.equal(roleCount)
-    })
-
     it('Should not add mentor', async () => {
       const fakeProject = keccak256(toUtf8Bytes('Fake project'))
       await expect(ResiToken.addMentor(await user.getAddress(), 0, fakeProject)).to.be.revertedWith(
@@ -85,9 +77,11 @@ describe('Resi Token initial', () => {
 
     it('Should not allow to remove mentor to anybody', async () => {
       await expect(
-        ResiToken.connect(invalidSigner).removeUserRole(MENTOR_ROLE, await deployer.getAddress())
+        ResiToken.connect(invalidSigner).revokeRole(MENTOR_ROLE, await deployer.getAddress())
       ).to.be.revertedWith(
-        `AccessControl: account ${(await invalidSigner.getAddress()).toLowerCase()} is missing role ${ADMIN_ROLE}`
+        `AccessControl: account ${(
+          await invalidSigner.getAddress()
+        ).toLowerCase()} is missing role ${DEFAULT_ADMIN_ROLE}`
       )
     })
 
@@ -107,7 +101,7 @@ describe('Resi Token initial', () => {
 
     it('Should not allow to remove resi builder to anybody', async () => {
       await expect(
-        ResiToken.connect(invalidSigner).removeUserRole(RESI_BUILDER_ROLE, await deployer.getAddress())
+        ResiToken.connect(invalidSigner).revokeRole(RESI_BUILDER_ROLE, await deployer.getAddress())
       ).to.be.revertedWith(
         `AccessControl: account ${(await invalidSigner.getAddress()).toLowerCase()} is missing role ${ADMIN_ROLE}`
       )
@@ -195,7 +189,7 @@ describe('Inteface', async () => {
     const mentorToRemove = await userTwo.getAddress()
     const mentorCount = await ResiToken.getRoleMemberCount(MENTOR_ROLE)
     //WHEN
-    await ResiToken.removeUserRole(MENTOR_ROLE, mentorToRemove)
+    await ResiToken.revokeRole(MENTOR_ROLE, mentorToRemove)
     const newMentorCount = await ResiToken.getRoleMemberCount(MENTOR_ROLE)
     const isMentor = await ResiToken.hasRole(MENTOR_ROLE, mentorToRemove)
     //THEN
@@ -222,7 +216,7 @@ describe('Inteface', async () => {
     //GIVEN
     const projectBuilderToRemove = await userThree.getAddress()
     //WHEN
-    await ResiToken.removeUserRole(PROJECT_BUILDER_ROLE, projectBuilderToRemove)
+    await ResiToken.revokeRole(PROJECT_BUILDER_ROLE, projectBuilderToRemove)
     const amountOfProjectBuilders = await ResiToken.getRoleMemberCount(PROJECT_BUILDER_ROLE)
     const isProjectBuilder = await ResiToken.hasRole(PROJECT_BUILDER_ROLE, projectBuilderToRemove)
     //THEN
@@ -246,7 +240,7 @@ describe('Inteface', async () => {
     //GIVEN
     const resiBuilderToRemove = await userThree.getAddress()
     //WHEN
-    await ResiToken.removeUserRole(RESI_BUILDER_ROLE, resiBuilderToRemove)
+    await ResiToken.revokeRole(RESI_BUILDER_ROLE, resiBuilderToRemove)
     const amountOfResiBuilders = await ResiToken.getRoleMemberCount(RESI_BUILDER_ROLE)
     const isResiBuilder = await ResiToken.hasRole(RESI_BUILDER_ROLE, resiBuilderToRemove)
     //THEN
@@ -399,7 +393,7 @@ describe('Finish serie', async () => {
     expect(ethers.utils.formatEther(userResiTokenBalance.toString())).to.be.equal('20.0')
     expect(ethers.utils.formatEther(serieSupply.toString())).to.be.equal('182.0')
     expect(ethers.utils.formatEther(vaultTokenBalance.toString())).to.be.equal('1000.0')
-    expect(ethers.utils.formatEther(exitQuote.toString())).to.be.equal('100.0')
+    expect(ethers.utils.formatEther(exitQuote.toString())).to.be.equal('109.890109890109890109')
   })
 
   it('Should allow to perform an exit', async () => {
@@ -413,7 +407,7 @@ describe('Finish serie', async () => {
     const newUserTokenBalance = await MockERC20Token.balanceOf(await user.getAddress())
     //THEN
     expect(userTokenBalance).to.be.equal('0')
-    expect(newUserTokenBalance).to.be.equal(ethers.utils.parseEther('100'))
+    expect(newUserTokenBalance.toString()).to.be.equal('109890109890109890109')
   })
 
   it('Should not allow to make new exit if user has already make one', async () => {

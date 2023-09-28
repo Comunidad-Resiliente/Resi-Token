@@ -67,7 +67,7 @@ describe('Resi Registry', () => {
   })
 
   it('Get sbt serie should return zero address', async () => {
-    expect(await ResiRegistry['getSBTSerie()']()).to.be.equal(ethers.constants.AddressZero)
+    expect(await ResiRegistry['activeSerieId()']()).to.be.equal(ethers.constants.AddressZero)
   })
 
   it('Get serie state should return not active and none supply', async () => {
@@ -203,12 +203,12 @@ describe('Resi Registry', () => {
   it('Should allow to set treasury vault', async () => {
     //GIVEN
     const treasuryVaultToSet = await treasuryVault.getAddress()
-    const curentTreasuryVault = await ResiRegistry.getTreasuryVault()
+    const curentTreasuryVault = await ResiRegistry.treasuryVault()
     //WHEN
     expect(await ResiRegistry.setTreasuryVault(await treasuryVault.getAddress()))
       .to.emit(ResiRegistry, 'TreasuryVaultSet')
       .withArgs(treasuryVaultToSet)
-    const newTreasuryVault = await ResiRegistry.getTreasuryVault()
+    const newTreasuryVault = await ResiRegistry.treasuryVault()
     //THEN
     expect(curentTreasuryVault).to.be.equal(ethers.constants.AddressZero)
     expect(newTreasuryVault).to.be.equal(treasuryVaultToSet)
@@ -331,7 +331,7 @@ describe('Resi Registry administration', () => {
   })
 
   it('Should return zero address for sbt serie', async () => {
-    expect(await ResiRegistry['getSBTSerie(uint256)'](1)).to.be.equal(ethers.constants.AddressZero)
+    expect(await ResiRegistry['seriesSBTs(uint256)'](1)).to.be.equal(ethers.constants.AddressZero)
   })
 
   it('Should not create serie if ongoing serie', async () => {
@@ -373,7 +373,7 @@ describe('Resi Registry administration', () => {
   it('Added project should return is valid', async () => {
     expect(await ResiRegistry['isValidProject(bytes32)'](PROJECT_TWO)).to.be.true
   })
-  
+
   it('Should not add project if invalid name', async () => {
     await expect(ResiRegistry.addProject(ethers.utils.formatBytes32String(''))).to.be.revertedWith(
       'ResiRegistry: INVALID NAME'

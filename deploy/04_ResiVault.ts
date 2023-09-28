@@ -25,15 +25,20 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
     args: [],
     contract: ContractName,
     from: deployer,
+    proxy: {
+      proxyContract: 'OptimizedTransparentProxy',
+      viaAdminContract: 'ResiProxyAdmin',
+      execute: {
+        init: {
+          methodName: 'initialize',
+          args: [serieID, ResiToken.address, vaultToken, ResiRegistry.address]
+        }
+      }
+    },
     skipIfAlreadyDeployed: false
   })
 
   const resiVaultAddress = ResiVaultResult.address
-  const ResiVaultContract = await ethers.getContract(ContractName)
-
-  if (ResiVaultResult.newlyDeployed) {
-    await ResiVaultContract.initialize(serieID, ResiToken.address, vaultToken, ResiRegistry.address)
-  }
 
   printDeploySuccessful(ContractName, resiVaultAddress)
 
@@ -43,4 +48,5 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
 export default func
 const id = ContractName + version
 func.tags = [id, version]
+func.dependencies = ['ResiProxyAdmin']
 func.id = id

@@ -1,16 +1,17 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.18;
 
-import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
-import "@openzeppelin/contracts-upgradeable/access/IAccessControlUpgradeable.sol";
-import "@openzeppelin/contracts-upgradeable/security/ReentrancyGuardUpgradeable.sol";
-import "@openzeppelin/contracts-upgradeable/token/ERC721/extensions/ERC721URIStorageUpgradeable.sol";
-import "@openzeppelin/contracts/utils/Counters.sol";
+import {OwnableUpgradeable} from "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
+import {IAccessControlUpgradeable} from "@openzeppelin/contracts-upgradeable/access/IAccessControlUpgradeable.sol";
+import {ReentrancyGuardUpgradeable} from "@openzeppelin/contracts-upgradeable/security/ReentrancyGuardUpgradeable.sol";
+import {ERC721URIStorageUpgradeable} from "@openzeppelin/contracts-upgradeable/token/ERC721/extensions/ERC721URIStorageUpgradeable.sol";
+import {ERC721Upgradeable} from "@openzeppelin/contracts-upgradeable/token/ERC721/ERC721Upgradeable.sol";
+import {Counters} from "@openzeppelin/contracts/utils/Counters.sol";
 
-import "./interfaces/IResiSBT.sol";
-import "./interfaces/IResiRegistry.sol";
-import "./interfaces/IResiToken.sol";
-import "./interfaces/IERC5192.sol";
+import {IResiSBT} from "./interfaces/IResiSBT.sol";
+import {IResiRegistry} from "./interfaces/IResiRegistry.sol";
+import {IResiToken} from "./interfaces/IResiToken.sol";
+import {IERC5192} from "./interfaces/IERC5192.sol";
 
 /// @title Resi SBT Contract
 /// @author Alejo Lovallo
@@ -30,7 +31,7 @@ contract ResiSBT is IResiSBT, IERC5192, OwnableUpgradeable, ERC721URIStorageUpgr
     address public RESI_REGISTRY;
 
     /// @dev user => nickname
-    mapping(address => bytes32) public userNickNames;
+    mapping(address user => bytes32 nickname) public userNickNames;
     /// @dev user => resi erc20 balances
     mapping(address => uint256) public resiTokenBalances;
     /// @dev tokenId => isLocked
@@ -64,16 +65,6 @@ contract ResiSBT is IResiSBT, IERC5192, OwnableUpgradeable, ERC721URIStorageUpgr
 
     /**************************** GETTERS  ****************************/
     /**
-     * @dev Retrieve token uri from id
-     * @param tokenId token id to retrieve uri
-     * @return uri
-     * @custom:experimental The following function is override required by Solidity.
-     */
-    function tokenURI(uint256 tokenId) public view override(ERC721URIStorageUpgradeable) returns (string memory) {
-        return super.tokenURI(tokenId);
-    }
-
-    /**
      * @dev Know if a sbt is locked
      * @param tokenId sbt token id
      * @return is sbt locked
@@ -90,13 +81,15 @@ contract ResiSBT is IResiSBT, IERC5192, OwnableUpgradeable, ERC721URIStorageUpgr
      * @return whether is sbt receiver
      */
     function isSBTReceiver(address _account, bytes32 _role, uint256 _serieId) public view returns (bool) {
-        if (
-            IAccessControlUpgradeable(RESI_TOKEN).hasRole(_role, _account) &&
-            IResiRegistry(RESI_REGISTRY).activeSerie() == _serieId
-        ) {
-            return true;
-        }
-        return false;
+        return (IAccessControlUpgradeable(RESI_TOKEN).hasRole(_role, _account) &&
+            IResiRegistry(RESI_REGISTRY).activeSerieId() == _serieId);
+    }
+
+    /**
+     * @dev Function for upgradeability.
+     */
+    function version() external pure returns (uint256) {
+        return 1;
     }
 
     /**************************** INTERFACE  ****************************/
@@ -160,7 +153,7 @@ contract ResiSBT is IResiSBT, IERC5192, OwnableUpgradeable, ERC721URIStorageUpgr
      * @param _uri token uri for the sbts
      * @param _role role that all users must have
      */
-    function mintBatchByRole(address[] memory _to, string memory _uri, bytes32 _role) external onlyOwner {
+    function mintBatchByRole(address[] calldata _to, string memory _uri, bytes32 _role) external onlyOwner {
         for (uint256 i = 0; i < _to.length; i++) {
             _checkMint(_to[i], _role, _uri);
             _mintSBT(_to[i], _role, _uri);
@@ -286,23 +279,10 @@ contract ResiSBT is IResiSBT, IERC5192, OwnableUpgradeable, ERC721URIStorageUpgr
     }
 
     /**
+     *
      *  @dev Transfer from is forbidden in SBT contract
      */
-    function transferFrom(address, address, uint256) public pure override {
-        revert TransferForbidden("ResiSBT: NO TRANSFER FROM ALLOWED");
-    }
-
-    /**
-     * @dev Safe transfer from is forbidden in SBT contract
-     */
-    function safeTransferFrom(address, address, uint256) public pure override {
-        revert TransferForbidden("ResiSBT: NO TRANSFER FROM ALLOWED");
-    }
-
-    /**
-     * @dev Safe transfer from is forbidden in SBT contract
-     */
-    function safeTransferFrom(address, address, uint256, bytes memory) public pure override {
+    function _transfer(address, address, uint256) internal pure override {
         revert TransferForbidden("ResiSBT: NO TRANSFER FROM ALLOWED");
     }
 

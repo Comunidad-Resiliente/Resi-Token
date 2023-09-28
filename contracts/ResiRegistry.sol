@@ -1,14 +1,13 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.18;
 
-import "./interfaces/IResiRegistry.sol";
-import "./interfaces/IResiVault.sol";
+import {IResiRegistry} from "./interfaces/IResiRegistry.sol";
+import {IResiVault} from "./interfaces/IResiVault.sol";
 
-import "@openzeppelin/contracts-upgradeable/security/ReentrancyGuardUpgradeable.sol";
-import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
-import "@openzeppelin/contracts/utils/Address.sol";
-import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
-import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
+import {ReentrancyGuardUpgradeable} from "@openzeppelin/contracts-upgradeable/security/ReentrancyGuardUpgradeable.sol";
+import {OwnableUpgradeable} from "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
+import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
+import {SafeERC20} from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 
 /// @title Resi Registry Contract
 /// @author Alejo Lovallo
@@ -18,22 +17,21 @@ contract ResiRegistry is IResiRegistry, OwnableUpgradeable, ReentrancyGuardUpgra
     address public RESI_TOKEN;
 
     /// @dev Global Treasury vault address handled by admin protocol
-    address private TREASURY_VAULT;
+    address public treasuryVault;
 
     /// @dev current serie running
-    uint256 private activeSerieId;
+    uint256 public activeSerieId;
 
     /// @dev serieId => Serie info
     mapping(uint256 => Serie) public series;
     /// @dev serieId => SBT
     mapping(uint256 => address) public seriesSBTs;
     /// @dev project name => Project info
-    mapping(bytes32 => Project) public projects;
+    mapping(bytes32 projectName => Project) public projects;
 
     using SafeERC20 for IERC20;
 
     function initialize() public initializer {
-        __Context_init_unchained();
         __Ownable_init_unchained();
         __ReentrancyGuard_init_unchained();
         emit RegistryInitialized();
@@ -56,10 +54,9 @@ contract ResiRegistry is IResiRegistry, OwnableUpgradeable, ReentrancyGuardUpgra
      * @return if valid
      */
     function isValidProject(uint256 _serie, bytes32 _project) external view returns (bool) {
-        if (_serie == activeSerieId && projects[_project].serie == activeSerieId && projects[_project].active) {
-            return true;
-        }
-        return false;
+        Project storage proj = projects[_project];
+        uint256 _activeSerieId = activeSerieId;
+        return (_serie == _activeSerieId && proj.serie == _activeSerieId && proj.active);
     }
 
     /**
@@ -68,40 +65,27 @@ contract ResiRegistry is IResiRegistry, OwnableUpgradeable, ReentrancyGuardUpgra
      * @return if valid
      */
     function isValidProject(bytes32 _project) external view returns (bool) {
-        Project memory proj = projects[_project];
-        if (proj.serie == activeSerieId && proj.active == true) {
-            return true;
-        }
-        return false;
+        Project storage proj = projects[_project];
+        return (proj.serie == activeSerieId && proj.active);
     }
 
     /**
      * @dev Get active serie sbt token
      * @return sbt address
      */
-    function getSBTSerie() external view returns (address) {
+    function getActiveSBTSerie() external view returns (address) {
         return seriesSBTs[activeSerieId];
-    }
-
-    /**
-     * @dev Get serie SBT token for a specific serie
-     * @param _serieId serie id to get sbt
-     * @return sbt address
-     */
-    function getSBTSerie(uint256 _serieId) external view returns (address) {
-        return seriesSBTs[_serieId];
     }
 
     /**
      * @dev Get serie active state and current supply emitted
      * @param _serieId serie id to get state
-     * @return wether serie is active
-     * @return currenty serie supply emitted
+     * @return isActive wether serie is active
+     * @return currentSupply currenty serie supply emitted
      */
-    function getSerieState(uint256 _serieId) external view returns (bool, uint256) {
-        bool isActive = series[_serieId].active;
-        uint256 currentSupply = series[_serieId].currentSupply;
-        return (isActive, currentSupply);
+    function getSerieState(uint256 _serieId) external view returns (bool isActive, uint256 currentSupply) {
+        isActive = series[_serieId].active;
+        currentSupply = series[_serieId].currentSupply;
     }
 
     /**
@@ -114,11 +98,10 @@ contract ResiRegistry is IResiRegistry, OwnableUpgradeable, ReentrancyGuardUpgra
     }
 
     /**
-     * @dev Get Treasury vault address
-     * @return treasury addresss
+     * @dev Function for upgradeability.
      */
-    function getTreasuryVault() external view returns (address) {
-        return TREASURY_VAULT;
+    function version() external pure returns (uint256) {
+        return 1;
     }
 
     /**************************** INTERFACE  ****************************/
@@ -139,7 +122,7 @@ contract ResiRegistry is IResiRegistry, OwnableUpgradeable, ReentrancyGuardUpgra
      */
     function setTreasuryVault(address _treasuryVault) external onlyOwner {
         require(_treasuryVault != address(0), "ResiRegistry: INVALID VAULT ADDRESS");
-        TREASURY_VAULT = _treasuryVault;
+        treasuryVault = _treasuryVault;
         emit TreasuryVaultSet(_treasuryVault);
     }
 
@@ -152,16 +135,15 @@ contract ResiRegistry is IResiRegistry, OwnableUpgradeable, ReentrancyGuardUpgra
      * @param _vault address of the serie vault
      */
     function createSerie(
-        uint256 _startDate,
-        uint256 _endDate,
-        uint256 _numberOfProjects,
+        uint40 _startDate,
+        uint40 _endDate,
+        uint128 _numberOfProjects,
         uint256 _maxSupply,
         address _vault
     ) external onlyOwner {
         _checkSerie(_startDate, _endDate, _numberOfProjects, _maxSupply, _vault);
         activeSerieId += 1;
         Serie memory newSerie = Serie({
-            id: activeSerieId,
             startDate: _startDate,
             endDate: _endDate,
             numberOfProjects: _numberOfProjects,
@@ -188,7 +170,7 @@ contract ResiRegistry is IResiRegistry, OwnableUpgradeable, ReentrancyGuardUpgra
      * @dev Add projects to current serie
      * @param names projects names
      */
-    function addProjects(bytes32[] memory names) external onlyOwner {
+    function addProjects(bytes32[] calldata names) external onlyOwner {
         for (uint256 i = 0; i < names.length; i++) {
             _addProject(names[i]);
         }
@@ -219,7 +201,7 @@ contract ResiRegistry is IResiRegistry, OwnableUpgradeable, ReentrancyGuardUpgra
      * @param _serieId serie id
      * @param _amount amount to increase
      */
-    function increaseSerieSupply(uint256 _serieId, uint256 _amount) external onlyRESIToken nonReentrant {
+    function increaseSerieSupply(uint256 _serieId, uint256 _amount) external onlyRESIToken {
         _increaseSerieSupply(_serieId, _amount);
     }
 
@@ -229,7 +211,7 @@ contract ResiRegistry is IResiRegistry, OwnableUpgradeable, ReentrancyGuardUpgra
      * @param _serieId serie id
      * @param _amount amount to decrease
      */
-    function decreaseSerieSupply(uint256 _serieId, uint256 _amount) external onlyRESIToken nonReentrant {
+    function decreaseSerieSupply(uint256 _serieId, uint256 _amount) external onlyRESIToken {
         _decreaseSerieSupply(_serieId, _amount);
     }
 
@@ -272,7 +254,7 @@ contract ResiRegistry is IResiRegistry, OwnableUpgradeable, ReentrancyGuardUpgra
     ) internal view onlyOwner {
         require(!(series[activeSerieId].active), "ResiRegistry: CURRENT SERIE IS NOT CLOSED YET");
         require(_startDate >= block.timestamp, "ResiRegistry: INVALID START DATE");
-        require(_endDate >= _startDate, "ResiRegistry: INVALID END DATE");
+        require(_endDate > _startDate, "ResiRegistry: INVALID END DATE");
         require(_numberOfProjects > 0, "ResiRegistry: PROJECTS MUST BE MORE THAN ZERO");
         require(_maxSupply > 0, "ResiRegistry: MAX SUPPLY TO EMIT MSUT BE GREATER THAN ZERO");
         require(_vault != address(0), "ResiRegistry: INVALID VAULT CONTRACT");
@@ -286,12 +268,13 @@ contract ResiRegistry is IResiRegistry, OwnableUpgradeable, ReentrancyGuardUpgra
     function _addProject(bytes32 _name) internal onlyOwner {
         require(series[activeSerieId].created, "ResiRegistry: SERIE INACTIVE");
         require(_name != bytes32(0), "ResiRegistry: INVALID NAME");
+        require(!projects[_name].created, "ResiRegistry: PROJECT ALREADY EXISTS");
         require(
             series[activeSerieId].currentProjects < series[activeSerieId].numberOfProjects,
             "ResiRegistry: MAX PROJECTS SERIES REACHED"
         );
         series[activeSerieId].currentProjects++;
-        Project memory newProject = Project({serie: activeSerieId, active: true});
+        Project memory newProject = Project({serie: activeSerieId, active: true, created: true});
         projects[_name] = newProject;
         emit ProjectAdded(_name, activeSerieId);
     }
@@ -321,7 +304,6 @@ contract ResiRegistry is IResiRegistry, OwnableUpgradeable, ReentrancyGuardUpgra
      */
     function _decreaseSerieSupply(uint256 _serieId, uint256 _amount) private {
         require(series[_serieId].created, "ResiRegistry: INVALID SERIE");
-        require(_amount > 0, "ResiRegistry: INVALID AMOUNT");
         uint256 oldSupply = series[_serieId].currentSupply;
         series[_serieId].currentSupply -= _amount;
         emit SerieSupplyUpdated(oldSupply, series[_serieId].currentSupply);
@@ -338,7 +320,7 @@ contract ResiRegistry is IResiRegistry, OwnableUpgradeable, ReentrancyGuardUpgra
         require(_amount > 0, "ResiRegistry: INVALID AMOUNT");
         require(_to != address(0), "ResiRegistry: INVALID RECEIVER");
         require(series[_serieId].currentSupply > 0, "ResiRegistry: NO MORE SUPPLY TO WITHDRAW");
-        require(series[_serieId].currentSupply - _amount > 0, "ResiRegistry: INVALID WITHDRAW AMOUNT");
+        require(series[_serieId].currentSupply - _amount >= 0, "ResiRegistry: INVALID WITHDRAW AMOUNT");
 
         address vaultToken = IResiVault(series[_serieId].vault).getMainToken();
 
@@ -348,7 +330,7 @@ contract ResiRegistry is IResiRegistry, OwnableUpgradeable, ReentrancyGuardUpgra
 
         require(afterBalance > beforeBalance, "ResiRegistry: SOMETHING WENT WRONG WITHDRAWING FROM VAULT");
 
-        IERC20(vaultToken).safeTransfer(_to, afterBalance);
+        IERC20(vaultToken).safeTransfer(_to, afterBalance - beforeBalance);
 
         emit WithdrawFromVault(_serieId, _amount, _to);
     }

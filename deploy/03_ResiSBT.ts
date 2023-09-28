@@ -20,13 +20,6 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
 
   const chainId = await getChainId()
 
-  const ResiSBTResult = await deploy(ContractName, {
-    args: [],
-    contract: ContractName,
-    from: deployer,
-    skipIfAlreadyDeployed: false
-  })
-
   const sbtName = `ResiSBT-${SBTConfig[chainId].SERIE_ID}`
   const sbtSymbol = `RSBT-${SBTConfig[chainId].SERIE_ID}`
   if (!sbtName || !sbtSymbol) {
@@ -35,12 +28,24 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   const contractURI = SBTConfig[chainId].CONTRACT_URI
   const serieID = SBTConfig[chainId].SERIE_ID
 
-  const resiSBTAddress = ResiSBTResult.address
-  const ResiSBTContract = await ethers.getContract(ContractName)
+  const ResiSBTResult = await deploy(ContractName, {
+    args: [],
+    contract: ContractName,
+    from: deployer,
+    proxy: {
+      proxyContract: 'OptimizedTransparentProxy',
+      viaAdminContract: 'ResiProxyAdmin',
+      execute: {
+        init: {
+          methodName: 'initialize',
+          args: [sbtName, sbtSymbol, contractURI, serieID, ResiRegistry.address, ResiToken.address]
+        }
+      }
+    },
+    skipIfAlreadyDeployed: false
+  })
 
-  if (ResiSBTResult.newlyDeployed) {
-    await ResiSBTContract.initialize(sbtName, sbtSymbol, contractURI, serieID, ResiRegistry.address, ResiToken.address)
-  }
+  const resiSBTAddress = ResiSBTResult.address
 
   printDeploySuccessful(ContractName, resiSBTAddress)
 
@@ -50,5 +55,5 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
 export default func
 const id = ContractName + version
 func.tags = [id, version]
-func.dependencies = ['ResiRegistry' + version, 'ResiToken' + version]
+func.dependencies = ['ResiRegistry' + version, 'ResiToken' + version, 'ResiProxyAdmin']
 func.id = id

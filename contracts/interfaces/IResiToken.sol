@@ -8,15 +8,10 @@ interface IResiToken {
 
     function addResiBuilder(address builder) external;
 
-    function removeUserRole(bytes32 role, address user) external;
-
-    function getRoleCount() external view returns (uint256);
-
     event TokenInitialized(address indexed treasury, address indexed registry);
     event MentorAdded(address indexed mentor, bytes32 project);
     event ProjectBuilderAdded(address indexed projectBuilder);
     event ResiBuilderAdded(address indexed resiBuilder);
-    event ResiRoleRemoved(bytes32 role, address indexed user);
     event ResiMinted(address indexed account, uint256 amount);
     event ResiBurnt(address indexed account, uint256 amount);
     event Exit(address indexed account, uint256 amount, uint256 serieId);
