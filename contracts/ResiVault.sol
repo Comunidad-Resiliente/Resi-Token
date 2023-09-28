@@ -79,6 +79,13 @@ contract ResiVault is IResiVault, OwnableUpgradeable, ReentrancyGuardUpgradeable
         return _getExitQuote(_amount);
     }
 
+    /**
+     * @dev Function for upgradeability.
+     */
+    function version() external pure returns (uint256) {
+        return 1;
+    }
+
     /**************************** INTERFACE  ****************************/
 
     /**

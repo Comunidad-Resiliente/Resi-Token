@@ -4,6 +4,7 @@ import {getEndingSerieEnvironmentInitialization, getManualEnvironemntInitializat
 import {Signer} from 'ethers'
 import {MockERC20, ResiRegistry, ResiSBT, ResiToken, ResiVault} from '../typechain-types'
 import {
+  DEFAULT_ADMIN_ROLE,
   ADMIN_ROLE,
   MENTOR_ROLE,
   PROJECT_BUILDER_ROLE,
@@ -78,7 +79,9 @@ describe('Resi Token initial', () => {
       await expect(
         ResiToken.connect(invalidSigner).revokeRole(MENTOR_ROLE, await deployer.getAddress())
       ).to.be.revertedWith(
-        `AccessControl: account ${(await invalidSigner.getAddress()).toLowerCase()} is missing role ${ADMIN_ROLE}`
+        `AccessControl: account ${(
+          await invalidSigner.getAddress()
+        ).toLowerCase()} is missing role ${DEFAULT_ADMIN_ROLE}`
       )
     })
 
