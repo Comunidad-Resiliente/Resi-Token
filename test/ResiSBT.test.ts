@@ -34,9 +34,9 @@ describe('Resi SBT initial', () => {
   describe('Initialization', async () => {
     it('Correct initialization', async () => {
       //GIVEN
-      const expectedName = 'RESI SBT'
-      const expectedSymbol = 'RSBT'
-      const expectedContractUri = 'https://ipfs'
+      const expectedName = 'ResiSBT-1'
+      const expectedSymbol = 'RSBT-1'
+      const expectedContractUri = 'localhost:3000'
       const expectedSerieId = '1'
       const expectedRegistry = ResiRegistry.address
       const expectedToken = ResiToken.address

@@ -31,6 +31,10 @@ contract ResiRegistry is IResiRegistry, OwnableUpgradeable, ReentrancyGuardUpgra
 
     using SafeERC20 for IERC20;
 
+    constructor(){
+        _disableInitializers();
+    }
+
     function initialize() public initializer {
         __Ownable_init_unchained();
         __ReentrancyGuard_init_unchained();
