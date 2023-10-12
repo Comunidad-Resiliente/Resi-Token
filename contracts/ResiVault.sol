@@ -23,6 +23,10 @@ contract ResiVault is IResiVault, OwnableUpgradeable, ReentrancyGuardUpgradeable
 
     using SafeERC20 for IERC20;
 
+    constructor() {
+        _disableInitializers();
+    }
+
     function initialize(
         uint256 _serieId,
         address _resiToken,

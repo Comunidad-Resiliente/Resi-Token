@@ -8,6 +8,7 @@ interface IResiToken {
 
     function addResiBuilder(address builder) external;
 
+    event RegistryUpdated(address registry);
     event TokenInitialized(address indexed treasury, address indexed registry);
     event MentorAdded(address indexed mentor, bytes32 project);
     event ProjectBuilderAdded(address indexed projectBuilder);

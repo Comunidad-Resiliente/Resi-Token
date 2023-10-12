@@ -39,6 +39,10 @@ contract ResiSBT is IResiSBT, IERC5192, OwnableUpgradeable, ERC721URIStorageUpgr
     /// @dev role => uri
     mapping(bytes32 => string) private defaultRoleUris;
 
+    constructor() {
+        _disableInitializers();
+    }
+
     function initialize(
         string memory _name,
         string memory _symbol,
