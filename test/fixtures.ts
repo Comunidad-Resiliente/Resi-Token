@@ -19,7 +19,6 @@ import {
   PROJECT_TWO,
   RESI_BUILDER_ROLE
 } from './constants'
-import {BigNumber} from 'ethers'
 
 export const resiMainFixture = deployments.createFixture(async () => {
   await deployments.fixture(['v1.0.0'])
@@ -41,39 +40,23 @@ export const resiMainFixture = deployments.createFixture(async () => {
 
 export const resiManualFixture = deployments.createFixture(async () => {
   const {deployer, treasury} = await getNamedAccounts()
+  const {ResiRegistryContract, ResiSBTContract, ResiTokenContract, ResiVaultContract} = await resiMainFixture()
 
-  const ResiRegistryFactory: ResiRegistry__factory = await ethers.getContractFactory<ResiRegistry__factory>(
-    'ResiRegistry'
-  )
-  const ResiVaultFactory: ResiVault__factory = await ethers.getContractFactory<ResiVault__factory>('ResiVault')
-  const ResiTokenFactory: ResiToken__factory = await ethers.getContractFactory<ResiToken__factory>('ResiToken')
-  const ResiSBTFactory: ResiSBT__factory = await ethers.getContractFactory<ResiSBT__factory>('ResiSBT')
   const MockERC20Factory: MockERC20__factory = await ethers.getContractFactory<MockERC20__factory>('MockERC20')
 
-  const ResiRegistry: ResiRegistry = await ResiRegistryFactory.deploy()
-  const ResiVault: ResiVault = await ResiVaultFactory.deploy()
-  const ResiToken: ResiToken = await ResiTokenFactory.deploy()
-  const ResiSBT: ResiSBT = await ResiSBTFactory.deploy()
   const MockERC20Token = await MockERC20Factory.deploy('MOCKERC20', 'MERC20', '1000000000000000000000000')
   await MockERC20Token.deployed()
 
-  await ResiRegistry.deployed()
-  await ResiVault.deployed()
-  await ResiToken.deployed()
-  await ResiSBT.deployed()
+  //CUSTOM INITIALIZATIONS
 
-  //INITIALIZATIONS
-
-  await ResiRegistry.initialize()
-  await ResiToken.initialize(treasury, ResiRegistry.address)
-  await ResiVault.initialize('1', ResiToken.address, MockERC20Token.address, ResiRegistry.address)
-  await ResiSBT.initialize('RESI SBT', 'RSBT', 'https://ipfs', '1', ResiRegistry.address, ResiToken.address)
+  await ResiTokenContract.setRegistry(ResiRegistryContract.address)
+  await ResiVaultContract.setMainToken(MockERC20Token.address)
 
   return {
-    ResiRegistryContract: ResiRegistry,
-    ResiTokenContract: ResiToken,
-    ResiVaultContract: ResiVault,
-    ResiSBTContract: ResiSBT,
+    ResiRegistryContract: ResiRegistryContract,
+    ResiTokenContract: ResiTokenContract,
+    ResiVaultContract: ResiVaultContract,
+    ResiSBTContract: ResiSBTContract,
     MockERC20TokenContract: MockERC20Token
   }
 })

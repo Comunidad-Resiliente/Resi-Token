@@ -42,6 +42,10 @@ contract ResiToken is
     using EnumerableSetUpgradeable for EnumerableSetUpgradeable.Bytes32Set;
     EnumerableSetUpgradeable.Bytes32Set private _rolesSet;
 
+    constructor() {
+        _disableInitializers();
+    }
+
     function initialize(address _treasury, address _registry) public initializer {
         require(_treasury != address(0), "INVALID TREASURY ADDRESS");
         require(_registry != address(0), "INVALID REGISTRY ADDRESS");
@@ -84,6 +88,12 @@ contract ResiToken is
 
     function unpause() external onlyRole(ADMIN_ROLE) whenPaused {
         _unpause();
+    }
+
+    function setRegistry(address _registry) external onlyRole(ADMIN_ROLE) whenNotPaused {
+        require(_registry != address(0), "ResiToken: INVALID NEW REGISTRY");
+        RESI_REGISTRY = _registry;
+        emit RegistryUpdated(_registry);
     }
 
     /**************************** INTERFACE  ****************************/
